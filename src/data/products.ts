@@ -38,7 +38,7 @@ export const bigFishProducts: BoillieProduct[] = [
 export const mixDeNadire: BoillieProduct = {
   id: "mix-nadire",
   name: "Mix de nădire",
-  description: "Amestec de boillies și forme diferite, pentru spod și baitboat. Ideale pentru atragerea în zonă.",
+  description: "Amestec de boillies cu forme diferite, pentru spod și baitboat. Ideale pentru atragerea în zonă si pe substrat.",
   price: "30 RON / kg",
   image: "/amestec-nadire-bun.png",
 };

@@ -7,10 +7,9 @@ import { motion, AnimatePresence } from "framer-motion";
 const LINKS = [
   { href: "#acasa", label: "Acasă" },
   { href: "#nada", label: "Nadă" },
+  { href: "#pva", label: "Pungi PVA" },
   { href: "#monturi", label: "Monturi" },
-  { href: "#pva", label: "PVA" },
-  { href: "#boillies", label: "Boillies" },
-  { href: "#momeala", label: "Momeală silicon" },
+  { href: "#boillies", label: "Amestec nădire" },
   { href: "#contact", label: "Contact" },
   { href: "#capturi", label: "Capturile noastre" },
 ];
@@ -35,14 +34,14 @@ export function Nav() {
           scrolled ? "bg-[var(--background)]/95 backdrop-blur-md border-b border-white/5" : ""
         }`}
       >
-        <nav className="max-w-[90rem] mx-auto px-4 md:px-6 h-20 md:h-24 flex items-center justify-between">
+        <nav className="max-w-[90rem] mx-auto px-4 md:px-6 h-32 md:h-40 flex items-center justify-between">
           <a href="#acasa" className="flex items-center shrink-0 mr-6 md:mr-8" aria-label="Lyra Baits – Acasă">
             <Image
-              src="/logo-navbar-shadow.png"
+              src="/logo-white-outline.png"
               alt="Lyra Baits"
-              width={240}
-              height={80}
-              className="h-12 w-auto sm:h-14 md:h-16 object-contain object-left"
+              width={260}
+              height={87}
+              className="h-36 w-auto sm:h-42 md:h-48 object-contain object-left"
               priority
             />
           </a>

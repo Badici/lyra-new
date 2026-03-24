@@ -9,11 +9,11 @@
 
 :root {
   --background: #0d1419;
-  --foreground: #f5f5f0;
-  --accent: #3d5a52;
-  --accent-light: #5a7a6e;
-  --muted: #6b7c75;
-  --cream: #e8e4dc;
+  --foreground: #f8f6f1;
+  --accent: #d97706;
+  --accent-light: #fbbf24;
+  --muted: #b8c7c0;
+  --cream: #f3efe7;
   --lake: #1a2a35;
   --forest: #152420;
 }

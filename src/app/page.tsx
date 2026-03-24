@@ -7,7 +7,6 @@ import { NadaSection } from "@/components/NadaSection";
 import { SectionBoillies } from "@/components/SectionBoillies";
 import { SectionMonturi } from "@/components/SectionMonturi";
 import { SectionPVA } from "@/components/SectionPVA";
-import { SectionMomeala } from "@/components/SectionMomeala";
 import { CapturileNoastre } from "@/components/CapturileNoastre";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 
@@ -101,17 +100,14 @@ export default function Home() {
         {/* Nada – clickable variants, gallery per type */}
         <NadaSection />
 
+        {/* Pungi PVA */}
+        <SectionPVA />
+
         {/* Monturi – two columns */}
         <SectionMonturi />
 
-        {/* PVA – compact pills row */}
-        <SectionPVA />
-
-        {/* Boillies – În curând block */}
+        {/* Amestec nădire */}
         <SectionBoillies />
-
-        {/* Momeală silicon – 2 types */}
-        <SectionMomeala />
 
         {/* Contact / CTA */}
         <section
@@ -141,7 +137,7 @@ export default function Home() {
               </a>
             </div>
             <p className="mt-8 text-sm text-[var(--muted)]">
-              Lyra Baits – Pescuit și camping. Nadă, boillies, monturi,
+              Lyra Baits – Pescuit și camping. Nadă, amestec nădire, monturi,
               accesorii.
             </p>
           </motion.div>
