@@ -137,7 +137,7 @@ export default function Home() {
               </a>
             </div>
             <p className="mt-8 text-sm text-[var(--muted)]">
-              Lyra Baits – Pescuit și camping. Nadă, amestec nădire, monturi,
+              Lyra Baits – Pescuit la crap. Nadă, amestec nădire, monturi,
               accesorii.
             </p>
           </motion.div>
@@ -156,6 +156,17 @@ export default function Home() {
               className="h-8 w-auto opacity-80 hover:opacity-100 transition-opacity mx-auto"
             />
           </a>
+          <div className="mb-3 flex items-center justify-center gap-5 text-sm">
+            <a href="/date-legale" className="hover:text-[var(--cream)] transition-colors">
+              Date legale
+            </a>
+            <a href="/date-legale#confidentialitate" className="hover:text-[var(--cream)] transition-colors">
+              Confidențialitate
+            </a>
+            <a href="/termeni-si-conditii" className="hover:text-[var(--cream)] transition-colors">
+              Termeni și condiții
+            </a>
+          </div>
           <p>© {new Date().getFullYear()} Lyra Baits. Toate comenzile prin WhatsApp +40 728 241 412.</p>
         </footer>
       </main>

@@ -14,9 +14,14 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Lyra Baits – Pescuit și Camping",
+  title: "Lyra Baits – Pescuit la crap",
   description:
-    "Momeală, boillies, monturi, accesorii pescuit și camping. Comandă prin WhatsApp.",
+    "Momeală, monturi, accesorii pescuit. Comandă prin WhatsApp.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favico.png",
+  },
 };
 
 export default function RootLayout({
