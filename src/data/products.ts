@@ -56,7 +56,7 @@ export type Montura = {
 };
 
 export const monturi: Montura[] = [
-  { id: "mont-1", name: "Montor inline pe leadcore, cu forfecă și fir de păr textil", price: "15 RON", image: "/momitor.png" },
+  { id: "mont-1", name: "Momitor inline pe leadcore, cu forfac cu fir de păr textil", price: "12 RON", image: "/momitor.png" },
   { id: "mont-2", name: "Plumb pastă inline pe leadcore, cu montură fir de păr textil", price: "15 RON", image: "/plumb-pasta.png" },
   { id: "mont-3", name: "Elicopter pe leadcore, cu fir de păr fluorcarbon", price: "15 RON", image: "/elicopter.png" },
   { id: "mont-4", name: "Elicopter fir camuflat natural, cu piatră naturală și fir de păr fluorcarbon", price: "22 RON", image: "/elicopter-piatra.png" },

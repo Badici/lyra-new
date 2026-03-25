@@ -33,10 +33,10 @@ export function SectionMonturi() {
           className="text-center mb-12 md:mb-16"
         >
           <h2 className="text-3xl md:text-4xl font-semibold text-[var(--cream)] mb-2">
-            Monturi și plumburi
+            Monturi și forface
           </h2>
           <p className="text-[var(--muted)]">
-            Monturi gata făcute pe leadcore, cu fir de păr textil sau fluorcarbon.
+            Monturi gata făcute pe leadcore, cu fir de păr, lucrate pe textil sau fluorcarbon.
           </p>
         </motion.header>
 
