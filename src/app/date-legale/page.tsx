@@ -1,6 +1,14 @@
-"use client";
-
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Date legale",
+  description:
+    "Datele legale Lyra Baits: denumire, CIF, adresa, date de contact, program si nota de confidentialitate.",
+  alternates: {
+    canonical: "/date-legale",
+  },
+};
 
 export default function DateLegalePage() {
   return (

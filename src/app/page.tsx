@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Script from "next/script";
 import { motion } from "framer-motion";
 import { Nav } from "@/components/Nav";
 import { NadaSection } from "@/components/NadaSection";
@@ -11,8 +12,53 @@ import { CapturileNoastre } from "@/components/CapturileNoastre";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 export default function Home() {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lyrabaits.ro";
+  const seoSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        name: "Lyra Baits",
+        url: `${siteUrl}/`,
+        telephone: "+40728241412",
+        email: "raresbadici@gmail.com",
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        url: `${siteUrl}/`,
+        name: "Lyra Baits",
+        inLanguage: "ro-RO",
+        publisher: {
+          "@id": `${siteUrl}/#organization`,
+        },
+      },
+      {
+        "@type": "Store",
+        "@id": `${siteUrl}/#store`,
+        name: "Lyra Baits",
+        url: `${siteUrl}/`,
+        image: `${siteUrl}/logo-lyra.png`,
+        telephone: "+40728241412",
+        priceRange: "$$",
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "Sos. Chitilei 242 E, Corp C5, Ap. 328, Parter, Faza 2",
+          addressCountry: "RO",
+        },
+        areaServed: "EU",
+      },
+    ],
+  };
+
   return (
     <>
+      <Script
+        id="seo-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(seoSchema) }}
+      />
       <Nav />
       <main>
         {/* Hero */}
@@ -22,7 +68,7 @@ export default function Home() {
         >
           <Image
             src="/hero.jpeg"
-            alt=""
+            alt="Pescuit la crap cu momeala Lyra Baits"
             fill
             priority
             className="absolute inset-0 object-cover"
@@ -36,6 +82,9 @@ export default function Home() {
             transition={{ duration: 0.7 }}
             className="relative z-10 text-center max-w-3xl"
           >
+            <h1 className="sr-only">
+              Lyra Baits - momeala, pungi PVA si monturi pentru pescuit la crap
+            </h1>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -55,14 +104,23 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-xl md:text-2xl text-[var(--cream)]/95 drop-shadow-sm font-sans mb-8"
+              className="text-xl md:text-2xl text-[var(--cream)]/95 drop-shadow-sm font-sans mb-4"
             >
-              Atracție pură.
+              Momeala premium pentru pescuit la crap.
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+              className="max-w-2xl mx-auto text-[var(--cream)]/90 text-base md:text-lg mb-8"
+            >
+              La Lyra Baits gasesti nada, pungi PVA, monturi si amestec de nadire
+              pentru partide eficiente pe lacurile din Romania.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
+              transition={{ delay: 0.65, duration: 0.5 }}
             >
               <a
                 href="#nada"
@@ -150,7 +208,7 @@ export default function Home() {
           <a href="#acasa" className="inline-block mb-4" aria-label="Lyra Baits">
             <Image
               src="/logo-lyra.png"
-              alt=""
+              alt="Logo Lyra Baits"
               width={100}
               height={34}
               className="h-8 w-auto opacity-80 hover:opacity-100 transition-opacity mx-auto"

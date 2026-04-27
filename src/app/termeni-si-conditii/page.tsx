@@ -1,6 +1,14 @@
-"use client";
-
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Termeni si conditii",
+  description:
+    "Termeni si conditii pentru comenzile Lyra Baits: comanda prin WhatsApp, livrare, preturi, retur si contact.",
+  alternates: {
+    canonical: "/termeni-si-conditii",
+  },
+};
 
 export default function TermeniSiConditiiPage() {
   return (

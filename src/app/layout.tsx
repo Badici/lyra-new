@@ -13,14 +13,62 @@ const instrumentSerif = Instrument_Serif({
   weight: "400",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lyrabaits.ro";
+
 export const metadata: Metadata = {
-  title: "Lyra Baits – Pescuit la crap",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Lyra Baits - Momeala si monturi pentru pescuit la crap",
+    template: "%s | Lyra Baits",
+  },
   description:
-    "Momeală, monturi, accesorii pescuit. Comandă prin WhatsApp.",
+    "Momeala pentru pescuit la crap, pungi PVA, monturi, forface si amestec de nadire. Comanda rapid prin WhatsApp de la Lyra Baits.",
+  applicationName: "Lyra Baits",
+  keywords: [
+    "momeala crap",
+    "nada crap",
+    "pungi PVA",
+    "monturi crap",
+    "forface crap",
+    "amestec nadire",
+    "boillies",
+    "accesorii pescuit",
+    "Lyra Baits",
+    "pescuit la crap Romania",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "ro_RO",
+    url: "/",
+    siteName: "Lyra Baits",
+    title: "Lyra Baits - Momeala si monturi pentru pescuit la crap",
+    description:
+      "Produse pentru pescuit la crap: nada, pungi PVA, monturi, forface si amestec de nadire. Comenzi prin WhatsApp.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Lyra Baits - Momeala si monturi pentru pescuit la crap",
+    description:
+      "Nada, monturi, forface, pungi PVA si amestec de nadire pentru pescuit la crap.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
-    apple: "/favico.png",
+    apple: "/favicon.ico",
   },
 };
 

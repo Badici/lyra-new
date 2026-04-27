@@ -11,7 +11,10 @@ export function CapturileNoastre() {
   const [viewerIndex, setViewerIndex] = useState(0);
 
   const viewableItems = useMemo<PhotoViewerItem[]>(() =>
-    catches.map((c) => ({ src: c.image, alt: "Captură" })),
+    catches.map((c, index) => ({
+      src: c.image,
+      alt: `Captura la crap cu produse Lyra Baits ${index + 1}`,
+    })),
     []
   );
 
@@ -57,7 +60,7 @@ export function CapturileNoastre() {
               >
                 <Image
                   src={c.image}
-                  alt="Captură"
+                  alt={`Captura la crap cu produse Lyra Baits ${i + 1}`}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                   sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
