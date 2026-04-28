@@ -33,7 +33,7 @@ export function CartPageClient() {
     const deliveryLabel =
       deliveryType === "curier"
         ? `Curier (+${DELIVERY_FEE_RON} RON)`
-        : "Livrare personală în București (0 RON)";
+        : "Ridicare personală în București (0 RON)";
 
     const message = [
       "Salut! Vreau să plasez următoarea comandă:",
@@ -119,7 +119,7 @@ export function CartPageClient() {
 
       <aside className="space-y-5 rounded-2xl border border-white/10 bg-[var(--lake)] p-5 md:p-6">
         <h2 className="text-xl font-semibold text-[var(--cream)]">
-          Finalizare comandă (mock)
+          Finalizare comandă
         </h2>
 
         <div className="space-y-2 text-sm text-[var(--muted)]">
@@ -140,7 +140,7 @@ export function CartPageClient() {
               checked={deliveryType === "personal"}
               onChange={() => setDeliveryType("personal")}
             />
-            Livrare personală în București (0 RON)
+            Ridicare personală în București (0 RON)
           </label>
         </div>
 

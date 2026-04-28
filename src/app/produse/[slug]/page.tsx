@@ -6,7 +6,6 @@ import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import {
   getProductBySlug,
-  getProductsByCategory,
   products,
   WHATSAPP_NUMBER,
 } from "@/data/catalog";
@@ -53,8 +52,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const relatedProducts = getProductsByCategory(product.categorySlug)
+  const getDeterministicScore = (candidateSlug: string) => {
+    const seed = `${product.slug}:${candidateSlug}`;
+    let hash = 0;
+    for (let index = 0; index < seed.length; index += 1) {
+      hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
+    }
+    return hash;
+  };
+
+  const relatedProducts = products
     .filter((entry) => entry.slug !== product.slug)
+    .sort(
+      (a, b) => getDeterministicScore(a.slug) - getDeterministicScore(b.slug)
+    )
     .slice(0, 3);
 
   return (
@@ -127,7 +138,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {relatedProducts.length > 0 ? (
           <section className="mt-14">
             <h2 className="text-2xl font-semibold text-[var(--cream)]">
-              Produse similare din aceeași categorie
+              Produse recomandate
             </h2>
             <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {relatedProducts.map((entry) => (

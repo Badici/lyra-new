@@ -4,7 +4,7 @@ import { CartPageClient } from "@/components/cart/CartPageClient";
 export const metadata: Metadata = {
   title: "Coș de cumpărături",
   description:
-    "Coș mock Lyra Baits: adaugă produse, selectează livrarea și trimite mesajul precompletat pe WhatsApp.",
+    "Completează datele de contact și trimite comanda pe WhatsApp pentru confirmare și detalii de livrare.",
   alternates: {
     canonical: "/cos",
   },
@@ -19,10 +19,9 @@ export default function CartPage() {
             Coșul tău
           </h1>
           <p className="mt-3 max-w-3xl text-[var(--muted)]">
-            Acesta este un checkout mock. Completezi datele și trimiți direct pe
-            WhatsApp lista de produse, împreună cu datele tale (adresă, telefon,
-            email) și tipul
-            de livrare.
+            După ce completezi datele de contact, apasă butonul „Trimite comandă pe
+            WhatsApp”, iar noi îți vom răspunde în cel mai scurt timp pentru
+            confirmare și termenii de livrare.
           </p>
         </header>
 
