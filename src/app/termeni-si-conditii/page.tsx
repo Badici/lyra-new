@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Termeni si conditii",
+  title: "Termeni și condiții",
   description:
-    "Termeni si conditii pentru comenzile Lyra Baits: comanda prin WhatsApp, livrare, preturi, retur si contact.",
+    "Termeni și condiții pentru comenzile Lyra Baits: comandă prin WhatsApp, livrare, prețuri, retur și contact.",
   alternates: {
     canonical: "/termeni-si-conditii",
   },

@@ -87,7 +87,7 @@ export function ShowcaseSection({
               transition={{ delay: 0.15 }}
               className="space-y-2"
             >
-              {products.map((p, i) => (
+              {products.map((p) => (
                 <li
                   key={p.id}
                   className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-[var(--cream)]/90 border-b border-white/5 pb-2 last:border-0"

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { DM_Sans, Instrument_Serif } from "next/font/google";
+import { CartProvider } from "@/components/cart/CartProvider";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -18,23 +21,23 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lyrabaits.ro";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Lyra Baits - Momeala si monturi pentru pescuit la crap",
+    default: "Lyra Baits - Momeală și monturi pentru pescuit la crap",
     template: "%s | Lyra Baits",
   },
   description:
-    "Momeala pentru pescuit la crap, pungi PVA, monturi, forface si amestec de nadire. Comanda rapid prin WhatsApp de la Lyra Baits.",
+    "Momeală pentru pescuit la crap, pungi PVA, monturi, forface și amestec de nădire. Comandă rapid prin WhatsApp de la Lyra Baits.",
   applicationName: "Lyra Baits",
   keywords: [
-    "momeala crap",
-    "nada crap",
+    "momeală crap",
+    "nadă crap",
     "pungi PVA",
     "monturi crap",
     "forface crap",
-    "amestec nadire",
+    "amestec nădire",
     "boillies",
     "accesorii pescuit",
     "Lyra Baits",
-    "pescuit la crap Romania",
+    "pescuit la crap România",
   ],
   alternates: {
     canonical: "/",
@@ -44,15 +47,15 @@ export const metadata: Metadata = {
     locale: "ro_RO",
     url: "/",
     siteName: "Lyra Baits",
-    title: "Lyra Baits - Momeala si monturi pentru pescuit la crap",
+    title: "Lyra Baits - Momeală și monturi pentru pescuit la crap",
     description:
-      "Produse pentru pescuit la crap: nada, pungi PVA, monturi, forface si amestec de nadire. Comenzi prin WhatsApp.",
+      "Produse pentru pescuit la crap: nadă, pungi PVA, monturi, forface și amestec de nădire. Comenzi prin WhatsApp.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lyra Baits - Momeala si monturi pentru pescuit la crap",
+    title: "Lyra Baits - Momeală și monturi pentru pescuit la crap",
     description:
-      "Nada, monturi, forface, pungi PVA si amestec de nadire pentru pescuit la crap.",
+      "Nadă, monturi, forface, pungi PVA și amestec de nădire pentru pescuit la crap.",
   },
   robots: {
     index: true,
@@ -82,7 +85,11 @@ export default function RootLayout({
       <body
         className={`${dmSans.variable} ${instrumentSerif.variable} font-sans antialiased`}
       >
-        {children}
+        <CartProvider>
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </CartProvider>
       </body>
     </html>
   );

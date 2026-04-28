@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Date legale",
   description:
-    "Datele legale Lyra Baits: denumire, CIF, adresa, date de contact, program si nota de confidentialitate.",
+    "Datele legale Lyra Baits: denumire, CIF, adresă, date de contact, program și notă de confidențialitate.",
   alternates: {
     canonical: "/date-legale",
   },
