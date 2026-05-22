@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ProductCategory } from "@/data/catalog";
+import { DEFAULT_PRODUCT_IMAGE, type ProductCategory } from "@/data/catalog";
 
 export function CategoryCard({
   category,
@@ -9,16 +9,20 @@ export function CategoryCard({
   category: ProductCategory;
   productCount: number;
 }) {
+  const categoryImage = category.heroImage || DEFAULT_PRODUCT_IMAGE;
+  const isSvgImage = categoryImage.endsWith(".svg");
+
   return (
     <article className="overflow-hidden rounded-2xl border border-white/10 bg-[var(--lake)]">
       <Link href={`/categorii/${category.slug}`} className="group block">
         <div className="relative aspect-[4/3]">
           <Image
-            src={category.heroImage}
+            src={categoryImage}
             alt={category.name}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 33vw"
+            unoptimized={isSvgImage}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
         </div>

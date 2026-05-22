@@ -5,6 +5,9 @@ import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import {
+  DEFAULT_PRODUCT_IMAGE,
+  formatRon,
+  getMinimumConfiguredPriceRon,
   getProductBySlug,
   products,
   WHATSAPP_NUMBER,
@@ -29,17 +32,22 @@ export async function generateMetadata({
       title: "Produs inexistent",
     };
   }
+  const primaryImage = product.images[0] ?? DEFAULT_PRODUCT_IMAGE;
 
   return {
     title: product.name,
-    description: `${product.shortDescription} ${product.priceLabel}.`,
+    description: product.pricingConfig
+      ? `${product.shortDescription} Preț pornind de la ${formatRon(
+          getMinimumConfiguredPriceRon(product)
+        )} RON.`
+      : `${product.shortDescription} ${product.priceLabel}.`,
     alternates: {
       canonical: `/produse/${product.slug}`,
     },
     openGraph: {
       title: `${product.name} | Lyra Baits`,
       description: product.shortDescription,
-      images: [product.images[0]],
+      images: [primaryImage],
       type: "website",
     },
   };
@@ -68,6 +76,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
     )
     .slice(0, 3);
 
+  const displayPrice = product.pricingConfig
+    ? `Pornind de la ${formatRon(getMinimumConfiguredPriceRon(product))} RON`
+    : product.priceLabel;
+  const primaryImage = product.images[0] ?? DEFAULT_PRODUCT_IMAGE;
+
   return (
     <main className="px-4 py-10 md:py-12">
       <div className="mx-auto w-full max-w-7xl">
@@ -86,7 +99,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {product.name}
             </h1>
             <p className="text-xl font-semibold text-[var(--accent-light)]">
-              {product.priceLabel}
+              {displayPrice}
             </p>
             <p className="leading-relaxed text-[var(--muted)]">{product.description}</p>
 
@@ -128,8 +141,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 name: product.name,
                 priceLabel: product.priceLabel,
                 priceValueRon: product.priceValueRon,
-                image: product.images[0],
+                image: primaryImage,
                 variantSelector: product.variantSelector,
+                pricingConfig: product.pricingConfig,
               }}
             />
           </div>

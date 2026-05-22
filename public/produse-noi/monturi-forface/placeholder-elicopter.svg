@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Montura elicopter - imagine placeholder</title>
+  <desc id="desc">Imagine temporara pana la adaugarea fotografiei produsului.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a2a35"/>
+      <stop offset="100%" stop-color="#152420"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <g fill="none" stroke="#fbbf24" stroke-width="6" opacity="0.8">
+    <circle cx="600" cy="430" r="120"/>
+    <path d="M600 250v-120M600 610v160M470 430H300M730 430h170"/>
+  </g>
+  <text x="600" y="720" fill="#f3efe7" text-anchor="middle" font-size="44" font-family="Arial, sans-serif">
+    Montura elicopter
+  </text>
+  <text x="600" y="770" fill="#b8c7c0" text-anchor="middle" font-size="28" font-family="Arial, sans-serif">
+    Poza in curand
+  </text>
+</svg>

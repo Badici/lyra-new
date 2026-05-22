@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Imagine produs indisponibila</title>
+  <desc id="desc">Placeholder pentru produse fara fotografie.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a2a35"/>
+      <stop offset="100%" stop-color="#152420"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#bg)"/>
+
+  <g opacity="0.9">
+    <rect x="470" y="260" width="260" height="180" rx="18" fill="none" stroke="#fbbf24" stroke-width="10"/>
+    <circle cx="540" cy="325" r="26" fill="#fbbf24"/>
+    <path d="M500 430l62-72 48 54 34-34 56 52" fill="none" stroke="#fbbf24" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="600" y="560" text-anchor="middle" fill="#f3efe7" font-size="44" font-family="Arial, sans-serif" font-weight="700">
+    Lyra Baits
+  </text>
+  <text x="600" y="612" text-anchor="middle" fill="#b8c7c0" font-size="30" font-family="Arial, sans-serif">
+    Poza produs in curand
+  </text>
+</svg>

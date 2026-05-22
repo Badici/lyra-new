@@ -1,18 +1,30 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { CatalogProduct } from "@/data/catalog";
+import {
+  DEFAULT_PRODUCT_IMAGE,
+  formatRon,
+  getMinimumConfiguredPriceRon,
+  type CatalogProduct,
+} from "@/data/catalog";
 
 export function ProductCard({ product }: { product: CatalogProduct }) {
+  const productImage = product.images[0] ?? DEFAULT_PRODUCT_IMAGE;
+  const isSvgImage = productImage.endsWith(".svg");
+  const displayPrice = product.pricingConfig
+    ? `Pornind de la ${formatRon(getMinimumConfiguredPriceRon(product))} RON`
+    : product.priceLabel;
+
   return (
     <article className="overflow-hidden rounded-2xl border border-white/10 bg-[var(--lake)]">
       <Link href={`/produse/${product.slug}`} className="group block">
         <div className="relative aspect-[4/3]">
           <Image
-            src={product.images[0]}
+            src={productImage}
             alt={product.name}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            unoptimized={isSvgImage}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
         </div>
@@ -22,7 +34,7 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
             {product.shortDescription}
           </p>
           <p className="text-base font-semibold text-[var(--accent-light)]">
-            {product.priceLabel}
+            {displayPrice}
           </p>
         </div>
       </Link>
