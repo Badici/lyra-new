@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { DELIVERY_FEE_RON, WHATSAPP_NUMBER } from "@/data/catalog";
+import { WHATSAPP_NUMBER } from "@/data/catalog";
 import { useCart } from "@/components/cart/CartProvider";
 
-type DeliveryType = "curier" | "easybox" | "personal";
+type DeliveryType = "curier" | "personal";
 
 type AddressSuggestion = {
   place_id: number;
@@ -33,15 +33,49 @@ export function CartPageClient() {
   const [city, setCity] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const [easyboxName, setEasyboxName] = useState("");
+  const [savedAddressHint, setSavedAddressHint] = useState("");
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isFetchingAddress, setIsFetchingAddress] = useState(false);
   const [orderFeedback, setOrderFeedback] = useState("");
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
 
-  const deliveryFee = deliveryType === "personal" ? 0 : DELIVERY_FEE_RON;
+  const deliveryFee = 0;
   const totalRon = subtotalRon + deliveryFee;
+
+  useEffect(() => {
+    const loadDefaultAddress = async () => {
+      const response = await fetch("/api/account/addresses");
+      if (!response.ok) {
+        return;
+      }
+      const addresses = (await response.json()) as Array<{
+        isDefault: boolean;
+        fullName: string;
+        phone: string;
+        email: string;
+        county: string;
+        city: string;
+        street: string;
+        postalCode: string;
+      }>;
+      const defaultAddress =
+        addresses.find((entry) => entry.isDefault) ?? addresses[0];
+      if (!defaultAddress) {
+        return;
+      }
+      setFullName(defaultAddress.fullName);
+      setPhone(defaultAddress.phone);
+      setEmail(defaultAddress.email);
+      setCounty(defaultAddress.county);
+      setCity(defaultAddress.city);
+      setStreetAddress(defaultAddress.street);
+      setPostalCode(defaultAddress.postalCode);
+      setSavedAddressHint("Am precompletat adresa salvată din cont.");
+    };
+
+    void loadDefaultAddress();
+  }, []);
 
   useEffect(() => {
     const query = streetAddress.trim();
@@ -84,8 +118,7 @@ export function CartPageClient() {
       county.trim() &&
       city.trim() &&
       streetAddress.trim() &&
-      postalCode.trim() &&
-      (deliveryType !== "easybox" || easyboxName.trim())
+      postalCode.trim()
   );
 
   const whatsappLink = useMemo(() => {
@@ -100,10 +133,8 @@ export function CartPageClient() {
 
     const deliveryLabel =
       deliveryType === "curier"
-        ? `Curier (+${DELIVERY_FEE_RON} RON)`
-        : deliveryType === "easybox"
-          ? `Easybox (+${DELIVERY_FEE_RON} RON)`
-          : "Ridicare personală în București (0 RON)";
+        ? "Curier (cost comunicat ulterior în funcție de localitate)"
+        : "Ridicare personală în București (0 RON)";
 
     const message = [
       "Salut! Vreau să plasez următoarea comandă:",
@@ -122,7 +153,6 @@ export function CartPageClient() {
       `Localitate: ${city || "-"}`,
       `Adresă: ${streetAddress || "-"}`,
       `Cod poștal: ${postalCode || "-"}`,
-      `Easybox: ${easyboxName || "-"}`,
     ].join("\n");
 
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
@@ -138,7 +168,6 @@ export function CartPageClient() {
     city,
     streetAddress,
     postalCode,
-    easyboxName,
   ]);
 
   const placeOrder = async () => {
@@ -159,11 +188,8 @@ export function CartPageClient() {
       deliveryMethod:
         deliveryType === "curier"
           ? "COURIER"
-          : deliveryType === "easybox"
-            ? "EASYBOX"
-            : ("PICKUP" as "COURIER" | "EASYBOX" | "PICKUP"),
+          : ("PICKUP" as "COURIER" | "PICKUP"),
       deliveryCostRon: deliveryFee,
-      easyboxName: easyboxName || undefined,
       idempotencyKey: crypto.randomUUID(),
       items: items.map((item) => ({
         productSlug: item.productSlug.split("::")[0],
@@ -282,6 +308,9 @@ export function CartPageClient() {
           </Link>{" "}
           pentru istoric comenzi. Poți comanda și fără cont.
         </p>
+        {savedAddressHint ? (
+          <p className="text-xs text-[var(--accent-light)]">{savedAddressHint}</p>
+        ) : null}
 
         <div className="space-y-2 text-sm text-[var(--muted)]">
           <p className="text-[var(--cream)]">Metoda livrare</p>
@@ -292,7 +321,7 @@ export function CartPageClient() {
               checked={deliveryType === "curier"}
               onChange={() => setDeliveryType("curier")}
             />
-            Curier (+{DELIVERY_FEE_RON} RON)
+            Curier (costul transportului este comunicat ulterior)
           </label>
           <label className="flex items-center gap-2">
             <input
@@ -302,15 +331,6 @@ export function CartPageClient() {
               onChange={() => setDeliveryType("personal")}
             />
             Ridicare personală în București (0 RON)
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="deliveryType"
-              checked={deliveryType === "easybox"}
-              onChange={() => setDeliveryType("easybox")}
-            />
-            Easybox (+{DELIVERY_FEE_RON} RON)
           </label>
         </div>
 
@@ -423,20 +443,6 @@ export function CartPageClient() {
             />
           </label>
 
-          {deliveryType === "easybox" ? (
-            <label className="block text-sm text-[var(--muted)]">
-              Easybox ales
-              <input
-                type="text"
-                value={easyboxName}
-                onChange={(event) => setEasyboxName(event.target.value)}
-                className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
-                placeholder="Ex: Easybox Militari Shopping"
-                required
-              />
-            </label>
-          ) : null}
-
           <label className="block text-sm text-[var(--muted)]">
             Telefon
             <input
@@ -471,11 +477,17 @@ export function CartPageClient() {
           </p>
           <p className="flex items-center justify-between text-[var(--muted)]">
             <span>Livrare</span>
-            <span>{deliveryFee.toFixed(2)} RON</span>
+            <span>
+              {deliveryType === "personal" ? "0.00 RON" : "se comunică ulterior"}
+            </span>
           </p>
           <p className="mt-2 flex items-center justify-between text-base font-semibold text-[var(--cream)]">
             <span>Total estimat</span>
-            <span>{totalRon.toFixed(2)} RON</span>
+            <span>
+              {deliveryType === "personal"
+                ? `${totalRon.toFixed(2)} RON`
+                : `${subtotalRon.toFixed(2)} RON + transport`}
+            </span>
           </p>
         </div>
 

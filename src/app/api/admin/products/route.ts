@@ -20,6 +20,15 @@ export async function GET() {
   const products = await prisma.product.findMany({
     include: {
       category: true,
+      recipe: {
+        include: {
+          items: {
+            include: {
+              material: true,
+            },
+          },
+        },
+      },
       pricingOverrides: true,
       recipeItems: {
         include: { material: true },
@@ -41,12 +50,15 @@ export async function POST(request: Request) {
     const {
       categoryId,
       pricingConfigJson,
+      recipeId,
       ...rest
     } = payload;
     const product = await prisma.product.create({
       data: {
         ...rest,
         pricingConfigJson: pricingConfigJson ?? undefined,
+        recipe:
+          recipeId ? { connect: { id: recipeId } } : undefined,
         category: categoryId
           ? {
               connect: { id: categoryId },

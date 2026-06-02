@@ -12,16 +12,17 @@ import {
 } from "@/data/catalog";
 import {
   getCatalogProductBySlug,
+  getCatalogProducts,
   getRelatedProducts,
-  getStaticCatalogProducts,
 } from "@/lib/catalog-service";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return getStaticCatalogProducts().map((product) => ({ slug: product.slug }));
+export async function generateStaticParams() {
+  const products = await getCatalogProducts();
+  return products.map((product) => ({ slug: product.slug }));
 }
 
 export async function generateMetadata({

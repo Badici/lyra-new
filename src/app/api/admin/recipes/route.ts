@@ -4,10 +4,18 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 
 const recipeSchema = z.object({
-  productId: z.string().min(1),
-  materialId: z.string().min(1),
-  qty: z.number().positive(),
-  wastePct: z.number().min(0).max(100).default(0),
+  name: z.string().min(2),
+  laborType: z.enum(["FIXED", "PERCENT"]),
+  laborValue: z.number().nonnegative(),
+  items: z
+    .array(
+      z.object({
+        kind: z.enum(["material", "category"]),
+        id: z.string().min(1),
+        qty: z.number().positive(),
+      })
+    )
+    .default([]),
 });
 
 async function canAdmin() {
@@ -20,10 +28,45 @@ export async function GET() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const recipes = await prisma.productRecipe.findMany({
-    include: { product: true, material: true },
+    include: {
+      product: true,
+      material: true,
+    },
     orderBy: { updatedAt: "desc" },
   });
-  return NextResponse.json(recipes);
+  const newRecipes = await prisma.recipe.findMany({
+    include: {
+      items: {
+        include: {
+          material: {
+            include: {
+              category: true,
+            },
+          },
+          materialCategory: {
+            include: {
+              materials: {
+                where: { active: true },
+                orderBy: { name: "asc" },
+              },
+            },
+          },
+        },
+      },
+      products: {
+        select: {
+          id: true,
+          slug: true,
+          name: true,
+        },
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+  return NextResponse.json({
+    recipes: newRecipes,
+    legacyRecipeRows: recipes,
+  });
 }
 
 export async function POST(request: Request) {
@@ -32,18 +75,27 @@ export async function POST(request: Request) {
   }
   try {
     const payload = recipeSchema.parse(await request.json());
-    const recipe = await prisma.productRecipe.upsert({
-      where: {
-        productId_materialId: {
-          productId: payload.productId,
-          materialId: payload.materialId,
+    const recipe = await prisma.recipe.create({
+      data: {
+        name: payload.name,
+        laborType: payload.laborType,
+        laborValue: payload.laborValue,
+        items: {
+          create: payload.items.map((item) => ({
+            materialId: item.kind === "material" ? item.id : undefined,
+            materialCategoryId: item.kind === "category" ? item.id : undefined,
+            qty: item.qty,
+          })),
         },
       },
-      update: {
-        qty: payload.qty,
-        wastePct: payload.wastePct,
+      include: {
+        items: {
+          include: {
+            material: true,
+            materialCategory: true,
+          },
+        },
       },
-      create: payload,
     });
     return NextResponse.json(recipe, { status: 201 });
   } catch (error) {

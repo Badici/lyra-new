@@ -18,6 +18,11 @@ enum ProductStatus {
   ARCHIVED
 }
 
+enum PricingMode {
+  MANUAL
+  AUTO
+}
+
 enum OrderSource {
   GUEST
   ACCOUNT
@@ -43,6 +48,11 @@ enum DeliveryMethod {
   PICKUP
 }
 
+enum RecipeLaborType {
+  FIXED
+  PERCENT
+}
+
 model User {
   id           String      @id @default(cuid())
   email        String      @unique
@@ -62,6 +72,8 @@ model Address {
   id          String   @id @default(cuid())
   userId      String?
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  label       String?
+  isDefault   Boolean  @default(false)
   fullName    String
   phone       String
   email       String
@@ -98,6 +110,7 @@ model Product {
   images               String[]
   basePriceRon         Float                  @default(0)
   priceLabel           String
+  pricingMode          PricingMode            @default(MANUAL)
   isConfigurable       Boolean                @default(false)
   pricingConfigJson    Json?
   variantSelectorLabel String?
@@ -108,6 +121,8 @@ model Product {
   status               ProductStatus          @default(ACTIVE)
   categoryId           String?
   category             Category?              @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  recipeId             String?
+  recipe               Recipe?                @relation(fields: [recipeId], references: [id], onDelete: SetNull)
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
   pricingOverrides     ProductPricingOverride[]
@@ -134,10 +149,23 @@ model RawMaterial {
   unit        String
   unitCostRon Float
   supplier    String?
+  categoryId  String?
+  category    MaterialCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   active      Boolean         @default(true)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   recipeItems ProductRecipe[]
+  recipeMaterialItems RecipeMaterial[]
+}
+
+model MaterialCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  materials   RawMaterial[]
+  recipeItems RecipeMaterial[]
 }
 
 model ProductRecipe {
@@ -152,6 +180,31 @@ model ProductRecipe {
   material    RawMaterial @relation(fields: [materialId], references: [id], onDelete: Restrict)
 
   @@unique([productId, materialId])
+}
+
+model Recipe {
+  id         String   @id @default(cuid())
+  name       String   @unique
+  laborType  RecipeLaborType @default(FIXED)
+  laborValue Float    @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  items      RecipeMaterial[]
+  products   Product[]
+}
+
+model RecipeMaterial {
+  id         String      @id @default(cuid())
+  recipeId   String
+  materialId String?
+  materialCategoryId String?
+  qty        Float       @default(1)
+  recipe     Recipe      @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  material   RawMaterial? @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  materialCategory MaterialCategory? @relation(fields: [materialCategoryId], references: [id], onDelete: SetNull)
+
+  @@unique([recipeId, materialId])
+  @@unique([recipeId, materialCategoryId])
 }
 
 model Order {

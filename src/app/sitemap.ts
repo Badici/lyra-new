@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
-import { products } from "@/data/catalog";
+import { getCatalogProducts } from "@/lib/catalog-service";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lyrabaits.ro";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
   const basePages: MetadataRoute.Sitemap = [
@@ -51,6 +51,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
+  const products = await getCatalogProducts();
   const productPages: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${siteUrl}/produse/${product.slug}`,
     lastModified: now,

@@ -5,9 +5,8 @@ import { z } from "zod";
 
 const patchMaterialSchema = z.object({
   name: z.string().min(2).optional(),
-  unit: z.string().min(1).optional(),
   unitCostRon: z.number().nonnegative().optional(),
-  supplier: z.string().optional(),
+  categoryId: z.string().optional(),
   active: z.boolean().optional(),
 });
 

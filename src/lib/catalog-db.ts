@@ -1,12 +1,83 @@
-import { type Product } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import type { CatalogProduct } from "@/data/catalog";
 
-function mapProduct(row: Product): CatalogProduct {
+type ProductWithRecipe = Prisma.ProductGetPayload<{
+  include: {
+    recipe: {
+      include: {
+        items: {
+          include: {
+            material: true;
+            materialCategory: {
+              include: {
+                materials: true;
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+}>;
+
+function buildPricingConfigFromRecipe(row: ProductWithRecipe) {
+  if (row.pricingMode !== "AUTO" || !row.recipe) {
+    return undefined;
+  }
+
+  const categoryItems = row.recipe.items.filter((item) => item.materialCategory);
+  const fixedMaterialItems = row.recipe.items.filter((item) => item.material);
+
+  const options = categoryItems
+    .map((item, index) => {
+    const category = item.materialCategory!;
+    return {
+      id: `recipe-category-${category.id}-${index}`,
+      label: category.name,
+      placeholder: `Alege ${category.name.toLowerCase()}`,
+      choices: category.materials
+        .filter((material) => material.active)
+        .map((material) => ({
+          value: material.id,
+          label: material.name,
+          costRon: material.unitCostRon * item.qty,
+        })),
+      };
+    })
+    .filter((option) => option.choices.length > 0);
+
+  const fixedCosts = fixedMaterialItems.map((item) => ({
+    label: item.material!.name,
+    costRon: item.material!.unitCostRon * item.qty,
+  }));
+
+  if (row.recipe.laborType === "FIXED" && row.recipe.laborValue > 0) {
+    fixedCosts.push({
+      label: "Manoperă",
+      costRon: row.recipe.laborValue,
+    });
+  }
+
+  const generatedConfig = {
+    options,
+    fixedCosts,
+    markupPercent: row.recipe.laborType === "PERCENT" ? row.recipe.laborValue : 0,
+  };
+
+  if (generatedConfig.options.length === 0 && generatedConfig.fixedCosts.length === 0) {
+    return undefined;
+  }
+
+  return generatedConfig;
+}
+
+function mapProduct(row: ProductWithRecipe): CatalogProduct {
   const pricingConfig =
-    row.pricingConfigJson && typeof row.pricingConfigJson === "object"
+    buildPricingConfigFromRecipe(row) ??
+    (row.pricingConfigJson && typeof row.pricingConfigJson === "object"
       ? (row.pricingConfigJson as CatalogProduct["pricingConfig"])
-      : undefined;
+      : undefined);
 
   const variantSelector =
     row.variantSelectorLabel && row.variantValues.length > 0
@@ -40,6 +111,22 @@ export async function getProductsFromDb() {
     where: {
       status: "ACTIVE",
     },
+    include: {
+      recipe: {
+        include: {
+          items: {
+            include: {
+              material: true,
+              materialCategory: {
+                include: {
+                  materials: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
   });
   return rows.map(mapProduct);
@@ -51,6 +138,22 @@ export async function getProductBySlugFromDb(slug: string) {
   }
   const row = await prisma.product.findUnique({
     where: { slug },
+    include: {
+      recipe: {
+        include: {
+          items: {
+            include: {
+              material: true,
+              materialCategory: {
+                include: {
+                  materials: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   });
   if (!row || row.status !== "ACTIVE") {
     return null;

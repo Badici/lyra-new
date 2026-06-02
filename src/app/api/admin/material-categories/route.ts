@@ -3,11 +3,9 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 
-const materialSchema = z.object({
+const categorySchema = z.object({
   name: z.string().min(2),
-  unitCostRon: z.number().nonnegative(),
-  categoryId: z.string().optional(),
-  active: z.boolean().default(true),
+  description: z.string().optional(),
 });
 
 async function canAdmin() {
@@ -19,13 +17,13 @@ export async function GET() {
   if (!(await canAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  const materials = await prisma.rawMaterial.findMany({
+  const categories = await prisma.materialCategory.findMany({
     include: {
-      category: true,
+      materials: true,
     },
-    orderBy: { updatedAt: "desc" },
+    orderBy: { name: "asc" },
   });
-  return NextResponse.json(materials);
+  return NextResponse.json(categories);
 }
 
 export async function POST(request: Request) {
@@ -33,17 +31,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   try {
-    const payload = materialSchema.parse(await request.json());
-    const material = await prisma.rawMaterial.create({
-      data: {
-        ...payload,
-        unit: "buc",
-      },
-    });
-    return NextResponse.json(material, { status: 201 });
+    const payload = categorySchema.parse(await request.json());
+    const category = await prisma.materialCategory.create({ data: payload });
+    return NextResponse.json(category, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Invalid material payload" },
+      { error: error instanceof Error ? error.message : "Invalid category payload" },
       { status: 400 }
     );
   }

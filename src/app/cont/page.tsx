@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { AddressBook } from "@/components/account/AddressBook";
 import { SignOutButton } from "@/components/account/SignOutButton";
+import { prisma } from "@/lib/db";
 import { listOrdersForUser } from "@/lib/order-service";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +15,10 @@ export default async function AccountPage() {
   }
 
   const orders = await listOrdersForUser(session.user.id);
+  const addresses = await prisma.address.findMany({
+    where: { userId: session.user.id },
+    orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }],
+  });
 
   return (
     <main className="px-4 py-10 md:py-12">
@@ -52,6 +58,8 @@ export default async function AccountPage() {
             </ul>
           )}
         </section>
+
+        <AddressBook initialAddresses={addresses} />
       </div>
     </main>
   );

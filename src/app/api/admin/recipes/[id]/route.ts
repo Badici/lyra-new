@@ -4,8 +4,18 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 
 const patchRecipeSchema = z.object({
-  qty: z.number().positive().optional(),
-  wastePct: z.number().min(0).max(100).optional(),
+  name: z.string().min(2).optional(),
+  laborType: z.enum(["FIXED", "PERCENT"]).optional(),
+  laborValue: z.number().nonnegative().optional(),
+  items: z
+    .array(
+      z.object({
+        kind: z.enum(["material", "category"]),
+        id: z.string().min(1),
+        qty: z.number().positive(),
+      })
+    )
+    .optional(),
 });
 
 async function canAdmin() {
@@ -24,9 +34,27 @@ export async function PATCH(request: Request, context: RouteContext) {
   try {
     const payload = patchRecipeSchema.parse(await request.json());
     const { id } = await context.params;
-    const recipe = await prisma.productRecipe.update({
+    if (payload.items) {
+      await prisma.recipeMaterial.deleteMany({
+        where: { recipeId: id },
+      });
+    }
+    const recipe = await prisma.recipe.update({
       where: { id },
-      data: payload,
+      data: {
+        name: payload.name,
+        laborType: payload.laborType,
+        laborValue: payload.laborValue,
+        items: payload.items
+          ? {
+              create: payload.items.map((item) => ({
+                materialId: item.kind === "material" ? item.id : undefined,
+                materialCategoryId: item.kind === "category" ? item.id : undefined,
+                qty: item.qty,
+              })),
+            }
+          : undefined,
+      },
     });
     return NextResponse.json(recipe);
   } catch (error) {
@@ -42,6 +70,6 @@ export async function DELETE(_: Request, context: RouteContext) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const { id } = await context.params;
-  await prisma.productRecipe.delete({ where: { id } });
+  await prisma.recipe.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }

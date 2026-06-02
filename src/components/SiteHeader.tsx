@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useCart } from "@/components/cart/CartProvider";
 
@@ -24,7 +25,23 @@ const tickerTrack = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const pathname = usePathname();
   const { cartCount } = useCart();
+
+  useEffect(() => {
+    const loadSession = async () => {
+      const response = await fetch("/api/auth/session");
+      if (!response.ok) {
+        return;
+      }
+      const session = (await response.json()) as {
+        user?: { role?: string };
+      };
+      setIsAdmin(session.user?.role === "ADMIN");
+    };
+    void loadSession();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--background)]/95 backdrop-blur">
@@ -61,7 +78,11 @@ export function SiteHeader() {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="font-medium transition-colors hover:text-[var(--cream)]"
+                className={`font-medium transition-colors hover:text-[var(--cream)] ${
+                  pathname === link.href
+                    ? "text-[var(--cream)]"
+                    : "text-[var(--muted)]"
+                }`}
               >
                 {link.label}
               </Link>
@@ -70,6 +91,14 @@ export function SiteHeader() {
         </ul>
 
         <div className="flex items-center gap-3">
+          {isAdmin ? (
+            <Link
+              href="/admin"
+              className="hidden rounded-full border border-[var(--accent)]/50 bg-[var(--accent)]/20 px-4 py-2 text-sm font-semibold text-[var(--accent-light)] transition-colors hover:border-[var(--accent)] lg:inline-flex"
+            >
+              Interfață admin
+            </Link>
+          ) : null}
           <Link
             href="/cos"
             className="inline-flex items-center gap-2 rounded-full border border-[var(--accent)]/50 bg-[var(--lake)] px-4 py-2 text-sm font-semibold text-[var(--cream)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent)]/20"
@@ -114,13 +143,26 @@ export function SiteHeader() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="block rounded-lg px-3 py-2 transition-colors hover:bg-white/5"
+                  className={`block rounded-lg px-3 py-2 transition-colors hover:bg-white/5 ${
+                    pathname === link.href ? "bg-white/10 text-[var(--cream)]" : ""
+                  }`}
                   onClick={() => setOpen(false)}
                 >
                   {link.label}
                 </Link>
               </li>
             ))}
+            {isAdmin ? (
+              <li>
+                <Link
+                  href="/admin"
+                  className="block rounded-lg px-3 py-2 text-[var(--accent-light)] transition-colors hover:bg-white/5"
+                  onClick={() => setOpen(false)}
+                >
+                  Interfață admin
+                </Link>
+              </li>
+            ) : null}
           </ul>
         </div>
       )}

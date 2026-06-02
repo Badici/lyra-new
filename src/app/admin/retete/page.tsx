@@ -2,21 +2,56 @@ import { RecipesManager } from "@/components/admin/RecipesManager";
 import { prisma } from "@/lib/db";
 
 export default async function AdminRecipesPage() {
-  const [products, materials, initialRows] = await Promise.all([
-    prisma.product.findMany({
-      select: { id: true, name: true },
-      where: { status: "ACTIVE" },
-      orderBy: { name: "asc" },
-    }),
+  const [materials, materialCategories, initialRows] = await Promise.all([
     prisma.rawMaterial.findMany({
-      select: { id: true, name: true, unit: true },
+      select: {
+        id: true,
+        name: true,
+        unit: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
       where: { active: true },
       orderBy: { name: "asc" },
     }),
-    prisma.productRecipe.findMany({
+    prisma.materialCategory.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: { name: "asc" },
+    }),
+    prisma.recipe.findMany({
       include: {
-        product: { select: { name: true } },
-        material: { select: { name: true, unit: true } },
+        items: {
+          include: {
+            material: {
+              include: {
+                category: {
+                  select: { name: true },
+                },
+              },
+            },
+            materialCategory: {
+              include: {
+                materials: {
+                  where: { active: true },
+                  orderBy: { name: "asc" },
+                },
+              },
+            },
+          },
+        },
+        products: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: { updatedAt: "desc" },
     }),
@@ -30,7 +65,11 @@ export default async function AdminRecipesPage() {
           Asociezi materii prime pe produs pentru cost și profit real.
         </p>
       </header>
-      <RecipesManager products={products} materials={materials} initialRows={initialRows} />
+      <RecipesManager
+        materials={materials}
+        materialCategories={materialCategories}
+        initialRows={initialRows}
+      />
     </div>
   );
 }

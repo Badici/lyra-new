@@ -23,6 +23,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     const {
       categoryId,
       pricingConfigJson,
+      recipeId,
       ...rest
     } = payload;
     const product = await prisma.product.update({
@@ -35,6 +36,12 @@ export async function PATCH(request: Request, context: RouteContext) {
             ? undefined
             : categoryId
               ? { connect: { id: categoryId } }
+              : { disconnect: true },
+        recipe:
+          recipeId === undefined
+            ? undefined
+            : recipeId
+              ? { connect: { id: recipeId } }
               : { disconnect: true },
       },
     });
