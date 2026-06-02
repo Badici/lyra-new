@@ -3,14 +3,22 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useCart } from "@/components/cart/CartProvider";
 
 const NAV_LINKS = [
   { href: "/", label: "Acasă" },
-  { href: "/categorii/carlige-accesorii", label: "Cârlige și accesorii" },
-  { href: "/categorii/monturi-forface", label: "Monturi și forface" },
-  { href: "/categorii/nade-aditivi", label: "Nade și aditivi" },
+  { href: "/catalog", label: "Catalog produse" },
 ];
+
+const TICKER_ITEMS = [
+  "Produs la comandă în România",
+  "Timp până la livrare: 2-10 zile",
+  "Calitate garantată",
+  "Raport calitate-preț excelent",
+];
+
+const tickerTrack = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -18,6 +26,22 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--background)]/95 backdrop-blur">
+      <div className="overflow-hidden border-b border-[var(--accent)]/45 bg-gradient-to-r from-[var(--accent)]/15 via-[var(--accent-light)]/15 to-[var(--accent)]/15 shadow-[0_0_28px_rgba(251,191,36,0.28)]">
+        <motion.div
+          className="flex w-max items-center py-2.5"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 20, ease: "linear", repeat: Infinity }}
+        >
+          {tickerTrack.map((item, index) => (
+            <span
+              key={`${item}-${index}`}
+              className="px-7 text-sm font-bold uppercase tracking-[0.18em] text-[var(--accent-light)] md:text-base"
+            >
+              ✦ {item}
+            </span>
+          ))}
+        </motion.div>
+      </div>
       <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 md:px-6">
         <Link href="/" className="inline-flex items-center gap-3">
           <Image

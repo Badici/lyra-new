@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import {
   calculateConfiguredPriceRon,
   formatRon,
@@ -35,7 +36,6 @@ export function AddToCartButton({ product }: { product: AddToCartPayload }) {
     ? calculateConfiguredPriceRon(
         {
           slug: product.productSlug,
-          categorySlug: "monturi-forface",
           name: product.name,
           shortDescription: "",
           description: "",
@@ -162,6 +162,14 @@ export function AddToCartButton({ product }: { product: AddToCartPayload }) {
         <label htmlFor="quantity" className="text-sm text-[var(--muted)]">
           Cantitate
         </label>
+        <button
+          type="button"
+          onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 bg-[var(--background)] text-[var(--cream)] transition-colors hover:border-[var(--accent)]/60 hover:text-[var(--accent-light)]"
+          aria-label="Scade cantitatea"
+        >
+          -
+        </button>
         <input
           id="quantity"
           type="number"
@@ -172,6 +180,14 @@ export function AddToCartButton({ product }: { product: AddToCartPayload }) {
           }
           className="w-20 rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
         />
+        <button
+          type="button"
+          onClick={() => setQuantity((current) => current + 1)}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 bg-[var(--background)] text-[var(--cream)] transition-colors hover:border-[var(--accent)]/60 hover:text-[var(--accent-light)]"
+          aria-label="Crește cantitatea"
+        >
+          +
+        </button>
       </div>
 
       {hasPricingConfig && typeof calculatedPrice === "number" ? (
@@ -183,9 +199,12 @@ export function AddToCartButton({ product }: { product: AddToCartPayload }) {
         </p>
       ) : null}
 
-      <button
+      <motion.button
         type="button"
         disabled={!canAdd}
+        whileHover={canAdd ? { scale: 1.03 } : undefined}
+        whileTap={canAdd ? { scale: 0.98 } : undefined}
+        transition={{ duration: 0.45, ease: "easeOut" }}
         onClick={() => {
           if (product.pricingConfig && typeof calculatedPrice === "number") {
             const configSummary = product.pricingConfig.options
@@ -246,7 +265,7 @@ export function AddToCartButton({ product }: { product: AddToCartPayload }) {
         }`}
       >
         Adaugă în coș
-      </button>
+      </motion.button>
 
       {variantRequired && !canAdd ? (
         <p className="text-sm text-[var(--muted)]">

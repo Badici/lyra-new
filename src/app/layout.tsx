@@ -21,20 +21,17 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lyrabaits.ro";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Lyra Baits - Momeală și monturi pentru pescuit la crap",
+    default: "Lyra Baits - Monturi și accesorii pentru pescuit la crap",
     template: "%s | Lyra Baits",
   },
   description:
-    "Momeală pentru pescuit la crap, pungi PVA, monturi, forface și amestec de nădire. Comandă rapid prin WhatsApp de la Lyra Baits.",
+    "Monturi, forface, cârlige, accesorii și pelete pentru pescuit la crap. Comandă rapid prin WhatsApp de la Lyra Baits.",
   applicationName: "Lyra Baits",
   keywords: [
-    "momeală crap",
-    "nadă crap",
+    "pelete crap",
     "pungi PVA",
     "monturi crap",
     "forface crap",
-    "amestec nădire",
-    "boillies",
     "accesorii pescuit",
     "Lyra Baits",
     "pescuit la crap România",
@@ -47,15 +44,15 @@ export const metadata: Metadata = {
     locale: "ro_RO",
     url: "/",
     siteName: "Lyra Baits",
-    title: "Lyra Baits - Momeală și monturi pentru pescuit la crap",
+    title: "Lyra Baits - Monturi și accesorii pentru pescuit la crap",
     description:
-      "Produse pentru pescuit la crap: nadă, pungi PVA, monturi, forface și amestec de nădire. Comenzi prin WhatsApp.",
+      "Produse pentru pescuit la crap: monturi, forface, cârlige, accesorii și pelete. Comenzi prin WhatsApp.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lyra Baits - Momeală și monturi pentru pescuit la crap",
+    title: "Lyra Baits - Monturi și accesorii pentru pescuit la crap",
     description:
-      "Nadă, monturi, forface, pungi PVA și amestec de nădire pentru pescuit la crap.",
+      "Monturi, forface, cârlige, accesorii și pelete pentru pescuit la crap.",
   },
   robots: {
     index: true,

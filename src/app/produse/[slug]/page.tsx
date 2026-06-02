@@ -85,10 +85,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
     <main className="px-4 py-10 md:py-12">
       <div className="mx-auto w-full max-w-7xl">
         <Link
-          href={`/categorii/${product.categorySlug}`}
+          href="/catalog"
           className="text-sm text-[var(--muted)] hover:text-[var(--cream)]"
         >
-          ← Înapoi la categorie
+          ← Înapoi la catalog
         </Link>
 
         <section className="mt-5 grid gap-8 lg:grid-cols-2">
@@ -101,6 +101,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <p className="text-xl font-semibold text-[var(--accent-light)]">
               {displayPrice}
             </p>
+            {product.slug === "montura-punga-pva" ? (
+              <p className="inline-flex rounded-full border border-[var(--accent)]/50 bg-[var(--accent)]/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[var(--accent-light)]">
+                Bag-uri la preț foarte bun
+              </p>
+            ) : null}
             <p className="leading-relaxed text-[var(--muted)]">{product.description}</p>
 
             <div className="rounded-xl border border-white/10 bg-[var(--lake)]/50 p-4">

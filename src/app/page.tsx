@@ -1,26 +1,27 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { CategoryCard } from "@/components/catalog/CategoryCard";
 import { ProductCard } from "@/components/catalog/ProductCard";
-import {
-  categories,
-  getProductsByCategory,
-  products,
-  WHATSAPP_NUMBER,
-} from "@/data/catalog";
+import { getDisplayProducts, WHATSAPP_NUMBER } from "@/data/catalog";
 
 export const metadata: Metadata = {
   title: "Produse pentru pescuit la crap",
   description:
-    "Catalog Lyra Baits cu produse organizate pe categorii: cârlige, monturi, forface, nade, pelete și aditivi pentru pescuit la crap.",
+    "Catalog Lyra Baits cu monturi, forface, cârlige, accesorii și pelete pentru pescuit la crap.",
   alternates: {
     canonical: "/",
+  },
+  openGraph: {
+    title: "Produse pentru pescuit la crap | Lyra Baits",
+    description:
+      "Vezi monturi, forface, cârlige, accesorii și pelete din catalogul Lyra Baits.",
+    type: "website",
+    url: "/",
   },
 };
 
 export default function Home() {
-  const highlightedProducts = products.slice(0, 2);
+  const highlightedProducts = getDisplayProducts().slice(0, 2);
 
   return (
     <main>
@@ -34,6 +35,8 @@ export default function Home() {
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[var(--background)]/35 via-[var(--background)]/75 to-[var(--background)]" />
+        <div className="absolute -top-10 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-[var(--accent)]/25 blur-3xl md:h-80 md:w-80" />
+        <div className="absolute bottom-8 right-8 hidden h-44 w-44 rounded-full border-2 border-[var(--accent-light)]/70 bg-[var(--accent)]/15 blur-[1px] md:block" />
         <div className="relative mx-auto max-w-5xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent-light)]">
             Lyra Baits
@@ -42,54 +45,28 @@ export default function Home() {
             Tot ce ai nevoie pentru pescuitul la crap
           </h1>
           <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-[var(--muted)] md:text-lg">
-            Descoperă categoriile noastre, intră pe produsul dorit și trimite
-            comandă direct pe WhatsApp în câteva secunde.
+            Descoperă catalogul nostru complet, alege produsele dorite și trimite
+            comanda direct pe WhatsApp în câteva secunde.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
-              href="/categorii/carlige-accesorii"
+              href="/catalog"
               className="rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold text-white transition-colors hover:bg-[var(--accent-light)]"
             >
-              Vezi cârlige și accesorii
+              Vezi catalogul de produse
             </Link>
-            <Link
-              href="/categorii/monturi-forface"
-              className="rounded-xl border border-[var(--accent)]/50 bg-[var(--lake)] px-5 py-3 font-semibold text-[var(--cream)] transition-colors hover:bg-[var(--accent)]/20"
-            >
-              Vezi monturi și forface
-            </Link>
-            <Link
-              href="/categorii/nade-aditivi"
-              className="rounded-xl border border-[var(--accent)]/50 bg-[var(--lake)] px-5 py-3 font-semibold text-[var(--cream)] transition-colors hover:bg-[var(--accent)]/20"
-            >
-              Vezi nade și aditivi
-            </Link>
+          </div>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm font-semibold uppercase tracking-wide md:text-base">
+            <span className="rounded-full border-2 border-[var(--accent)]/65 bg-[var(--accent)]/20 px-5 py-2 text-[var(--accent-light)] shadow-[0_0_32px_rgba(251,191,36,0.28)]">
+              Cel mai bun raport calitate-preț
+            </span>
+            <span className="rounded-full border-2 border-[var(--accent)]/65 bg-[var(--accent)]/20 px-5 py-2 text-[var(--accent-light)] shadow-[0_0_32px_rgba(251,191,36,0.28)]">
+              Bag-uri la preț competitiv
+            </span>
           </div>
           <p className="mt-6 text-sm text-[var(--muted)]">
             Comenzi rapide pe WhatsApp: +40 728 241 412
           </p>
-        </div>
-      </section>
-
-      <section className="px-4 py-14 md:py-16">
-        <div className="mx-auto w-full max-w-7xl">
-          <div className="mb-8">
-            <h2 className="text-3xl font-semibold text-[var(--cream)]">
-              Categorii de produse
-            </h2>
-            <p className="mt-2 text-[var(--muted)]">
-              Fiecare categorie are pagină separată, cu produse detaliate și poze.
-            </p>
-          </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {categories.map((category) => (
-              <CategoryCard
-                key={category.slug}
-                category={category}
-                productCount={getProductsByCategory(category.slug).length}
-              />
-            ))}
-          </div>
         </div>
       </section>
 
@@ -105,10 +82,10 @@ export default function Home() {
               </p>
             </div>
             <Link
-              href="/categorii/nade-aditivi"
+              href="/catalog"
               className="text-sm font-semibold text-[var(--accent-light)] hover:underline"
             >
-              Vezi toate produsele din nade și aditivi
+              Vezi catalogul complet
             </Link>
           </div>
           <div className="grid gap-5 md:grid-cols-2">

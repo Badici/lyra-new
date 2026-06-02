@@ -1,6 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { DEFAULT_PRODUCT_IMAGE, type ProductCategory } from "@/data/catalog";
+import { DEFAULT_PRODUCT_IMAGE } from "@/data/catalog";
+
+type ProductCategory = {
+  slug: string;
+  name: string;
+  description: string;
+  heroImage: string;
+};
 
 export function CategoryCard({
   category,

@@ -1,13 +1,5 @@
-export type ProductCategory = {
-  slug: string;
-  name: string;
-  description: string;
-  heroImage: string;
-};
-
 export type CatalogProduct = {
   slug: string;
-  categorySlug: ProductCategory["slug"];
   name: string;
   shortDescription: string;
   description: string;
@@ -114,34 +106,9 @@ const BAG_LEADS: PricingChoice[] = [
   { value: "bag-110", label: "Plumb bag - 110g", costRon: 4 },
 ];
 
-export const categories: ProductCategory[] = [
-  {
-    slug: "carlige-accesorii",
-    name: "Cârlige și accesorii",
-    description:
-      "Cârlige wide gape, fir pentru forfac și vârtejuri pentru monturi curate și eficiente.",
-    heroImage: "/produse-noi/carlige-accesorii/carlige1.png",
-  },
-  {
-    slug: "monturi-forface",
-    name: "Monturi și forface",
-    description:
-      "Monturi pregătite pe leadcore și seturi de rig-uri pentru partide la crap.",
-    heroImage: "/produse-noi/monturi-forface/montura-inline.png",
-  },
-  {
-    slug: "nade-aditivi",
-    name: "Nade și aditivi",
-    description:
-      "Nade, pelete și aditivi pentru atracție rapidă pe vad și constanță pe toată partida.",
-    heroImage: "/produse-noi/nade-aditivi/mix-pelete.png",
-  },
-];
-
 export const products: CatalogProduct[] = [
   {
     slug: "carlige-wide-gape",
-    categorySlug: "carlige-accesorii",
     name: "Cârlige wide gape",
     shortDescription: "Mărimi 4, 6, 8, 10 - plic de 10 bucăți.",
     description:
@@ -165,7 +132,6 @@ export const products: CatalogProduct[] = [
   },
   {
     slug: "fir-forfac-textil-014",
-    categorySlug: "carlige-accesorii",
     name: "Fir forfac textil 0.14",
     shortDescription: "Rolă 100m, verde, mătăsos, ideal pentru forface.",
     description:
@@ -181,7 +147,6 @@ export const products: CatalogProduct[] = [
   },
   {
     slug: "vartejuri-marimea-4",
-    categorySlug: "carlige-accesorii",
     name: "Vârtejuri mărimea 4",
     shortDescription: "Plic cu 10 bucăți pentru monturi pe crap.",
     description:
@@ -193,7 +158,6 @@ export const products: CatalogProduct[] = [
   },
   {
     slug: "montura-inline-leadcore",
-    categorySlug: "monturi-forface",
     name: "Montură inline",
     shortDescription: "Leadcore, plumb 100g.",
     description:
@@ -238,7 +202,6 @@ export const products: CatalogProduct[] = [
   },
   {
     slug: "montura-plumb-pierdut",
-    categorySlug: "monturi-forface",
     name: "Montură plumb pierdut",
     shortDescription: "Leadcore, plumb 100g, sistem plumb pierdut.",
     description:
@@ -284,7 +247,6 @@ export const products: CatalogProduct[] = [
   },
   {
     slug: "montura-punga-pva",
-    categorySlug: "monturi-forface",
     name: "Montură pungă PVA",
     shortDescription:
       "Leadcore, cârlig nr. 8, plumb 60g, mix pelete fishmeal + cerealier colorat.",
@@ -351,7 +313,6 @@ export const products: CatalogProduct[] = [
   },
   {
     slug: "carlige-legate-set-5",
-    categorySlug: "monturi-forface",
     name: "Cârlige legate - set 5 buc",
     shortDescription:
       "Set de 5 cârlige legate, configurabile după mărime, fir, tip montură și lungime rig.",
@@ -427,7 +388,6 @@ export const products: CatalogProduct[] = [
   },
   {
     slug: "montura-elicopter",
-    categorySlug: "monturi-forface",
     name: "Montură elicopter",
     shortDescription:
       "Montură elicopter configurabilă, cu preț calculat automat după materiale.",
@@ -473,7 +433,6 @@ export const products: CatalogProduct[] = [
   },
   {
     slug: "mix-pelete-500g",
-    categorySlug: "nade-aditivi",
     name: "Mix pelete 500g",
     shortDescription:
       "Mixul din bagurile noastre, în cutie rezistentă la apă, ideal pentru feeder, PVA sau momitor.",
@@ -488,50 +447,26 @@ export const products: CatalogProduct[] = [
       "Utilizare: feeder, PVA, momitor",
     ],
   },
-  {
-    slug: "nada-fishmeal-800g",
-    categorySlug: "nade-aditivi",
-    name: "Nadă Fishmeal",
-    shortDescription: "Nadă natur cu 30% făină de pește.",
-    description:
-      "Nadă pe bază cerealieră, cu adaos de 30% făină de pește. Formulă echilibrată pentru partide la crap pe vaduri solicitate.",
-    priceLabel: "15 RON / 800g",
-    priceValueRon: 15,
-    images: ["/produse-noi/nade-aditivi/nada-fishmeal.png"],
-    specs: ["Cantitate: 800g", "Raport fishmeal: 30%"],
-  },
-  {
-    slug: "nada-natur-800g",
-    categorySlug: "nade-aditivi",
-    name: "Nadă Natur",
-    shortDescription: "Nadă cerealieră simplă, fără aditivi.",
-    description:
-      "Nadă simplă, cerealieră, fără aditivi. Soluție bună pentru partide clasice sau pentru a fi combinată cu aditivi lichizi.",
-    priceLabel: "9 RON / 800g",
-    priceValueRon: 9,
-    images: ["/produse-noi/nade-aditivi/nada-natur.png"],
-    specs: ["Cantitate: 800g", "Compoziție: făină cerealieră pură"],
-  },
-  {
-    slug: "nada-usturoi-1-5kg",
-    categorySlug: "nade-aditivi",
-    name: "Nadă Usturoi",
-    shortDescription: "Nadă cerealieră cu aromă intensă de usturoi.",
-    description:
-      "Nadă cerealieră cu aromă intensă de usturoi, recomandată când peștii răspund la profiluri puternice de atracție.",
-    priceLabel: "20 RON / 1.5kg",
-    priceValueRon: 20,
-    images: ["/produse-noi/nade-aditivi/nada-usturoi.png"],
-    specs: ["Cantitate: 1.5kg", "Profil: cerealier, aromă intensă de usturoi"],
-  },
 ];
 
-export function getCategoryBySlug(slug: string) {
-  return categories.find((category) => category.slug === slug);
-}
+const DISPLAY_PRIORITY: Record<string, number> = {
+  "montura-punga-pva": 0,
+  "montura-inline-leadcore": 1,
+  "montura-plumb-pierdut": 2,
+  "montura-elicopter": 3,
+  "carlige-legate-set-5": 4,
+  "mix-pelete-500g": 5,
+};
 
-export function getProductsByCategory(categorySlug: string) {
-  return products.filter((product) => product.categorySlug === categorySlug);
+export function getDisplayProducts() {
+  return [...products].sort((a, b) => {
+    const aPriority = DISPLAY_PRIORITY[a.slug] ?? 100;
+    const bPriority = DISPLAY_PRIORITY[b.slug] ?? 100;
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority;
+    }
+    return a.name.localeCompare(b.name, "ro");
+  });
 }
 
 export function getProductBySlug(slug: string) {

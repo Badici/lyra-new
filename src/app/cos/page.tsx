@@ -19,8 +19,8 @@ export default function CartPage() {
             Coșul tău
           </h1>
           <p className="mt-3 max-w-3xl text-[var(--muted)]">
-            După ce completezi datele de contact, apasă butonul „Trimite comandă pe
-            WhatsApp”, iar noi îți vom răspunde în cel mai scurt timp pentru
+            După ce completezi toate datele de livrare și contact, apasă butonul
+            „Trimite comandă pe WhatsApp”, iar noi îți vom răspunde rapid pentru
             confirmare și termenii de livrare.
           </p>
         </header>

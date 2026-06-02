@@ -1,24 +1,87 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 import { DELIVERY_FEE_RON, WHATSAPP_NUMBER } from "@/data/catalog";
 import { useCart } from "@/components/cart/CartProvider";
 
 type DeliveryType = "curier" | "personal";
 
+type AddressSuggestion = {
+  place_id: number;
+  display_name: string;
+  address?: {
+    county?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+    postcode?: string;
+    road?: string;
+    house_number?: string;
+    suburb?: string;
+  };
+};
+
 export function CartPageClient() {
   const { items, subtotalRon, updateQuantity, removeItem, clearCart } = useCart();
   const [deliveryType, setDeliveryType] = useState<DeliveryType>("curier");
-  const [address, setAddress] = useState("");
+  const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [county, setCounty] = useState("");
+  const [city, setCity] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isFetchingAddress, setIsFetchingAddress] = useState(false);
 
   const deliveryFee = deliveryType === "curier" ? DELIVERY_FEE_RON : 0;
   const totalRon = subtotalRon + deliveryFee;
 
+  useEffect(() => {
+    const query = streetAddress.trim();
+    if (query.length < 4) {
+      setAddressSuggestions([]);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        setIsFetchingAddress(true);
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&countrycodes=ro&limit=5&q=${encodeURIComponent(
+            query
+          )}`
+        );
+        if (!response.ok) {
+          setAddressSuggestions([]);
+          return;
+        }
+        const data = (await response.json()) as AddressSuggestion[];
+        setAddressSuggestions(data);
+      } catch {
+        setAddressSuggestions([]);
+      } finally {
+        setIsFetchingAddress(false);
+      }
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [streetAddress]);
+
   const canSendMessage =
-    items.length > 0 && address.trim() && phone.trim() && email.trim();
+    items.length > 0 &&
+    fullName.trim() &&
+    phone.trim() &&
+    email.trim() &&
+    county.trim() &&
+    city.trim() &&
+    streetAddress.trim() &&
+    postalCode.trim();
 
   const whatsappLink = useMemo(() => {
     const itemLines = items
@@ -45,23 +108,39 @@ export function CartPageClient() {
       `Total estimat: ${totalRon.toFixed(2)} RON`,
       "",
       "Date client:",
-      `Adresă: ${address || "-"}`,
+      `Nume complet: ${fullName || "-"}`,
       `Telefon: ${phone || "-"}`,
       `Email: ${email || "-"}`,
+      `Județ: ${county || "-"}`,
+      `Localitate: ${city || "-"}`,
+      `Adresă: ${streetAddress || "-"}`,
+      `Cod poștal: ${postalCode || "-"}`,
     ].join("\n");
 
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-  }, [items, subtotalRon, totalRon, deliveryType, address, phone, email]);
+  }, [
+    items,
+    subtotalRon,
+    totalRon,
+    deliveryType,
+    fullName,
+    phone,
+    email,
+    county,
+    city,
+    streetAddress,
+    postalCode,
+  ]);
 
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-[var(--lake)]/50 p-8 text-center">
         <h1 className="text-2xl font-semibold text-[var(--cream)]">Coșul este gol</h1>
         <p className="mt-2 text-[var(--muted)]">
-          Adaugă produse din categorii, apoi revino aici pentru finalizarea comenzii.
+          Adaugă produse din catalog, apoi revino aici pentru finalizarea comenzii.
         </p>
         <Link
-          href="/"
+          href="/catalog"
           className="mt-6 inline-flex rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold text-white transition-colors hover:bg-[var(--accent-light)]"
         >
           Vezi produsele
@@ -86,6 +165,14 @@ export function CartPageClient() {
                   <p className="text-sm text-[var(--muted)]">{item.priceLabel}</p>
                 </div>
                 <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(item.productSlug, Math.max(1, item.quantity - 1))}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/20 bg-[var(--background)] text-[var(--cream)] transition-colors hover:border-[var(--accent)]/60 hover:text-[var(--accent-light)]"
+                    aria-label={`Scade cantitatea pentru ${item.name}`}
+                  >
+                    -
+                  </button>
                   <input
                     type="number"
                     min={1}
@@ -95,6 +182,14 @@ export function CartPageClient() {
                     }
                     className="w-20 rounded-lg border border-white/15 bg-[var(--background)] px-2 py-1.5 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
                   />
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(item.productSlug, item.quantity + 1)}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/20 bg-[var(--background)] text-[var(--cream)] transition-colors hover:border-[var(--accent)]/60 hover:text-[var(--accent-light)]"
+                    aria-label={`Crește cantitatea pentru ${item.name}`}
+                  >
+                    +
+                  </button>
                   <button
                     type="button"
                     onClick={() => removeItem(item.productSlug)}
@@ -146,13 +241,110 @@ export function CartPageClient() {
 
         <div className="space-y-3">
           <label className="block text-sm text-[var(--muted)]">
-            Adresă completă
+            Nume complet
             <input
               type="text"
-              value={address}
-              onChange={(event) => setAddress(event.target.value)}
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
               className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
-              placeholder="Ex: Str. Exemplu 10, București"
+              placeholder="Ex: Popescu Andrei"
+              required
+              autoComplete="name"
+            />
+          </label>
+
+          <label className="block text-sm text-[var(--muted)]">
+            Adresă completă
+            <div className="relative mt-1">
+              <input
+                type="text"
+                value={streetAddress}
+                onChange={(event) => {
+                  setStreetAddress(event.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                className="w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
+                placeholder="Ex: Str. Exemplu 10, București"
+                required
+                autoComplete="street-address"
+              />
+              {showSuggestions && streetAddress.trim().length >= 4 && (
+                <div className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-lg border border-white/15 bg-[var(--background)] p-1 shadow-lg">
+                  {isFetchingAddress ? (
+                    <p className="px-3 py-2 text-xs text-[var(--muted)]">
+                      Căutăm adrese...
+                    </p>
+                  ) : addressSuggestions.length > 0 ? (
+                    addressSuggestions.map((suggestion) => (
+                      <button
+                        key={suggestion.place_id}
+                        type="button"
+                        onClick={() => {
+                          setStreetAddress(suggestion.display_name);
+                          setCounty(suggestion.address?.county ?? "");
+                          setCity(
+                            suggestion.address?.city ??
+                              suggestion.address?.town ??
+                              suggestion.address?.village ??
+                              ""
+                          );
+                          setPostalCode(suggestion.address?.postcode ?? "");
+                          setShowSuggestions(false);
+                        }}
+                        className="w-full rounded-md px-3 py-2 text-left text-xs text-[var(--muted)] transition-colors hover:bg-white/5 hover:text-[var(--cream)]"
+                      >
+                        {suggestion.display_name}
+                      </button>
+                    ))
+                  ) : (
+                    <p className="px-3 py-2 text-xs text-[var(--muted)]">
+                      Nu am găsit rezultate. Completează manual.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </label>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block text-sm text-[var(--muted)]">
+              Județ
+              <input
+                type="text"
+                value={county}
+                onChange={(event) => setCounty(event.target.value)}
+                className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
+                placeholder="Ex: București"
+                required
+                autoComplete="address-level1"
+              />
+            </label>
+
+            <label className="block text-sm text-[var(--muted)]">
+              Localitate
+              <input
+                type="text"
+                value={city}
+                onChange={(event) => setCity(event.target.value)}
+                className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
+                placeholder="Ex: București"
+                required
+                autoComplete="address-level2"
+              />
+            </label>
+          </div>
+
+          <label className="block text-sm text-[var(--muted)]">
+            Cod poștal
+            <input
+              type="text"
+              value={postalCode}
+              onChange={(event) => setPostalCode(event.target.value)}
+              className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
+              placeholder="Ex: 010101"
+              required
+              autoComplete="postal-code"
             />
           </label>
 
@@ -164,6 +356,8 @@ export function CartPageClient() {
               onChange={(event) => setPhone(event.target.value)}
               className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
               placeholder="07xxxxxxxx"
+              required
+              autoComplete="tel"
             />
           </label>
 
@@ -175,6 +369,8 @@ export function CartPageClient() {
               onChange={(event) => setEmail(event.target.value)}
               className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
               placeholder="email@domeniu.ro"
+              required
+              autoComplete="email"
             />
           </label>
         </div>
@@ -194,10 +390,13 @@ export function CartPageClient() {
           </p>
         </div>
 
-        <a
+        <motion.a
           href={canSendMessage ? whatsappLink : "#"}
           target="_blank"
           rel="noopener noreferrer"
+          whileHover={canSendMessage ? { scale: 1.03 } : undefined}
+          whileTap={canSendMessage ? { scale: 0.98 } : undefined}
+          transition={{ duration: 0.45, ease: "easeOut" }}
           className={`inline-flex w-full items-center justify-center rounded-xl px-5 py-3 font-semibold text-white transition-colors ${
             canSendMessage
               ? "bg-[#25D366] hover:bg-[#20bd5a]"
@@ -206,12 +405,12 @@ export function CartPageClient() {
           aria-disabled={!canSendMessage}
         >
           Trimite comandă pe WhatsApp
-        </a>
+        </motion.a>
 
         {!canSendMessage ? (
           <p className="text-xs text-[var(--muted)]">
-            Completează informațiile de livrare, telefonul și emailul pentru a genera
-            mesajul complet.
+            Completează toate datele de livrare, numele, telefonul și emailul pentru
+            a genera mesajul complet.
           </p>
         ) : null}
       </aside>
