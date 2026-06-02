@@ -9,6 +9,8 @@ import { useCart } from "@/components/cart/CartProvider";
 const NAV_LINKS = [
   { href: "/", label: "Acasă" },
   { href: "/catalog", label: "Catalog produse" },
+  { href: "/plumbi-si-momitoare", label: "Plumbi și momitoare" },
+  { href: "/cont", label: "Contul meu" },
 ];
 
 const TICKER_ITEMS = [

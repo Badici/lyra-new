@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+}
+
+enum ProductStatus {
+  ACTIVE
+  DRAFT
+  ARCHIVED
+}
+
+enum OrderSource {
+  GUEST
+  ACCOUNT
+  MANUAL
+}
+
+enum OrderStatus {
+  NOUA
+  CONFIRMATA
+  IN_PREGATIRE
+  EXPEDIATA
+  LIVRATA
+  ANULATA
+}
+
+enum PaymentMethod {
+  COD
+}
+
+enum DeliveryMethod {
+  COURIER
+  EASYBOX
+  PICKUP
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         UserRole    @default(CUSTOMER)
+  active       Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  addresses    Address[]
+  orders       Order[]
+  auditLogs    AuditLog[]
+}
+
+model Address {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  fullName    String
+  phone       String
+  email       String
+  county      String
+  city        String
+  street      String
+  postalCode  String
+  easyboxId   String?
+  easyboxName String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      Order[]
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String
+  heroImage   String?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+model Product {
+  id                   String                 @id @default(cuid())
+  slug                 String                 @unique
+  name                 String
+  shortDescription     String
+  description          String
+  specs                String[]
+  images               String[]
+  basePriceRon         Float                  @default(0)
+  priceLabel           String
+  isConfigurable       Boolean                @default(false)
+  pricingConfigJson    Json?
+  variantSelectorLabel String?
+  variantValues        String[]
+  variantPlaceholder   String?
+  customOrderNote      String?
+  displayOrder         Int                    @default(100)
+  status               ProductStatus          @default(ACTIVE)
+  categoryId           String?
+  category             Category?              @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  pricingOverrides     ProductPricingOverride[]
+  recipeItems          ProductRecipe[]
+  orderItems           OrderItem[]
+}
+
+model ProductPricingOverride {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  overrideRon  Float
+  reason       String?
+  active       Boolean  @default(true)
+  activeFrom   DateTime @default(now())
+  activeTo     DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model RawMaterial {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  unit        String
+  unitCostRon Float
+  supplier    String?
+  active      Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  recipeItems ProductRecipe[]
+}
+
+model ProductRecipe {
+  id          String      @id @default(cuid())
+  productId   String
+  materialId  String
+  qty         Float
+  wastePct    Float       @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  material    RawMaterial @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@unique([productId, materialId])
+}
+
+model Order {
+  id               String         @id @default(cuid())
+  number           String         @unique
+  source           OrderSource
+  status           OrderStatus    @default(NOUA)
+  paymentMethod    PaymentMethod  @default(COD)
+  deliveryMethod   DeliveryMethod @default(COURIER)
+  userId           String?
+  user             User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  addressId        String?
+  address          Address?       @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  notes            String?
+  subtotalRon      Float
+  deliveryCostRon  Float
+  totalRon         Float
+  recipeCostRon    Float          @default(0)
+  profitRon        Float          @default(0)
+  idempotencyKey   String?        @unique
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  items            OrderItem[]
+  deliveryCostRows DeliveryCost[]
+  emailLogs        EmailLog[]
+}
+
+model OrderItem {
+  id                  String   @id @default(cuid())
+  orderId             String
+  productId           String?
+  productNameSnapshot String
+  productSlugSnapshot String
+  unitPriceRon        Float
+  quantity            Int
+  lineTotalRon        Float
+  recipeCostSnapshot  Float    @default(0)
+  configJson          Json?
+  createdAt           DateTime @default(now())
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product             Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+model DeliveryCost {
+  id         String   @id @default(cuid())
+  orderId    String
+  carrier    String
+  method     String
+  costRon    Float
+  createdAt  DateTime @default(now())
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model AffiliateClick {
+  id         String   @id @default(cuid())
+  source     String
+  targetUrl  String
+  paramsJson Json?
+  ipHash     String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+}
+
+model EmailLog {
+  id         String   @id @default(cuid())
+  orderId    String?
+  order      Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  emailType  String
+  recipient  String
+  status     String
+  providerId String?
+  errorText  String?
+  createdAt  DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String?
+  payload    Json?
+  createdAt  DateTime @default(now())
+}

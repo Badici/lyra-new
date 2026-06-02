@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductCard } from "@/components/catalog/ProductCard";
-import { getDisplayProducts } from "@/data/catalog";
+import { getCatalogProducts } from "@/lib/catalog-service";
 
 export const metadata: Metadata = {
   title: "Catalog produse",
@@ -19,8 +19,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CatalogPage() {
-  const displayProducts = getDisplayProducts();
+export default async function CatalogPage() {
+  const displayProducts = await getCatalogProducts();
 
   return (
     <main className="px-4 py-10 md:py-12">

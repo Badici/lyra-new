@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DELIVERY_FEE_RON, WHATSAPP_NUMBER } from "@/data/catalog";
 import { useCart } from "@/components/cart/CartProvider";
 
-type DeliveryType = "curier" | "personal";
+type DeliveryType = "curier" | "easybox" | "personal";
 
 type AddressSuggestion = {
   place_id: number;
@@ -33,11 +33,14 @@ export function CartPageClient() {
   const [city, setCity] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
   const [postalCode, setPostalCode] = useState("");
+  const [easyboxName, setEasyboxName] = useState("");
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isFetchingAddress, setIsFetchingAddress] = useState(false);
+  const [orderFeedback, setOrderFeedback] = useState("");
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
 
-  const deliveryFee = deliveryType === "curier" ? DELIVERY_FEE_RON : 0;
+  const deliveryFee = deliveryType === "personal" ? 0 : DELIVERY_FEE_RON;
   const totalRon = subtotalRon + deliveryFee;
 
   useEffect(() => {
@@ -73,15 +76,17 @@ export function CartPageClient() {
     };
   }, [streetAddress]);
 
-  const canSendMessage =
+  const canSendMessage = Boolean(
     items.length > 0 &&
-    fullName.trim() &&
-    phone.trim() &&
-    email.trim() &&
-    county.trim() &&
-    city.trim() &&
-    streetAddress.trim() &&
-    postalCode.trim();
+      fullName.trim() &&
+      phone.trim() &&
+      email.trim() &&
+      county.trim() &&
+      city.trim() &&
+      streetAddress.trim() &&
+      postalCode.trim() &&
+      (deliveryType !== "easybox" || easyboxName.trim())
+  );
 
   const whatsappLink = useMemo(() => {
     const itemLines = items
@@ -96,7 +101,9 @@ export function CartPageClient() {
     const deliveryLabel =
       deliveryType === "curier"
         ? `Curier (+${DELIVERY_FEE_RON} RON)`
-        : "Ridicare personală în București (0 RON)";
+        : deliveryType === "easybox"
+          ? `Easybox (+${DELIVERY_FEE_RON} RON)`
+          : "Ridicare personală în București (0 RON)";
 
     const message = [
       "Salut! Vreau să plasez următoarea comandă:",
@@ -115,6 +122,7 @@ export function CartPageClient() {
       `Localitate: ${city || "-"}`,
       `Adresă: ${streetAddress || "-"}`,
       `Cod poștal: ${postalCode || "-"}`,
+      `Easybox: ${easyboxName || "-"}`,
     ].join("\n");
 
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
@@ -130,7 +138,58 @@ export function CartPageClient() {
     city,
     streetAddress,
     postalCode,
+    easyboxName,
   ]);
+
+  const placeOrder = async () => {
+    if (!canSendMessage) {
+      return;
+    }
+
+    setOrderFeedback("");
+    setIsSubmittingOrder(true);
+    const payload = {
+      fullName,
+      phone,
+      email,
+      county,
+      city,
+      street: streetAddress,
+      postalCode,
+      deliveryMethod:
+        deliveryType === "curier"
+          ? "COURIER"
+          : deliveryType === "easybox"
+            ? "EASYBOX"
+            : ("PICKUP" as "COURIER" | "EASYBOX" | "PICKUP"),
+      deliveryCostRon: deliveryFee,
+      easyboxName: easyboxName || undefined,
+      idempotencyKey: crypto.randomUUID(),
+      items: items.map((item) => ({
+        productSlug: item.productSlug.split("::")[0],
+        name: item.name,
+        priceValueRon: item.priceValueRon,
+        quantity: item.quantity,
+      })),
+    };
+
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    setIsSubmittingOrder(false);
+    if (!response.ok) {
+      const body = (await response.json()) as { error?: string };
+      setOrderFeedback(body.error ?? "Comanda nu a putut fi înregistrată.");
+      return;
+    }
+    const body = (await response.json()) as { number: string };
+    clearCart();
+    setOrderFeedback(
+      `Comanda #${body.number} a fost înregistrată. Ai primit confirmare pe email.`
+    );
+  };
 
   if (items.length === 0) {
     return (
@@ -216,6 +275,13 @@ export function CartPageClient() {
         <h2 className="text-xl font-semibold text-[var(--cream)]">
           Finalizare comandă
         </h2>
+        <p className="text-xs text-[var(--muted)]">
+          Ai cont?{" "}
+          <Link href="/cont/login" className="text-[var(--accent-light)] hover:underline">
+            Intră în cont
+          </Link>{" "}
+          pentru istoric comenzi. Poți comanda și fără cont.
+        </p>
 
         <div className="space-y-2 text-sm text-[var(--muted)]">
           <p className="text-[var(--cream)]">Metoda livrare</p>
@@ -236,6 +302,15 @@ export function CartPageClient() {
               onChange={() => setDeliveryType("personal")}
             />
             Ridicare personală în București (0 RON)
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="deliveryType"
+              checked={deliveryType === "easybox"}
+              onChange={() => setDeliveryType("easybox")}
+            />
+            Easybox (+{DELIVERY_FEE_RON} RON)
           </label>
         </div>
 
@@ -348,6 +423,20 @@ export function CartPageClient() {
             />
           </label>
 
+          {deliveryType === "easybox" ? (
+            <label className="block text-sm text-[var(--muted)]">
+              Easybox ales
+              <input
+                type="text"
+                value={easyboxName}
+                onChange={(event) => setEasyboxName(event.target.value)}
+                className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
+                placeholder="Ex: Easybox Militari Shopping"
+                required
+              />
+            </label>
+          ) : null}
+
           <label className="block text-sm text-[var(--muted)]">
             Telefon
             <input
@@ -390,28 +479,44 @@ export function CartPageClient() {
           </p>
         </div>
 
-        <motion.a
-          href={canSendMessage ? whatsappLink : "#"}
-          target="_blank"
-          rel="noopener noreferrer"
+        <motion.button
+          type="button"
+          disabled={!canSendMessage || isSubmittingOrder}
+          onClick={placeOrder}
           whileHover={canSendMessage ? { scale: 1.03 } : undefined}
           whileTap={canSendMessage ? { scale: 0.98 } : undefined}
           transition={{ duration: 0.45, ease: "easeOut" }}
           className={`inline-flex w-full items-center justify-center rounded-xl px-5 py-3 font-semibold text-white transition-colors ${
             canSendMessage
-              ? "bg-[#25D366] hover:bg-[#20bd5a]"
-              : "cursor-not-allowed bg-[#25D366]/40"
+              ? "bg-[var(--accent)] hover:bg-[var(--accent-light)]"
+              : "cursor-not-allowed bg-[var(--accent)]/40"
           }`}
           aria-disabled={!canSendMessage}
         >
-          Trimite comandă pe WhatsApp
-        </motion.a>
+          {isSubmittingOrder ? "Se înregistrează comanda..." : "Plasează comandă"}
+        </motion.button>
+
+        <a
+          href={canSendMessage ? whatsappLink : "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`inline-flex w-full items-center justify-center rounded-xl border px-5 py-3 text-sm font-semibold transition-colors ${
+            canSendMessage
+              ? "border-[#25D366]/60 text-[#25D366] hover:bg-[#25D366]/10"
+              : "cursor-not-allowed border-white/20 text-white/40"
+          }`}
+        >
+          Sau trimite pe WhatsApp
+        </a>
 
         {!canSendMessage ? (
           <p className="text-xs text-[var(--muted)]">
             Completează toate datele de livrare, numele, telefonul și emailul pentru
             a genera mesajul complet.
           </p>
+        ) : null}
+        {orderFeedback ? (
+          <p className="text-xs text-[var(--accent-light)]">{orderFeedback}</p>
         ) : null}
       </aside>
     </div>

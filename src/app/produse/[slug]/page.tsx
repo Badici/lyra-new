@@ -8,24 +8,27 @@ import {
   DEFAULT_PRODUCT_IMAGE,
   formatRon,
   getMinimumConfiguredPriceRon,
-  getProductBySlug,
-  products,
   WHATSAPP_NUMBER,
 } from "@/data/catalog";
+import {
+  getCatalogProductBySlug,
+  getRelatedProducts,
+  getStaticCatalogProducts,
+} from "@/lib/catalog-service";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
 };
 
 export function generateStaticParams() {
-  return products.map((product) => ({ slug: product.slug }));
+  return getStaticCatalogProducts().map((product) => ({ slug: product.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getCatalogProductBySlug(slug);
 
   if (!product) {
     return {
@@ -55,26 +58,12 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getCatalogProductBySlug(slug);
   if (!product) {
     notFound();
   }
 
-  const getDeterministicScore = (candidateSlug: string) => {
-    const seed = `${product.slug}:${candidateSlug}`;
-    let hash = 0;
-    for (let index = 0; index < seed.length; index += 1) {
-      hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
-    }
-    return hash;
-  };
-
-  const relatedProducts = products
-    .filter((entry) => entry.slug !== product.slug)
-    .sort(
-      (a, b) => getDeterministicScore(a.slug) - getDeterministicScore(b.slug)
-    )
-    .slice(0, 3);
+  const relatedProducts = await getRelatedProducts(product.slug, 3);
 
   const displayPrice = product.pricingConfig
     ? `Pornind de la ${formatRon(getMinimumConfiguredPriceRon(product))} RON`

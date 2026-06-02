@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ProductCard } from "@/components/catalog/ProductCard";
-import { getDisplayProducts, WHATSAPP_NUMBER } from "@/data/catalog";
+import { WHATSAPP_NUMBER } from "@/data/catalog";
+import { getCatalogProducts } from "@/lib/catalog-service";
 
 export const metadata: Metadata = {
   title: "Produse pentru pescuit la crap",
@@ -20,8 +21,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
-  const highlightedProducts = getDisplayProducts().slice(0, 2);
+export default async function Home() {
+  const highlightedProducts = (await getCatalogProducts()).slice(0, 2);
 
   return (
     <main>
