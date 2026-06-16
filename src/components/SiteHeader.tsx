@@ -94,7 +94,7 @@ export function SiteHeader() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.98 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="absolute right-0 z-50 mt-2 w-80 rounded-2xl border border-white/10 bg-[var(--background)] p-4 shadow-[0_20px_40px_rgba(0,0,0,0.35)]"
+                  className="fixed left-4 right-4 top-28 z-50 rounded-2xl border border-white/10 bg-[var(--background)] p-4 shadow-[0_20px_40px_rgba(0,0,0,0.35)] sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80"
                 >
                   <p className="text-sm font-semibold text-[var(--cream)]">Preview coș</p>
                   {items.length === 0 ? (
