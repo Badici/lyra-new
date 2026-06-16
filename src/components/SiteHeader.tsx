@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCart } from "@/components/cart/CartProvider";
+import { formatRon } from "@/data/catalog";
 
 const NAV_LINKS = [
   { href: "/", label: "Acasă" },
   { href: "/catalog", label: "Catalog produse" },
   { href: "/parteneri", label: "Parteneri" },
+  { href: "/contact", label: "Contact" },
 ];
 
 const TICKER_ITEMS = [
@@ -23,7 +25,9 @@ const tickerTrack = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
-  const { cartCount } = useCart();
+  const [isCartPreviewOpen, setIsCartPreviewOpen] = useState(false);
+  const { items, cartCount, subtotalRon } = useCart();
+  const previewItems = useMemo(() => items.slice(0, 3), [items]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--background)]/95 backdrop-blur">
@@ -69,15 +73,70 @@ export function SiteHeader() {
         </ul>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/cos"
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--accent)]/50 bg-[var(--lake)] px-4 py-2 text-sm font-semibold text-[var(--cream)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent)]/20"
-          >
-            Coș
-            <span className="rounded-full bg-[var(--accent)] px-2 py-0.5 text-xs text-white">
-              {cartCount}
-            </span>
-          </Link>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsCartPreviewOpen((current) => !current)}
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--accent)]/50 bg-[var(--lake)] px-4 py-2 text-sm font-semibold text-[var(--cream)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent)]/20"
+              aria-expanded={isCartPreviewOpen}
+              aria-controls="cart-preview"
+            >
+              Coș
+              <span className="rounded-full bg-[var(--accent)] px-2 py-0.5 text-xs text-white">
+                {cartCount}
+              </span>
+            </button>
+            <AnimatePresence>
+              {isCartPreviewOpen ? (
+                <motion.div
+                  id="cart-preview"
+                  initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="absolute right-0 z-50 mt-2 w-80 rounded-2xl border border-white/10 bg-[var(--background)] p-4 shadow-[0_20px_40px_rgba(0,0,0,0.35)]"
+                >
+                  <p className="text-sm font-semibold text-[var(--cream)]">Preview coș</p>
+                  {items.length === 0 ? (
+                    <p className="mt-2 text-xs text-[var(--muted)]">Nu ai produse în coș.</p>
+                  ) : (
+                    <>
+                      <ul className="mt-3 space-y-2">
+                        {previewItems.map((item) => (
+                          <li
+                            key={item.productSlug}
+                            className="flex items-start justify-between gap-3 text-xs"
+                          >
+                            <span className="line-clamp-2 text-[var(--muted)]">
+                              {item.name} x{item.quantity}
+                            </span>
+                            <span className="whitespace-nowrap text-[var(--cream)]">
+                              {formatRon(item.priceValueRon * item.quantity)} RON
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      {items.length > previewItems.length ? (
+                        <p className="mt-2 text-[10px] text-[var(--muted)]">
+                          + încă {items.length - previewItems.length} produse
+                        </p>
+                      ) : null}
+                      <p className="mt-3 text-sm font-semibold text-[var(--cream)]">
+                        Subtotal: {formatRon(subtotalRon)} RON
+                      </p>
+                    </>
+                  )}
+                  <Link
+                    href="/cos"
+                    onClick={() => setIsCartPreviewOpen(false)}
+                    className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--accent-light)]"
+                  >
+                    Finalizează comanda
+                  </Link>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
 
           <button
             type="button"
@@ -128,12 +187,24 @@ export function SiteHeader() {
                   <Link
                     href={link.href}
                     className="block rounded-lg px-3 py-2 transition-colors hover:bg-white/5"
-                    onClick={() => setOpen(false)}
+                  onClick={() => {
+                    setOpen(false);
+                    setIsCartPreviewOpen(false);
+                  }}
                   >
                     {link.label}
                   </Link>
                 </li>
               ))}
+            <li>
+              <Link
+                href="/cos"
+                className="block rounded-lg px-3 py-2 font-semibold text-[var(--accent-light)] transition-colors hover:bg-white/5"
+                onClick={() => setOpen(false)}
+              >
+                Finalizează comanda
+              </Link>
+            </li>
             </motion.ul>
           </motion.div>
         ) : null}

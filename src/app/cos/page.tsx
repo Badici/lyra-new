@@ -4,7 +4,7 @@ import { CartPageClient } from "@/components/cart/CartPageClient";
 export const metadata: Metadata = {
   title: "Coș de cumpărături",
   description:
-    "Completează datele de contact și trimite comanda pe WhatsApp pentru confirmare și detalii de livrare.",
+    "Completează datele de contact, finalizează comanda și primești confirmarea pe email.",
   alternates: {
     canonical: "/cos",
   },
@@ -19,9 +19,9 @@ export default function CartPage() {
             Coșul tău
           </h1>
           <p className="mt-3 max-w-3xl text-[var(--muted)]">
-            După ce completezi toate datele de livrare și contact, apasă butonul
-            „Trimite comandă pe WhatsApp”, iar noi îți vom răspunde rapid pentru
-            confirmare și termenii de livrare.
+            După ce completezi datele de livrare și contact, apasă „Finalizează comanda”.
+            Comanda este trimisă direct pe email, iar noi revenim rapid cu confirmarea și
+            detaliile de livrare.
           </p>
         </header>
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ProductCard } from "@/components/catalog/ProductCard";
-import { getDisplayProducts, WHATSAPP_NUMBER } from "@/data/catalog";
+import { getDisplayProducts } from "@/data/catalog";
 
 export const metadata: Metadata = {
   title: "Produse pentru pescuit la crap",
@@ -45,8 +45,8 @@ export default function Home() {
             Tot ce ai nevoie pentru pescuitul la crap
           </h1>
           <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-[var(--muted)] md:text-lg">
-            Descoperă catalogul nostru complet, alege produsele dorite și trimite
-            comanda direct pe WhatsApp în câteva secunde.
+            Descoperă catalogul nostru complet, alege produsele dorite și finalizează
+            comanda rapid direct din coș.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -64,9 +64,7 @@ export default function Home() {
               Bag-uri la preț competitiv
             </span>
           </div>
-          <p className="mt-6 text-sm text-[var(--muted)]">
-            Comenzi rapide pe WhatsApp: +40 728 241 412
-          </p>
+          <p className="mt-6 text-sm text-[var(--muted)]">Comenzi online cu confirmare pe email</p>
         </div>
       </section>
 
@@ -103,18 +101,16 @@ export default function Home() {
               Ai lista finală de produse?
             </h2>
             <p className="mt-2 text-[var(--muted)]">
-              În coș completezi datele de livrare (adresă, telefon, email), iar
-              mesajul pentru WhatsApp se generează automat.
+              În coș completezi datele de livrare, iar comanda este trimisă direct
+              pe email pentru confirmare rapidă.
             </p>
           </div>
-          <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex rounded-xl bg-[#25D366] px-5 py-3 font-semibold text-white transition-colors hover:bg-[#20bd5a]"
+          <Link
+            href="/contact"
+            className="inline-flex rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold text-white transition-colors hover:bg-[var(--accent-light)]"
           >
-            Contact direct pe WhatsApp
-          </a>
+            Vezi datele de contact
+          </Link>
         </div>
       </section>
     </main>

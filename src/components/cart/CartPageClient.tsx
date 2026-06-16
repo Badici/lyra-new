@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { DELIVERY_FEE_RON, WHATSAPP_NUMBER } from "@/data/catalog";
+import { formatRon } from "@/data/catalog";
 import { useCart } from "@/components/cart/CartProvider";
 
 type DeliveryType = "curier" | "personal";
@@ -26,22 +26,28 @@ type AddressSuggestion = {
 export function CartPageClient() {
   const { items, subtotalRon, updateQuantity, removeItem, clearCart } = useCart();
   const [deliveryType, setDeliveryType] = useState<DeliveryType>("curier");
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [county, setCounty] = useState("");
   const [city, setCity] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
-  const [postalCode, setPostalCode] = useState("");
+  const [street, setStreet] = useState("");
+  const [streetNumber, setStreetNumber] = useState("");
+  const [addressDetails, setAddressDetails] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [orderPlaced, setOrderPlaced] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isFetchingAddress, setIsFetchingAddress] = useState(false);
 
-  const deliveryFee = deliveryType === "curier" ? DELIVERY_FEE_RON : 0;
-  const totalRon = subtotalRon + deliveryFee;
-
   useEffect(() => {
-    const query = streetAddress.trim();
+    if (deliveryType !== "curier") {
+      return;
+    }
+
+    const query = street.trim();
     if (query.length < 4) {
       setAddressSuggestions([]);
       return;
@@ -71,73 +77,106 @@ export function CartPageClient() {
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [streetAddress]);
+  }, [street, deliveryType]);
 
-  const canSendMessage =
-    items.length > 0 &&
-    fullName.trim() &&
-    phone.trim() &&
-    email.trim() &&
-    county.trim() &&
-    city.trim() &&
-    streetAddress.trim() &&
-    postalCode.trim();
+  const canPlaceOrder =
+    deliveryType === "personal"
+      ? items.length > 0 && firstName.trim() && phone.trim()
+      : items.length > 0 &&
+        firstName.trim() &&
+        lastName.trim() &&
+        phone.trim() &&
+        email.trim() &&
+        county.trim() &&
+        city.trim() &&
+        street.trim() &&
+        streetNumber.trim();
 
-  const whatsappLink = useMemo(() => {
-    const itemLines = items
-      .map(
-        (item, index) =>
-          `${index + 1}. ${item.name} x${item.quantity} - ${(
-            item.priceValueRon * item.quantity
-          ).toFixed(2)} RON`
-      )
-      .join("\n");
-
-    const deliveryLabel =
+  const deliveryLabel = useMemo(
+    () =>
       deliveryType === "curier"
-        ? `Curier (+${DELIVERY_FEE_RON} RON)`
-        : "Ridicare personală în București (0 RON)";
+        ? "Curier (preț comunicat ulterior)"
+        : "Ridicare personală (Șos. Chitilei sau Politehnica București) - gratuit",
+    [deliveryType]
+  );
 
-    const message = [
-      "Salut! Vreau să plasez următoarea comandă:",
+  const buildOrderMessage = () => {
+    const lines = items.map(
+      (item, index) =>
+        `${index + 1}. ${item.name} x${item.quantity} - ${formatRon(
+          item.priceValueRon * item.quantity
+        )} RON`
+    );
+
+    const deliveryDetails =
+      deliveryType === "curier"
+        ? [
+            "Livrare: Curier (preț transport comunicat ulterior)",
+            `Prenume: ${firstName}`,
+            `Nume: ${lastName}`,
+            `Telefon: ${phone}`,
+            `Email: ${email}`,
+            `Județ: ${county}`,
+            `Oraș: ${city}`,
+            `Stradă: ${street}`,
+            `Număr: ${streetNumber}`,
+            `Detalii adresă: ${addressDetails || "-"}`,
+          ]
+        : [
+            "Livrare: Ridicare personală (gratuit)",
+            "Punct ridicare: Șos. Chitilei sau Politehnica București",
+            `Nume și prenume: ${firstName}`,
+            `Telefon: ${phone}`,
+          ];
+
+    return [
+      "[TAG-LYRABAITS-COMANDA]",
       "",
-      itemLines,
+      "Comandă nouă din website-ul Lyra Baits.",
       "",
-      `Subtotal produse: ${subtotalRon.toFixed(2)} RON`,
-      `Livrare: ${deliveryLabel}`,
-      `Total estimat: ${totalRon.toFixed(2)} RON`,
+      "Produse:",
+      ...lines,
       "",
-      "Date client:",
-      `Nume complet: ${fullName || "-"}`,
-      `Telefon: ${phone || "-"}`,
-      `Email: ${email || "-"}`,
-      `Județ: ${county || "-"}`,
-      `Localitate: ${city || "-"}`,
-      `Adresă: ${streetAddress || "-"}`,
-      `Cod poștal: ${postalCode || "-"}`,
+      `Subtotal produse: ${formatRon(subtotalRon)} RON`,
+      "",
+      "Date livrare și contact:",
+      ...deliveryDetails,
     ].join("\n");
+  };
 
-    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-  }, [
-    items,
-    subtotalRon,
-    totalRon,
-    deliveryType,
-    fullName,
-    phone,
-    email,
-    county,
-    city,
-    streetAddress,
-    postalCode,
-  ]);
+  if (orderPlaced) {
+    return (
+      <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-[var(--lake)]/50 p-8 text-center">
+        <h1 className="text-3xl font-semibold text-[var(--cream)]">Mulțumim pentru comandă!</h1>
+        <p className="mt-3 text-[var(--muted)]">
+          Comanda a fost trimisă cu succes. Revenim rapid pe telefon sau email pentru
+          confirmare și detaliile de livrare.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/catalog"
+            className="inline-flex rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold text-white transition-colors hover:bg-[var(--accent-light)]"
+          >
+            Continuă cumpărăturile
+          </Link>
+          <Link
+            href="/contact"
+            className="inline-flex rounded-xl border border-white/20 px-5 py-3 font-semibold text-[var(--cream)] transition-colors hover:bg-white/5"
+          >
+            Date de contact
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-[var(--lake)]/50 p-8 text-center">
         <h1 className="text-2xl font-semibold text-[var(--cream)]">Coșul este gol</h1>
-        <p className="mt-2 text-[var(--muted)]">
-          Adaugă produse din catalog, apoi revino aici pentru finalizarea comenzii.
+          <p className="mt-2 text-[var(--muted)]">
+            Adaugă produse din catalog, apoi revino aici pentru finalizarea comenzii prin
+            email.
         </p>
         <Link
           href="/catalog"
@@ -218,7 +257,7 @@ export function CartPageClient() {
         </h2>
 
         <div className="space-y-2 text-sm text-[var(--muted)]">
-          <p className="text-[var(--cream)]">Metoda livrare</p>
+          <p className="text-[var(--cream)]">Metodă livrare</p>
           <label className="flex items-center gap-2">
             <input
               type="radio"
@@ -226,7 +265,7 @@ export function CartPageClient() {
               checked={deliveryType === "curier"}
               onChange={() => setDeliveryType("curier")}
             />
-            Curier (+{DELIVERY_FEE_RON} RON)
+            Curier (preț transport comunicat ulterior)
           </label>
           <label className="flex items-center gap-2">
             <input
@@ -235,118 +274,165 @@ export function CartPageClient() {
               checked={deliveryType === "personal"}
               onChange={() => setDeliveryType("personal")}
             />
-            Ridicare personală în București (0 RON)
+            Ridicare personală (Șos. Chitilei sau Politehnica București) - gratuit
           </label>
         </div>
+        <p className="rounded-xl border border-white/10 bg-black/10 px-3 py-2 text-xs text-[var(--muted)]">
+          Prețul transportului va fi comunicat în funcție de distanță și greutatea coletului.
+        </p>
 
         <div className="space-y-3">
           <label className="block text-sm text-[var(--muted)]">
-            Nume complet
+            {deliveryType === "curier" ? "Prenume" : "Nume și prenume"}
             <input
               type="text"
-              value={fullName}
-              onChange={(event) => setFullName(event.target.value)}
+              value={firstName}
+              onChange={(event) => setFirstName(event.target.value)}
               className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
-              placeholder="Ex: Popescu Andrei"
+              placeholder={deliveryType === "curier" ? "Ex: Andrei" : "Ex: Andrei Popescu"}
               required
-              autoComplete="name"
+              autoComplete="given-name"
             />
           </label>
 
-          <label className="block text-sm text-[var(--muted)]">
-            Adresă completă
-            <div className="relative mt-1">
-              <input
-                type="text"
-                value={streetAddress}
-                onChange={(event) => {
-                  setStreetAddress(event.target.value);
-                  setShowSuggestions(true);
-                }}
-                onFocus={() => setShowSuggestions(true)}
-                className="w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
-                placeholder="Ex: Str. Exemplu 10, București"
-                required
-                autoComplete="street-address"
-              />
-              {showSuggestions && streetAddress.trim().length >= 4 && (
-                <div className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-lg border border-white/15 bg-[var(--background)] p-1 shadow-lg">
-                  {isFetchingAddress ? (
-                    <p className="px-3 py-2 text-xs text-[var(--muted)]">
-                      Căutăm adrese...
-                    </p>
-                  ) : addressSuggestions.length > 0 ? (
-                    addressSuggestions.map((suggestion) => (
-                      <button
-                        key={suggestion.place_id}
-                        type="button"
-                        onClick={() => {
-                          setStreetAddress(suggestion.display_name);
-                          setCounty(suggestion.address?.county ?? "");
-                          setCity(
-                            suggestion.address?.city ??
-                              suggestion.address?.town ??
-                              suggestion.address?.village ??
-                              ""
-                          );
-                          setPostalCode(suggestion.address?.postcode ?? "");
-                          setShowSuggestions(false);
-                        }}
-                        className="w-full rounded-md px-3 py-2 text-left text-xs text-[var(--muted)] transition-colors hover:bg-white/5 hover:text-[var(--cream)]"
-                      >
-                        {suggestion.display_name}
-                      </button>
-                    ))
-                  ) : (
-                    <p className="px-3 py-2 text-xs text-[var(--muted)]">
-                      Nu am găsit rezultate. Completează manual.
-                    </p>
+          {deliveryType === "curier" ? (
+            <>
+              <label className="block text-sm text-[var(--muted)]">
+                Nume
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(event) => setLastName(event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
+                  placeholder="Ex: Popescu"
+                  required
+                  autoComplete="family-name"
+                />
+              </label>
+
+              <label className="block text-sm text-[var(--muted)]">
+                Email
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
+                  placeholder="email@domeniu.ro"
+                  required
+                  autoComplete="email"
+                />
+              </label>
+
+              <label className="block text-sm text-[var(--muted)]">
+                Adresă (stradă)
+                <div className="relative mt-1">
+                  <input
+                    type="text"
+                    value={street}
+                    onChange={(event) => {
+                      setStreet(event.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    className="w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
+                    placeholder="Ex: Strada Lalelelor"
+                    required
+                    autoComplete="street-address"
+                  />
+                  {showSuggestions && street.trim().length >= 4 && (
+                    <div className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-lg border border-white/15 bg-[var(--background)] p-1 shadow-lg">
+                      {isFetchingAddress ? (
+                        <p className="px-3 py-2 text-xs text-[var(--muted)]">
+                          Căutăm adrese...
+                        </p>
+                      ) : addressSuggestions.length > 0 ? (
+                        addressSuggestions.map((suggestion) => (
+                          <button
+                            key={suggestion.place_id}
+                            type="button"
+                            onClick={() => {
+                              setStreet(suggestion.address?.road ?? suggestion.display_name);
+                              setCounty(suggestion.address?.county ?? "");
+                              setCity(
+                                suggestion.address?.city ??
+                                  suggestion.address?.town ??
+                                  suggestion.address?.village ??
+                                  ""
+                              );
+                              setStreetNumber(suggestion.address?.house_number ?? "");
+                              setShowSuggestions(false);
+                            }}
+                            className="w-full rounded-md px-3 py-2 text-left text-xs text-[var(--muted)] transition-colors hover:bg-white/5 hover:text-[var(--cream)]"
+                          >
+                            {suggestion.display_name}
+                          </button>
+                        ))
+                      ) : (
+                        <p className="px-3 py-2 text-xs text-[var(--muted)]">
+                          Nu am găsit rezultate. Completează manual.
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
-          </label>
+              </label>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block text-sm text-[var(--muted)]">
-              Județ
-              <input
-                type="text"
-                value={county}
-                onChange={(event) => setCounty(event.target.value)}
-                className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
-                placeholder="Ex: București"
-                required
-                autoComplete="address-level1"
-              />
-            </label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block text-sm text-[var(--muted)]">
+                  Județ
+                  <input
+                    type="text"
+                    value={county}
+                    onChange={(event) => setCounty(event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
+                    placeholder="Ex: București"
+                    required
+                    autoComplete="address-level1"
+                  />
+                </label>
 
-            <label className="block text-sm text-[var(--muted)]">
-              Localitate
-              <input
-                type="text"
-                value={city}
-                onChange={(event) => setCity(event.target.value)}
-                className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
-                placeholder="Ex: București"
-                required
-                autoComplete="address-level2"
-              />
-            </label>
-          </div>
+                <label className="block text-sm text-[var(--muted)]">
+                  Oraș
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(event) => setCity(event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
+                    placeholder="Ex: București"
+                    required
+                    autoComplete="address-level2"
+                  />
+                </label>
+              </div>
 
-          <label className="block text-sm text-[var(--muted)]">
-            Cod poștal
-            <input
-              type="text"
-              value={postalCode}
-              onChange={(event) => setPostalCode(event.target.value)}
-              className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
-              placeholder="Ex: 010101"
-              required
-              autoComplete="postal-code"
-            />
-          </label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block text-sm text-[var(--muted)]">
+                  Număr
+                  <input
+                    type="text"
+                    value={streetNumber}
+                    onChange={(event) => setStreetNumber(event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
+                    placeholder="Ex: 12A"
+                    required
+                    autoComplete="address-line2"
+                  />
+                </label>
+
+                <label className="block text-sm text-[var(--muted)]">
+                  Detalii adresă (opțional)
+                  <input
+                    type="text"
+                    value={addressDetails}
+                    onChange={(event) => setAddressDetails(event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
+                    placeholder="Ex: scara B, etaj 3, ap. 14"
+                    autoComplete="off"
+                  />
+                </label>
+              </div>
+            </>
+          ) : null}
 
           <label className="block text-sm text-[var(--muted)]">
             Telefon
@@ -360,58 +446,83 @@ export function CartPageClient() {
               autoComplete="tel"
             />
           </label>
-
-          <label className="block text-sm text-[var(--muted)]">
-            Email
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="mt-1 w-full rounded-lg border border-white/15 bg-[var(--background)] px-3 py-2 text-[var(--cream)] outline-none ring-[var(--accent)]/70 focus:ring-2"
-              placeholder="email@domeniu.ro"
-              required
-              autoComplete="email"
-            />
-          </label>
         </div>
 
         <div className="space-y-1 rounded-xl border border-white/10 bg-black/10 p-4 text-sm">
           <p className="flex items-center justify-between text-[var(--muted)]">
             <span>Subtotal produse</span>
-            <span>{subtotalRon.toFixed(2)} RON</span>
+            <span>{formatRon(subtotalRon)} RON</span>
           </p>
           <p className="flex items-center justify-between text-[var(--muted)]">
-            <span>Livrare</span>
-            <span>{deliveryFee.toFixed(2)} RON</span>
+            <span>Metodă livrare</span>
+            <span className="text-right">{deliveryLabel}</span>
           </p>
           <p className="mt-2 flex items-center justify-between text-base font-semibold text-[var(--cream)]">
-            <span>Total estimat</span>
-            <span>{totalRon.toFixed(2)} RON</span>
+            <span>Total produse</span>
+            <span>{formatRon(subtotalRon)} RON</span>
           </p>
         </div>
 
-        <motion.a
-          href={canSendMessage ? whatsappLink : "#"}
-          target="_blank"
-          rel="noopener noreferrer"
-          whileHover={canSendMessage ? { scale: 1.03 } : undefined}
-          whileTap={canSendMessage ? { scale: 0.98 } : undefined}
+        <motion.button
+          type="button"
+          onClick={async () => {
+            if (!canPlaceOrder || isSubmitting) {
+              return;
+            }
+
+            setIsSubmitting(true);
+            setStatusMessage("");
+
+            const response = await fetch("https://formsubmit.co/ajax/raresbadici@gmail.com", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              body: JSON.stringify({
+                _subject: "[LYRABAITS-COMANDA] Comandă nouă din website",
+                _captcha: "false",
+                _template: "table",
+                message: buildOrderMessage(),
+                email: deliveryType === "curier" ? email : "comanda@lyrabaits.ro",
+              }),
+            });
+
+            if (!response.ok) {
+              setStatusMessage(
+                "Nu am putut trimite comanda pe email. Te rugăm încearcă din nou."
+              );
+              setIsSubmitting(false);
+              return;
+            }
+
+            setStatusMessage(
+              "Comanda a fost trimisă pe email. Revenim rapid cu confirmarea și detaliile de livrare."
+            );
+            clearCart();
+            setOrderPlaced(true);
+            setIsSubmitting(false);
+          }}
+          whileHover={canPlaceOrder && !isSubmitting ? { scale: 1.03 } : undefined}
+          whileTap={canPlaceOrder && !isSubmitting ? { scale: 0.98 } : undefined}
           transition={{ duration: 0.45, ease: "easeOut" }}
           className={`inline-flex w-full items-center justify-center rounded-xl px-5 py-3 font-semibold text-white transition-colors ${
-            canSendMessage
-              ? "bg-[#25D366] hover:bg-[#20bd5a]"
-              : "cursor-not-allowed bg-[#25D366]/40"
+            canPlaceOrder && !isSubmitting
+              ? "bg-[var(--accent)] hover:bg-[var(--accent-light)]"
+              : "cursor-not-allowed bg-[var(--accent)]/40"
           }`}
-          aria-disabled={!canSendMessage}
+          disabled={!canPlaceOrder || isSubmitting}
         >
-          Trimite comandă pe WhatsApp
-        </motion.a>
+          {isSubmitting ? "Se trimite comanda..." : "Finalizează comanda"}
+        </motion.button>
 
-        {!canSendMessage ? (
+        {!canPlaceOrder ? (
           <p className="text-xs text-[var(--muted)]">
-            Completează toate datele de livrare, numele, telefonul și emailul pentru
-            a genera mesajul complet.
+            Completează toate câmpurile obligatorii pentru metoda de livrare aleasă.
           </p>
+        ) : null}
+        {statusMessage ? (
+          <p className="text-xs text-[var(--muted)]">{statusMessage}</p>
         ) : null}
       </aside>
     </div>
