@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCart } from "@/components/cart/CartProvider";
 import { formatRon } from "@/data/catalog";
@@ -28,6 +28,28 @@ export function SiteHeader() {
   const [isCartPreviewOpen, setIsCartPreviewOpen] = useState(false);
   const { items, cartCount, subtotalRon } = useCart();
   const previewItems = useMemo(() => items.slice(0, 3), [items]);
+  const cartPreviewRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!isCartPreviewOpen) {
+      return;
+    }
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      if (cartPreviewRef.current && !cartPreviewRef.current.contains(target)) {
+        setIsCartPreviewOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isCartPreviewOpen]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--background)]/95 backdrop-blur">
@@ -73,7 +95,7 @@ export function SiteHeader() {
         </ul>
 
         <div className="flex items-center gap-3">
-          <div className="relative">
+          <div ref={cartPreviewRef} className="relative">
             <button
               type="button"
               onClick={() => setIsCartPreviewOpen((current) => !current)}
@@ -96,7 +118,17 @@ export function SiteHeader() {
                   transition={{ duration: 0.25, ease: "easeOut" }}
                   className="fixed left-4 right-4 top-28 z-50 rounded-2xl border border-white/10 bg-[var(--background)] p-4 shadow-[0_20px_40px_rgba(0,0,0,0.35)] sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80"
                 >
-                  <p className="text-sm font-semibold text-[var(--cream)]">Preview coș</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-[var(--cream)]">Preview coș</p>
+                    <button
+                      type="button"
+                      onClick={() => setIsCartPreviewOpen(false)}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-white/15 text-sm text-[var(--muted)] transition-colors hover:border-white/30 hover:text-[var(--cream)]"
+                      aria-label="Închide preview coș"
+                    >
+                      ×
+                    </button>
+                  </div>
                   {items.length === 0 ? (
                     <p className="mt-2 text-xs text-[var(--muted)]">Nu ai produse în coș.</p>
                   ) : (
@@ -187,24 +219,24 @@ export function SiteHeader() {
                   <Link
                     href={link.href}
                     className="block rounded-lg px-3 py-2 transition-colors hover:bg-white/5"
-                  onClick={() => {
-                    setOpen(false);
-                    setIsCartPreviewOpen(false);
-                  }}
+                    onClick={() => {
+                      setOpen(false);
+                      setIsCartPreviewOpen(false);
+                    }}
                   >
                     {link.label}
                   </Link>
                 </li>
               ))}
-            <li>
-              <Link
-                href="/cos"
-                className="block rounded-lg px-3 py-2 font-semibold text-[var(--accent-light)] transition-colors hover:bg-white/5"
-                onClick={() => setOpen(false)}
-              >
-                Finalizează comanda
-              </Link>
-            </li>
+              <li>
+                <Link
+                  href="/cos"
+                  className="block rounded-lg px-3 py-2 font-semibold text-[var(--accent-light)] transition-colors hover:bg-white/5"
+                  onClick={() => setOpen(false)}
+                >
+                  Finalizează comanda
+                </Link>
+              </li>
             </motion.ul>
           </motion.div>
         ) : null}
