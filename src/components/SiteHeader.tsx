@@ -3,12 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useCart } from "@/components/cart/CartProvider";
 
 const NAV_LINKS = [
   { href: "/", label: "Acasă" },
   { href: "/catalog", label: "Catalog produse" },
+  { href: "/parteneri", label: "Parteneri" },
 ];
 
 const TICKER_ITEMS = [
@@ -105,23 +106,38 @@ export function SiteHeader() {
         </div>
       </nav>
 
-      {open && (
-        <div className="border-t border-white/10 bg-[var(--background)] lg:hidden">
-          <ul className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 text-[var(--cream)] md:px-6">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="block rounded-lg px-3 py-2 transition-colors hover:bg-white/5"
-                  onClick={() => setOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {open ? (
+          <motion.div
+            key="mobile-menu"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            className="overflow-hidden border-t border-white/10 bg-[var(--background)] lg:hidden"
+          >
+            <motion.ul
+              initial={{ y: -8, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -8, opacity: 0 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 text-[var(--cream)] md:px-6"
+            >
+              {NAV_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="block rounded-lg px-3 py-2 transition-colors hover:bg-white/5"
+                    onClick={() => setOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </motion.ul>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </header>
   );
 }
