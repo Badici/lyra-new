@@ -164,7 +164,7 @@ export const products: CatalogProduct[] = [
       "Montură inline lucrată pe leadcore, cu plumb de 100g. Soluție simplă și eficientă pentru partide de staționar la crap.",
     priceLabel: "Preț calculat automat",
     priceValueRon: 0,
-    images: ["/produse-noi/monturi-forface/montura-inline.png"],
+    images: ["/montura-inline/montura-inline.png"],
     specs: [
       "Fir montură: leadcore sau textil",
       "Conectică: vârtej normal sau agrafă rapidă",
@@ -208,7 +208,7 @@ export const products: CatalogProduct[] = [
       "Montură pe leadcore cu sistem plumb pierdut, plumb de 100g. Concepută pentru prezentări stabile în zone cu agățături.",
     priceLabel: "Preț calculat automat",
     priceValueRon: 0,
-    images: ["/produse-noi/monturi-forface/montura-plumb-pierdut.png"],
+    images: ["/montura-plumb-pierdut/montura-plumb-pierdut.png"],
     specs: [
       "Fir montură: leadcore sau textil",
       "Conectică: vârtej normal sau agrafă rapidă",
@@ -254,7 +254,7 @@ export const products: CatalogProduct[] = [
       "Montură cu pungă PVA lucrată pe leadcore, cu cârlig mărimea 8 și plumb de 60g. Greutate totală 90-100g, umplută cu mix de pelete fishmeal și cerealier colorat pentru atracție maximă.",
     priceLabel: "Preț calculat automat",
     priceValueRon: 0,
-    images: ["/produse-noi/monturi-forface/montura-punga-pva.png"],
+    images: ["/montura-punga-pva/montura-punga-pva.png"],
     specs: [
       "Fir montură: leadcore, textil sau fluorcarbon",
       "Cârlig: mărimea 4/6/8/10/12",
@@ -312,6 +312,157 @@ export const products: CatalogProduct[] = [
       "Pentru comenzi custom de minimum 20 de bucăți, realizăm orice tip de bag dorește clientul.",
   },
   {
+    slug: "montura-momitor-longcast",
+    name: "Montură momitor longcast",
+    shortDescription:
+      "Set 2 bucăți, momitor longcast 60g, plastifiat verde camuflaj, legat pe textil.",
+    description:
+      "Set de 2 bucăți de monturi cu momitor longcast de 60g, plastifiat în culoare verde camuflaj. Legat pe textil, cu agrafă rapidă, tijă rezistentă și autointepare. Doar atașezi rig-ul și lansezi.",
+    priceLabel: "15 RON / pachet (2 buc)",
+    priceValueRon: 15,
+    images: ["/momitor-legat/momitor-longcast-legat.png"],
+    specs: [
+      "Set: 2 monturi",
+      "Momitor longcast: 60g",
+      "Material: textil",
+      "Conectică: agrafă rapidă",
+    ],
+  },
+  {
+    slug: "montura-plumb-pasta",
+    name: "Montură plumb pastă",
+    shortDescription:
+      "Set 2 bucăți, plumb de pastă 80g, plastifiat verde camuflaj, legat pe textil.",
+    description:
+      "Set de 2 monturi cu plumb de pastă de 80g, plastifiat în culoare verde camuflaj, cu tijă și autointepare. Legat pe textil, cu agrafă rapidă. Ideal pentru pescuitul cu pastă de boillies. Doar atașezi rig-ul și lansezi.",
+    priceLabel: "15 RON / pachet (2 buc)",
+    priceValueRon: 15,
+    images: [
+      "/plumb-pasta-legat/plumb-pasta-legat.png",
+      "/plumb-pasta-legat/multi-plumb-pasta-legat.png",
+    ],
+    specs: [
+      "Set: 2 monturi",
+      "Plumb de pastă: 80g",
+      "Material: textil",
+      "Conectică: agrafă rapidă",
+    ],
+  },
+  {
+    slug: "montura-momitor-cu-forfac",
+    name: "Montură momitor cu forfac",
+    shortDescription:
+      "Montură completă cu forfac, momitor longcast 60g, alegi tipul de forfac fără cost suplimentar.",
+    description:
+      "Montură completă cu forfac, momitor longcast de 60g, plastifiat în culoare verde camuflaj. Legat pe textil, cu agrafă rapidă, tijă rezistentă și autointepare. Doar atașezi rig-ul și lansezi.",
+    priceLabel: "10 RON / buc",
+    priceValueRon: 10,
+    images: ["/montura-momitor/montura-momitor-cu-spin.png"],
+    specs: [
+      "Montură completă cu forfac",
+      "Momitor longcast: 60g",
+      "Material: textil",
+      "Conectică: agrafă rapidă",
+      "Tip forfac configurabil fără cost suplimentar",
+    ],
+    pricingConfig: {
+      markupPercent: 0,
+      fixedCosts: [{ label: "Preț fix produs", costRon: 10 }],
+      options: [
+        {
+          id: "tip-forfac",
+          label: "Tip forfac",
+          placeholder: "Alege tipul de forfac",
+          choices: [
+            { value: "fir-par", label: "Fir de păr", costRon: 0 },
+            { value: "blowback", label: "Blowback cu varnish", costRon: 0 },
+            { value: "spin", label: "Cu spin", costRon: 0 },
+            { value: "banda", label: "Cu bandă", costRon: 0 },
+            { value: "drig", label: "Drig", costRon: 0 },
+          ],
+        },
+        {
+          id: "fir-forfac",
+          label: "Fir forfac",
+          placeholder: "Alege firul forfacului",
+          choices: [
+            { value: "textil", label: "Textil", costRon: 0 },
+            { value: "fluorcarbon", label: "Fluorcarbon", costRon: 0 },
+          ],
+        },
+        {
+          id: "marime-carlig",
+          label: "Mărime cârlig",
+          placeholder: "Alege mărimea cârligului",
+          choices: [
+            { value: "4", label: "4", costRon: 0 },
+            { value: "6", label: "6", costRon: 0 },
+            { value: "8", label: "8", costRon: 0 },
+            { value: "10", label: "10", costRon: 0 },
+            { value: "12", label: "12", costRon: 0 },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    slug: "montura-plumb-pasta-cu-forfac",
+    name: "Montură plumb pastă cu forfac",
+    shortDescription:
+      "Montură completă cu forfac și plumb de pastă 80g, alegi tipul de forfac fără cost suplimentar.",
+    description:
+      "Montură completă cu forfac, cu plumb de pastă de 80g plastifiat în culoare verde camuflaj, cu tijă și autointepare. Legat pe textil, cu agrafă rapidă. Ideală pentru pescuitul cu pastă de boillies. Doar atașezi rig-ul și lansezi.",
+    priceLabel: "10 RON / buc",
+    priceValueRon: 10,
+    images: ["/montura-plumb-pasta/montura-plumb-pasta.png"],
+    specs: [
+      "Montură completă cu forfac",
+      "Plumb de pastă: 80g",
+      "Material: textil",
+      "Conectică: agrafă rapidă",
+      "Tip forfac configurabil fără cost suplimentar",
+    ],
+    pricingConfig: {
+      markupPercent: 0,
+      fixedCosts: [{ label: "Preț fix produs", costRon: 10 }],
+      options: [
+        {
+          id: "tip-forfac",
+          label: "Tip forfac",
+          placeholder: "Alege tipul de forfac",
+          choices: [
+            { value: "fir-par", label: "Fir de păr", costRon: 0 },
+            { value: "blowback", label: "Blowback cu varnish", costRon: 0 },
+            { value: "spin", label: "Cu spin", costRon: 0 },
+            { value: "banda", label: "Cu bandă", costRon: 0 },
+            { value: "drig", label: "Drig", costRon: 0 },
+          ],
+        },
+        {
+          id: "fir-forfac",
+          label: "Fir forfac",
+          placeholder: "Alege firul forfacului",
+          choices: [
+            { value: "textil", label: "Textil", costRon: 0 },
+            { value: "fluorcarbon", label: "Fluorcarbon", costRon: 0 },
+          ],
+        },
+        {
+          id: "marime-carlig",
+          label: "Mărime cârlig",
+          placeholder: "Alege mărimea cârligului",
+          choices: [
+            { value: "4", label: "4", costRon: 0 },
+            { value: "6", label: "6", costRon: 0 },
+            { value: "8", label: "8", costRon: 0 },
+            { value: "10", label: "10", costRon: 0 },
+            { value: "12", label: "12", costRon: 0 },
+          ],
+        },
+      ],
+    },
+  },
+  {
     slug: "carlige-legate-set-5",
     name: "Cârlige legate - set 5 buc",
     shortDescription:
@@ -320,7 +471,7 @@ export const products: CatalogProduct[] = [
       "Cârlige legate la set de 5 bucăți, configurabile pe mărime cârlig, tip de fir pentru forfac, tip de montură și lungime rig. Prețul este calculat automat pe materiale și include adaosul standard de 30%.",
     priceLabel: "Preț calculat automat",
     priceValueRon: 0,
-    images: ["/produse-noi/monturi-forface/monturi-cu-spin.png"],
+    images: ["/carlige-legate/carlige-legate.png"],
     specs: [
       "Set: 5 cârlige legate",
       "Mărime cârlig: 4/6/8/10/12",
@@ -451,11 +602,15 @@ export const products: CatalogProduct[] = [
 
 const DISPLAY_PRIORITY: Record<string, number> = {
   "montura-punga-pva": 0,
-  "montura-inline-leadcore": 1,
-  "montura-plumb-pierdut": 2,
-  "montura-elicopter": 3,
-  "carlige-legate-set-5": 4,
-  "mix-pelete-500g": 5,
+  "montura-momitor-longcast": 1,
+  "montura-plumb-pasta": 2,
+  "montura-momitor-cu-forfac": 3,
+  "montura-plumb-pasta-cu-forfac": 4,
+  "montura-inline-leadcore": 5,
+  "montura-plumb-pierdut": 6,
+  "montura-elicopter": 7,
+  "carlige-legate-set-5": 8,
+  "mix-pelete-500g": 9,
 };
 
 export function getDisplayProducts() {

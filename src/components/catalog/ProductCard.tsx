@@ -34,16 +34,15 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
       transition={{ duration: 0.45, ease: "easeOut" }}
     >
       <Link href={`/produse/${product.slug}`} className="group block">
-        <div className="relative aspect-[4/3]">
+        <div className="relative aspect-[4/3] overflow-hidden bg-black">
           <Image
             src={productImage}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-cover transition-transform duration-300 will-change-transform group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
             unoptimized={isSvgImage}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
         </div>
         <div className="space-y-2 p-5">
           {accentBadge ? (

@@ -45,11 +45,11 @@ export function SiteHeader() {
       <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 md:px-6">
         <Link href="/" className="inline-flex items-center gap-3">
           <Image
-            src="/logo-lyra.png"
+            src="/logo-navbar.png"
             alt="Lyra Baits"
-            width={120}
-            height={40}
-            className="h-9 w-auto"
+            width={220}
+            height={72}
+            className="h-12 w-auto md:h-14"
             priority
           />
         </Link>
