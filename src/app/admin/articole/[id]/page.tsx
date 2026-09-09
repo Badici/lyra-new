@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/admin/page-header";
+import { ImageField } from "@/components/admin/image-field";
 import { TiptapEditor } from "@/components/admin/tiptap-editor";
 import { upsertArticle } from "@/features/articles/admin-actions";
 import { getAdminArticleById } from "@/features/articles/admin-queries";
@@ -17,6 +18,11 @@ export default async function EditArticlePage({ params }: { params: Params }) {
       <PageHeader title={article.title} backHref="/admin/articole" />
       <form action={upsertArticle} className="admin-card grid max-w-3xl gap-4 p-5">
         <input type="hidden" name="id" value={article.id} />
+        <ImageField
+          name="coverImageKey"
+          label="Banner / cover"
+          defaultValue={article.coverImageKey}
+        />
         <input name="title" required defaultValue={article.title} className="admin-input" />
         <input name="slug" defaultValue={article.slug} className="admin-input" />
         <textarea
@@ -24,10 +30,13 @@ export default async function EditArticlePage({ params }: { params: Params }) {
           defaultValue={article.excerpt ?? ""}
           className="admin-textarea"
         />
-        <TiptapEditor
-          name="content"
-          initialContent={article.content as Record<string, unknown>}
-        />
+        <div>
+          <p className="admin-label">Conținut (poți insera imagini din toolbar)</p>
+          <TiptapEditor
+            name="content"
+            initialContent={article.content as Record<string, unknown>}
+          />
+        </div>
         <select name="status" defaultValue={article.status} className="admin-select">
           {ARTICLE_STATUSES.map((s) => (
             <option key={s} value={s}>

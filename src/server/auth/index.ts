@@ -5,6 +5,18 @@ import { db } from "@/db/client";
 import * as schema from "@/db/schema";
 import { getPublicSiteUrl } from "@/lib/env";
 
+function authTrustedOrigins(): string[] {
+  const primary = getPublicSiteUrl();
+  const extras = [
+    primary,
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    process.env.BETTER_AUTH_URL,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+  ].filter((v): v is string => Boolean(v));
+  return [...new Set(extras.map((u) => u.replace(/\/$/, "")))];
+}
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -15,6 +27,12 @@ export const auth = betterAuth({
       verification: schema.verifications,
     },
   }),
+  // Our auth PKs are Postgres uuid — Better Auth's default nanoid IDs break inserts.
+  advanced: {
+    database: {
+      generateId: () => crypto.randomUUID(),
+    },
+  },
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 10,
@@ -42,7 +60,7 @@ export const auth = betterAuth({
       maxAge: 60 * 5,
     },
   },
-  trustedOrigins: [getPublicSiteUrl()],
+  trustedOrigins: authTrustedOrigins(),
   plugins: [nextCookies()],
 });
 

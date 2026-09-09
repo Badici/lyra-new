@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ConfirmDeleteForm } from "@/components/admin/confirm-delete-form";
+import { ImageField } from "@/components/admin/image-field";
 import { PageHeader } from "@/components/admin/page-header";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { ContentStatusBadge } from "@/components/admin/status-badge";
@@ -11,6 +12,7 @@ import {
 } from "@/features/shows/admin-actions";
 import { getAdminShowById } from "@/features/shows/admin-queries";
 import { CONTENT_STATUSES } from "@/lib/constants";
+import { youtubeThumbnailUrl } from "@/lib/youtube";
 
 const statusLabels = {
   DRAFT: "Draft",
@@ -29,11 +31,20 @@ export default async function AdminShowDetailPage({
 
   return (
     <div>
-      <PageHeader title={show.name} backHref="/admin/emisiuni" />
+      <PageHeader
+        title={show.name}
+        description="Emisiune (grup) + episoade (linkuri YouTube, thumbnail automat)."
+        backHref="/admin/emisiuni"
+      />
 
       <form action={upsertShow} className="admin-card mb-8 space-y-4 p-5">
         <input type="hidden" name="id" value={show.id} />
         <h2 className="font-display text-lg text-cream">Detalii emisiune</h2>
+        <ImageField
+          name="coverImageKey"
+          label="Copertă emisiune"
+          defaultValue={show.coverImageKey}
+        />
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="admin-label">Nume</label>
@@ -55,12 +66,22 @@ export default async function AdminShowDetailPage({
           </div>
           <div>
             <label className="admin-label">Ordine</label>
-            <input name="sortOrder" type="number" defaultValue={show.sortOrder} className="admin-input" />
+            <input
+              name="sortOrder"
+              type="number"
+              defaultValue={show.sortOrder}
+              className="admin-input"
+            />
           </div>
         </div>
         <div>
           <label className="admin-label">Descriere</label>
-          <textarea name="description" defaultValue={show.description ?? ""} className="admin-textarea" rows={3} />
+          <textarea
+            name="description"
+            defaultValue={show.description ?? ""}
+            className="admin-textarea"
+            rows={3}
+          />
         </div>
         <div className="flex flex-wrap gap-3">
           <SubmitButton label="Salvează emisiune" variant="accent" />
@@ -75,62 +96,108 @@ export default async function AdminShowDetailPage({
       <section className="mb-6">
         <h2 className="mb-4 font-display text-xl text-cream">Episoade</h2>
         <div className="space-y-4">
-          {show.episodes.map((episode) => (
-            <div key={episode.id} className="admin-card p-5">
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                <span className="font-medium text-cream">
-                  #{episode.episodeNumber} — {episode.title}
-                </span>
-                <ContentStatusBadge status={episode.status} />
-              </div>
-              <form action={upsertEpisode} className="space-y-3">
-                <input type="hidden" name="id" value={episode.id} />
-                <input type="hidden" name="showId" value={show.id} />
-                <div className="grid gap-3 sm:grid-cols-2">
+          {show.episodes.map((episode) => {
+            const thumb =
+              episode.thumbnailKey ?? youtubeThumbnailUrl(episode.videoUrl);
+            return (
+              <div key={episode.id} className="admin-card p-5">
+                <div className="mb-3 flex flex-wrap items-center gap-3">
+                  {thumb ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={thumb}
+                      alt=""
+                      className="h-16 w-28 rounded-lg object-cover ring-1 ring-border"
+                    />
+                  ) : null}
                   <div>
-                    <label className="admin-label">Titlu</label>
-                    <input name="title" defaultValue={episode.title} required className="admin-input" />
+                    <span className="font-medium text-cream">
+                      #{episode.episodeNumber} — {episode.title}
+                    </span>
+                    <div className="mt-1">
+                      <ContentStatusBadge status={episode.status} />
+                    </div>
                   </div>
-                  <div>
-                    <label className="admin-label">Slug</label>
-                    <input name="slug" defaultValue={episode.slug} className="admin-input" />
+                </div>
+                <form action={upsertEpisode} className="space-y-3">
+                  <input type="hidden" name="id" value={episode.id} />
+                  <input type="hidden" name="showId" value={show.id} />
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className="admin-label">Titlu</label>
+                      <input
+                        name="title"
+                        defaultValue={episode.title}
+                        required
+                        className="admin-input"
+                      />
+                    </div>
+                    <div>
+                      <label className="admin-label">Slug</label>
+                      <input
+                        name="slug"
+                        defaultValue={episode.slug}
+                        className="admin-input"
+                      />
+                    </div>
+                    <div>
+                      <label className="admin-label">Nr. episod</label>
+                      <input
+                        name="episodeNumber"
+                        type="number"
+                        defaultValue={episode.episodeNumber}
+                        required
+                        className="admin-input"
+                      />
+                    </div>
+                    <div>
+                      <label className="admin-label">Status</label>
+                      <select
+                        name="status"
+                        defaultValue={episode.status}
+                        className="admin-select"
+                      >
+                        {CONTENT_STATUSES.map((s) => (
+                          <option key={s} value={s}>
+                            {statusLabels[s]}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="admin-label">Link YouTube</label>
+                      <input
+                        name="videoUrl"
+                        defaultValue={episode.videoUrl ?? ""}
+                        placeholder="https://www.youtube.com/watch?v=…"
+                        className="admin-input"
+                      />
+                      <p className="mt-1 text-xs text-muted">
+                        Thumbnail-ul se preia automat de pe YouTube.
+                      </p>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="admin-label">Descriere</label>
+                      <textarea
+                        name="description"
+                        defaultValue={episode.description ?? ""}
+                        className="admin-textarea"
+                        rows={2}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="admin-label">Nr. episod</label>
-                    <input
-                      name="episodeNumber"
-                      type="number"
-                      defaultValue={episode.episodeNumber}
-                      required
-                      className="admin-input"
+                  <div className="flex flex-wrap gap-3">
+                    <SubmitButton label="Salvează episod" />
+                    <ConfirmDeleteForm
+                      action={deleteEpisode}
+                      confirmMessage={`Sigur ștergi episodul „${episode.title}"?`}
+                      hiddenFields={{ id: episode.id }}
                     />
                   </div>
-                  <div>
-                    <label className="admin-label">Status</label>
-                    <select name="status" defaultValue={episode.status} className="admin-select">
-                      {CONTENT_STATUSES.map((s) => (
-                        <option key={s} value={s}>
-                          {statusLabels[s]}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="admin-label">URL video</label>
-                    <input name="videoUrl" defaultValue={episode.videoUrl ?? ""} className="admin-input" />
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <SubmitButton label="Salvează episod" />
-                  <ConfirmDeleteForm
-                    action={deleteEpisode}
-                    confirmMessage={`Sigur ștergi episodul „${episode.title}"?`}
-                    hiddenFields={{ id: episode.id }}
-                  />
-                </div>
-              </form>
-            </div>
-          ))}
+                </form>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -163,8 +230,17 @@ export default async function AdminShowDetailPage({
             </select>
           </div>
           <div>
-            <label className="admin-label">URL video</label>
-            <input name="videoUrl" className="admin-input" />
+            <label className="admin-label">Link YouTube *</label>
+            <input
+              name="videoUrl"
+              required
+              placeholder="https://youtu.be/… sau watch?v=…"
+              className="admin-input"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="admin-label">Descriere</label>
+            <textarea name="description" className="admin-textarea" rows={2} />
           </div>
         </div>
         <SubmitButton label="Adaugă episod" variant="accent" />

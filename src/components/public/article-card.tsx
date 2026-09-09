@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MagneticHover } from "@/components/motion/magnetic-hover";
-import { PlaceholderMedia } from "@/components/ui/placeholder-media";
+import { MediaImage } from "@/components/ui/media-image";
 
 type ArticleCardData = {
   slug: string;
@@ -8,6 +8,7 @@ type ArticleCardData = {
   excerpt?: string | null;
   publishedAt?: Date | null;
   authorName?: string | null;
+  coverImageKey?: string | null;
   featured?: boolean;
 };
 
@@ -29,10 +30,11 @@ export function ArticleCard({
           <div
             className={`shimmer-sheen mb-4 overflow-hidden rounded-2xl ${featured ? "md:aspect-[21/9]" : ""}`}
           >
-            <PlaceholderMedia
+            <MediaImage
+              src={article.coverImageKey}
               seed={`article-${article.slug}`}
+              alt={article.title}
               ratio={featured ? "wide" : "video"}
-              label="Articol"
               className="transition duration-500 ease-out group-hover:scale-[1.04]"
             />
           </div>

@@ -1,4 +1,5 @@
 import { ConfirmDeleteForm } from "@/components/admin/confirm-delete-form";
+import { ImageField } from "@/components/admin/image-field";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { TiptapEditor } from "@/components/admin/tiptap-editor";
 import { deleteArticle, upsertArticle } from "@/features/articles/admin-actions";
@@ -22,6 +23,11 @@ export function ArticleForm({ article }: ArticleFormProps) {
         {article && <input type="hidden" name="id" value={article.id} />}
 
         <div className="admin-card space-y-4 p-5">
+          <ImageField
+            name="coverImageKey"
+            label="Banner / cover"
+            defaultValue={article?.coverImageKey}
+          />
           <div>
             <label htmlFor="title" className="admin-label">
               Titlu *
@@ -83,7 +89,7 @@ export function ArticleForm({ article }: ArticleFormProps) {
         </div>
 
         <div>
-          <p className="admin-label mb-2">Conținut (TipTap JSON)</p>
+          <p className="admin-label mb-2">Conținut (poți insera imagini din toolbar)</p>
           <TiptapEditor name="content" initialContent={article?.content} />
         </div>
 

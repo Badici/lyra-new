@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/admin/page-header";
 import { ConfirmDeleteForm } from "@/components/admin/confirm-delete-form";
+import { ImageField } from "@/components/admin/image-field";
 import { deleteCategory, upsertCategory } from "@/features/categories/admin-actions";
 import { getAdminCategories } from "@/features/categories/queries";
 
@@ -15,6 +16,7 @@ export default async function AdminCategoriesPage() {
 
       <form action={upsertCategory} className="admin-card grid max-w-2xl gap-3 p-5">
         <h2 className="font-display text-2xl">Categorie nouă</h2>
+        <ImageField name="imageKey" label="Imagine categorie" />
         <input name="name" required placeholder="Nume" className="admin-input" />
         <input name="slug" placeholder="Slug (opțional)" className="admin-input" />
         <textarea name="shortDescription" placeholder="Descriere scurtă" className="admin-textarea" />
@@ -33,6 +35,13 @@ export default async function AdminCategoriesPage() {
           <div key={cat.id} className="admin-card p-5">
             <form action={upsertCategory} className="grid gap-3 md:grid-cols-2">
               <input type="hidden" name="id" value={cat.id} />
+              <div className="md:col-span-2">
+                <ImageField
+                  name="imageKey"
+                  label="Imagine categorie"
+                  defaultValue={cat.imageKey}
+                />
+              </div>
               <input name="name" defaultValue={cat.name} className="admin-input" required />
               <input name="slug" defaultValue={cat.slug} className="admin-input" />
               <textarea

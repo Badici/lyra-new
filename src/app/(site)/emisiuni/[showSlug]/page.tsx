@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PlaceholderMedia } from "@/components/ui/placeholder-media";
+import { MediaImage } from "@/components/ui/media-image";
 import { getShowBySlug } from "@/features/products/queries";
+import { youtubeThumbnailUrl } from "@/lib/youtube";
 
 type Props = { params: Promise<{ showSlug: string }> };
 
@@ -40,7 +41,13 @@ export default async function ShowPage({ params }: Props) {
         </Link>
 
         <div className="mb-10 grid gap-8 lg:grid-cols-2">
-          <PlaceholderMedia seed={`show-${show.slug}`} ratio="wide" label={show.name} />
+          <MediaImage
+            src={show.coverImageKey}
+            seed={`show-${show.slug}`}
+            alt={show.name}
+            ratio="wide"
+            priority
+          />
           <div>
             <h1 className="mb-4 font-display text-5xl tracking-wide">{show.name}</h1>
             <p className="leading-relaxed text-muted">
@@ -53,32 +60,37 @@ export default async function ShowPage({ params }: Props) {
 
         <h2 className="mb-6 font-display text-4xl tracking-wide">Episoade</h2>
         {show.episodes.length > 0 ? (
-          <ul className="divide-y divide-border">
-            {show.episodes.map((episode) => (
-              <li key={episode.id} className="flex flex-wrap items-center justify-between gap-4 py-4">
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-muted">
-                    Ep. {episode.episodeNumber}
-                    {episode.seasonNumber ? ` · Sezon ${episode.seasonNumber}` : ""}
-                  </p>
+          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {show.episodes.map((episode) => {
+              const thumb =
+                episode.thumbnailKey ?? youtubeThumbnailUrl(episode.videoUrl);
+              return (
+                <li key={episode.id}>
                   <Link
                     href={`/emisiuni/${show.slug}/${episode.slug}`}
-                    className="font-display text-2xl tracking-wide hover:text-accent"
+                    className="group block"
                   >
-                    {episode.title}
+                    <MediaImage
+                      src={thumb}
+                      seed={`episode-${episode.slug}`}
+                      alt={episode.title}
+                      ratio="video"
+                      className="mb-3 transition duration-500 group-hover:scale-[1.02]"
+                    />
+                    <p className="text-xs uppercase tracking-widest text-muted">
+                      Ep. {episode.episodeNumber}
+                      {episode.seasonNumber ? ` · Sezon ${episode.seasonNumber}` : ""}
+                    </p>
+                    <h3 className="font-display text-2xl tracking-wide group-hover:text-accent">
+                      {episode.title}
+                    </h3>
+                    {episode.description ? (
+                      <p className="mt-1 line-clamp-2 text-sm text-muted">{episode.description}</p>
+                    ) : null}
                   </Link>
-                  {episode.description ? (
-                    <p className="mt-1 max-w-2xl text-sm text-muted">{episode.description}</p>
-                  ) : null}
-                </div>
-                <Link
-                  href={`/emisiuni/${show.slug}/${episode.slug}`}
-                  className="text-sm text-accent underline-offset-4 hover:underline"
-                >
-                  Vezi episodul
-                </Link>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className="text-muted">Nu există episoade publicate pentru această emisiune.</p>

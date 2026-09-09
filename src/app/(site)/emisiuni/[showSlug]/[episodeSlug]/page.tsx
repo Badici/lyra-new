@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PlaceholderMedia } from "@/components/ui/placeholder-media";
+import { MediaImage } from "@/components/ui/media-image";
 import { getEpisode } from "@/features/products/queries";
+import { youtubeEmbedUrl, youtubeThumbnailUrl } from "@/lib/youtube";
 
 type Props = { params: Promise<{ showSlug: string; episodeSlug: string }> };
 
@@ -34,6 +35,7 @@ export default async function EpisodePage({ params }: Props) {
   if (!data) notFound();
 
   const { show, episode } = data;
+  const embed = youtubeEmbedUrl(episode.videoUrl);
 
   return (
     <article className="section-lyra">
@@ -54,10 +56,10 @@ export default async function EpisodePage({ params }: Props) {
         </p>
         <h1 className="mb-6 font-display text-5xl tracking-wide">{episode.title}</h1>
 
-        {episode.videoUrl ? (
+        {embed ? (
           <div className="mb-8 aspect-video overflow-hidden rounded-2xl bg-depth">
             <iframe
-              src={episode.videoUrl}
+              src={embed}
               title={episode.title}
               className="h-full w-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -65,10 +67,11 @@ export default async function EpisodePage({ params }: Props) {
             />
           </div>
         ) : (
-          <PlaceholderMedia
+          <MediaImage
+            src={episode.thumbnailKey ?? youtubeThumbnailUrl(episode.videoUrl)}
             seed={`episode-${episode.slug}`}
+            alt={episode.title}
             ratio="video"
-            label="Video placeholder"
             className="mb-8"
           />
         )}

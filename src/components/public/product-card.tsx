@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MagneticHover } from "@/components/motion/magnetic-hover";
-import { PlaceholderMedia } from "@/components/ui/placeholder-media";
+import { MediaImage } from "@/components/ui/media-image";
 import { formatRon } from "@/lib/money";
 import { stockMessageRo } from "@/lib/stock";
 
@@ -11,6 +11,7 @@ type ProductCardData = {
   shortDescription?: string | null;
   priceBani: number;
   stockQuantity: number;
+  mainImageKey?: string | null;
 };
 
 export function ProductCard({ product }: { product: ProductCardData }) {
@@ -21,10 +22,11 @@ export function ProductCard({ product }: { product: ProductCardData }) {
       <article className="group">
         <Link href={`/produse/${product.slug}`} className="block">
           <div className="shimmer-sheen mb-4 overflow-hidden rounded-2xl">
-            <PlaceholderMedia
+            <MediaImage
+              src={product.mainImageKey}
               seed={`product-${product.slug}`}
+              alt={product.name}
               ratio="square"
-              label={product.name}
               className="transition duration-500 ease-out group-hover:scale-[1.04]"
             />
           </div>

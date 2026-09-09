@@ -22,7 +22,18 @@ export default async function AdminOrdersPage({
 
   return (
     <div className="space-y-6 p-4 md:p-8">
-      <PageHeader title="Comenzi" description="Filtrează și gestionează comenzile." />
+      <PageHeader
+        title="Comenzi"
+        description="Filtrează și gestionează comenzile."
+        actions={
+          <Link
+            href="/admin/comenzi/nou"
+            className="rounded-xl bg-accent px-4 py-2 text-sm text-cream"
+          >
+            Comandă nouă
+          </Link>
+        }
+      />
 
       <form className="flex flex-col gap-3 sm:flex-row">
         <input

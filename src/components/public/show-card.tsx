@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { MagneticHover } from "@/components/motion/magnetic-hover";
-import { PlaceholderMedia } from "@/components/ui/placeholder-media";
+import { MediaImage } from "@/components/ui/media-image";
 
 type ShowCardData = {
   slug: string;
   name: string;
   shortDescription?: string | null;
+  coverImageKey?: string | null;
   episodeCount?: number;
 };
 
@@ -15,10 +16,11 @@ export function ShowCard({ show }: { show: ShowCardData }) {
       <article className="group">
         <Link href={`/emisiuni/${show.slug}`} className="block">
           <div className="shimmer-sheen mb-4 overflow-hidden rounded-2xl">
-            <PlaceholderMedia
+            <MediaImage
+              src={show.coverImageKey}
               seed={`show-${show.slug}`}
+              alt={show.name}
               ratio="video"
-              label="Emisiune"
               className="transition duration-500 ease-out group-hover:scale-[1.04]"
             />
           </div>

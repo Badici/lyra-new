@@ -11,8 +11,6 @@ import { requireAdmin } from "@/server/auth/session";
 const adjustSchema = z.object({
   productId: z.string().uuid(),
   delta: z.coerce.number().int().refine((v) => v !== 0, "Ajustarea nu poate fi zero."),
-  reason: z.string().trim().min(2).max(120),
-  note: z.string().trim().optional(),
 });
 
 export async function adjustStock(formData: FormData): Promise<void> {
@@ -20,13 +18,11 @@ export async function adjustStock(formData: FormData): Promise<void> {
   const parsed = adjustSchema.safeParse({
     productId: formData.get("productId"),
     delta: formData.get("delta"),
-    reason: formData.get("reason"),
-    note: formData.get("note") || undefined,
   });
 
   if (!parsed.success) return;
 
-  const { productId, delta, reason, note } = parsed.data;
+  const { productId, delta } = parsed.data;
   const product = await db.query.products.findFirst({ where: eq(products.id, productId) });
   if (!product) return;
 
@@ -35,8 +31,8 @@ export async function adjustStock(formData: FormData): Promise<void> {
   await db.insert(inventoryMovements).values({
     productId,
     delta,
-    reason,
-    note: note ?? null,
+    reason: delta > 0 ? "adăugare" : "scădere",
+    note: null,
     actorUserId: session.user.id,
   });
 

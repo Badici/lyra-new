@@ -20,6 +20,7 @@ const articleSchema = z.object({
   authorName: z.string().trim().optional(),
   isFeatured: z.coerce.boolean().optional(),
   tags: z.string().trim().optional(),
+  coverImageKey: z.string().trim().optional(),
 });
 
 function parseArticleForm(formData: FormData) {
@@ -33,6 +34,7 @@ function parseArticleForm(formData: FormData) {
     authorName: formData.get("authorName") || undefined,
     isFeatured: formData.get("isFeatured") === "on" || formData.get("isFeatured") === "true",
     tags: formData.get("tags") || undefined,
+    coverImageKey: formData.get("coverImageKey") || undefined,
   });
 }
 
@@ -71,6 +73,7 @@ export async function upsertArticle(formData: FormData): Promise<void> {
     isFeatured: data.isFeatured ?? false,
     tags,
     publishedAt: data.status === "PUBLISHED" ? new Date() : null,
+    coverImageKey: data.coverImageKey || null,
   };
 
   if (data.id) {

@@ -18,6 +18,7 @@ const categorySchema = z.object({
   heroDescription: z.string().trim().optional(),
   sortOrder: z.coerce.number().int().default(0),
   isActive: z.coerce.boolean().optional(),
+  imageKey: z.string().trim().optional(),
 });
 
 function parseCategoryForm(formData: FormData) {
@@ -31,6 +32,7 @@ function parseCategoryForm(formData: FormData) {
     heroDescription: formData.get("heroDescription") || undefined,
     sortOrder: formData.get("sortOrder") ?? 0,
     isActive: formData.get("isActive") === "on" || formData.get("isActive") === "true",
+    imageKey: formData.get("imageKey") || undefined,
   });
 }
 
@@ -59,6 +61,7 @@ export async function upsertCategory(formData: FormData): Promise<void> {
     heroDescription: data.heroDescription ?? null,
     sortOrder: data.sortOrder,
     isActive: data.isActive ?? true,
+    imageKey: data.imageKey || null,
   };
 
   if (data.id) {

@@ -24,21 +24,21 @@ export default async function AdminStockPage() {
                 </p>
               </div>
             </div>
-            <form action={adjustStock} className="grid gap-3 sm:grid-cols-4">
+            <form action={adjustStock} className="flex flex-wrap items-end gap-3">
               <input type="hidden" name="productId" value={p.id} />
-              <input
-                name="delta"
-                type="number"
-                required
-                placeholder="Delta (+/-)"
-                className="admin-input"
-              />
-              <input
-                name="reason"
-                required
-                placeholder="Motiv"
-                className="admin-input sm:col-span-2"
-              />
+              <div className="min-w-[10rem] flex-1">
+                <label className="admin-label" htmlFor={`delta-${p.id}`}>
+                  Ajustare (+/-)
+                </label>
+                <input
+                  id={`delta-${p.id}`}
+                  name="delta"
+                  type="number"
+                  required
+                  placeholder="ex. 5 sau -2"
+                  className="admin-input"
+                />
+              </div>
               <button type="submit" className="rounded-xl bg-accent px-4 py-2 text-sm text-cream">
                 Ajustează
               </button>
@@ -48,7 +48,7 @@ export default async function AdminStockPage() {
                 {p.inventoryMovements.map((m) => (
                   <li key={m.id}>
                     {m.createdAt.toISOString().slice(0, 10)} · {m.delta > 0 ? "+" : ""}
-                    {m.delta} · {m.reason}
+                    {m.delta}
                   </li>
                 ))}
               </ul>

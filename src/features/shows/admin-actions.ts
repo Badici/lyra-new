@@ -8,6 +8,11 @@ import { db } from "@/db/client";
 import { episodes, shows } from "@/db/schema";
 import { CONTENT_STATUSES } from "@/lib/constants";
 import { slugify, uniqueSlug } from "@/lib/slug";
+import {
+  extractYoutubeId,
+  normalizeYoutubeWatchUrl,
+  youtubeThumbnailUrl,
+} from "@/lib/youtube";
 import { requireAdmin } from "@/server/auth/session";
 
 const showSchema = z.object({
@@ -18,6 +23,7 @@ const showSchema = z.object({
   shortDescription: z.string().trim().optional(),
   status: z.enum(CONTENT_STATUSES),
   sortOrder: z.coerce.number().int().default(0),
+  coverImageKey: z.string().trim().optional(),
 });
 
 const episodeSchema = z.object({
@@ -29,7 +35,6 @@ const episodeSchema = z.object({
   episodeNumber: z.coerce.number().int().positive(),
   seasonNumber: z.coerce.number().int().positive().optional(),
   videoUrl: z.string().trim().optional(),
-  videoProvider: z.string().trim().optional(),
   durationSeconds: z.coerce.number().int().positive().optional(),
   status: z.enum(CONTENT_STATUSES),
 });
@@ -59,6 +64,7 @@ export async function upsertShow(formData: FormData): Promise<void> {
     shortDescription: formData.get("shortDescription") || undefined,
     status: formData.get("status"),
     sortOrder: formData.get("sortOrder") ?? 0,
+    coverImageKey: formData.get("coverImageKey") || undefined,
   });
 
   if (!parsed.success) return;
@@ -68,26 +74,29 @@ export async function upsertShow(formData: FormData): Promise<void> {
     ? slugify(data.slug)
     : await ensureShowSlug(data.name, data.id);
 
-  const payload = {
+  const showPayload = {
     name: data.name,
     slug,
     description: data.description ?? null,
     shortDescription: data.shortDescription ?? null,
     status: data.status,
     sortOrder: data.sortOrder,
+    coverImageKey: data.coverImageKey?.trim() || null,
   };
 
   if (data.id) {
-    await db.update(shows).set(payload).where(eq(shows.id, data.id));
+    await db.update(shows).set(showPayload).where(eq(shows.id, data.id));
     revalidatePath("/admin/emisiuni");
     revalidatePath(`/admin/emisiuni/${data.id}`);
+    revalidatePath("/emisiuni");
     return;
   }
 
-  const [created] = await db.insert(shows).values(payload).returning({ id: shows.id });
+  const [created] = await db.insert(shows).values(showPayload).returning({ id: shows.id });
   if (!created) return;
 
   revalidatePath("/admin/emisiuni");
+  revalidatePath("/emisiuni");
   redirect(`/admin/emisiuni/${created.id}`);
 }
 
@@ -96,6 +105,7 @@ export async function deleteShow(formData: FormData): Promise<void> {
   const id = z.string().uuid().parse(formData.get("id"));
   await db.delete(shows).where(eq(shows.id, id));
   revalidatePath("/admin/emisiuni");
+  revalidatePath("/emisiuni");
   redirect("/admin/emisiuni");
 }
 
@@ -110,7 +120,6 @@ export async function upsertEpisode(formData: FormData): Promise<void> {
     episodeNumber: formData.get("episodeNumber"),
     seasonNumber: formData.get("seasonNumber") || undefined,
     videoUrl: formData.get("videoUrl") || undefined,
-    videoProvider: formData.get("videoProvider") || undefined,
     durationSeconds: formData.get("durationSeconds") || undefined,
     status: formData.get("status"),
   });
@@ -122,6 +131,10 @@ export async function upsertEpisode(formData: FormData): Promise<void> {
     ? slugify(data.slug)
     : await ensureEpisodeSlug(data.showId, data.title, data.id);
 
+  const ytId = extractYoutubeId(data.videoUrl);
+  const watchUrl = normalizeYoutubeWatchUrl(data.videoUrl);
+  const thumb = youtubeThumbnailUrl(data.videoUrl);
+
   const payload = {
     showId: data.showId,
     title: data.title,
@@ -129,8 +142,9 @@ export async function upsertEpisode(formData: FormData): Promise<void> {
     description: data.description ?? null,
     episodeNumber: data.episodeNumber,
     seasonNumber: data.seasonNumber ?? null,
-    videoUrl: data.videoUrl ?? null,
-    videoProvider: data.videoProvider ?? null,
+    videoUrl: watchUrl ?? (data.videoUrl?.trim() || null),
+    videoProvider: ytId ? "youtube" : null,
+    thumbnailKey: thumb,
     durationSeconds: data.durationSeconds ?? null,
     status: data.status,
     publishedAt: data.status === "PUBLISHED" ? new Date() : null,
@@ -152,6 +166,7 @@ export async function upsertEpisode(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/emisiuni");
   revalidatePath(`/admin/emisiuni/${data.showId}`);
+  revalidatePath("/emisiuni");
 }
 
 export async function deleteEpisode(formData: FormData): Promise<void> {
@@ -163,4 +178,5 @@ export async function deleteEpisode(formData: FormData): Promise<void> {
   await db.delete(episodes).where(eq(episodes.id, id));
   revalidatePath("/admin/emisiuni");
   revalidatePath(`/admin/emisiuni/${episode.showId}`);
+  revalidatePath("/emisiuni");
 }

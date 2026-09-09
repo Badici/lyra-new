@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PlaceholderMedia } from "@/components/ui/placeholder-media";
+import { TipTapContent } from "@/components/public/tiptap-content";
+import { MediaImage } from "@/components/ui/media-image";
 import { getArticleBySlug } from "@/features/products/queries";
-import { extractTipTapText } from "@/lib/content";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -33,7 +33,6 @@ export default async function ArticlePage({ params }: Props) {
 
   if (!article) notFound();
 
-  const body = extractTipTapText(article.content);
   const dateLabel = article.publishedAt
     ? new Intl.DateTimeFormat("ro-RO", { dateStyle: "long" }).format(article.publishedAt)
     : null;
@@ -53,26 +52,20 @@ export default async function ArticlePage({ params }: Props) {
           <p className="mb-8 text-sm text-muted">de {article.authorName}</p>
         ) : null}
 
-        <PlaceholderMedia
+        <MediaImage
+          src={article.coverImageKey}
           seed={`article-${article.slug}`}
+          alt={article.title}
           ratio="wide"
-          label="Copertă articol"
           className="mb-10"
+          priority
         />
 
         {article.excerpt ? (
           <p className="mb-8 text-lg leading-relaxed text-muted">{article.excerpt}</p>
         ) : null}
 
-        {body ? (
-          <div className="space-y-4 leading-relaxed text-foreground">
-            {body.split("\n\n").map((paragraph) => (
-              <p key={paragraph.slice(0, 32)}>{paragraph}</p>
-            ))}
-          </div>
-        ) : (
-          <p className="text-muted">Conținut editorial în curs de publicare.</p>
-        )}
+        <TipTapContent content={article.content} />
       </div>
     </article>
   );

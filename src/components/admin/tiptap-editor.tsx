@@ -2,7 +2,9 @@
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
 import { useState } from "react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 type TiptapEditorProps = {
@@ -15,9 +17,17 @@ export function TiptapEditor({ name, initialContent, className }: TiptapEditorPr
   const [jsonValue, setJsonValue] = useState(
     JSON.stringify(initialContent ?? { type: "doc", content: [] }),
   );
+  const [uploading, setUploading] = useState(false);
 
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Image.configure({
+        HTMLAttributes: {
+          class: "rounded-xl my-4 max-w-full h-auto",
+        },
+      }),
+    ],
     content: initialContent ?? { type: "doc", content: [] },
     immediatelyRender: false,
     onUpdate: ({ editor: ed }) => {
@@ -30,6 +40,27 @@ export function TiptapEditor({ name, initialContent, className }: TiptapEditorPr
       },
     },
   });
+
+  async function insertImage(file: File | null) {
+    if (!file || !editor) return;
+    setUploading(true);
+    try {
+      const body = new FormData();
+      body.set("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body });
+      const data = (await res.json()) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        toast.error(data.error ?? "Upload eșuat");
+        return;
+      }
+      editor.chain().focus().setImage({ src: data.url }).run();
+      toast.success("Imagine inserată");
+    } catch {
+      toast.error("Upload eșuat");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   return (
     <div className={cn("admin-card overflow-hidden", className)}>
@@ -64,6 +95,19 @@ export function TiptapEditor({ name, initialContent, className }: TiptapEditorPr
           active={editor?.isActive("orderedList")}
           onClick={() => editor?.chain().focus().toggleOrderedList().run()}
         />
+        <label className="cursor-pointer rounded-lg px-2.5 py-1 text-xs font-medium text-muted hover:bg-forest/60 hover:text-cream">
+          {uploading ? "…" : "Imagine"}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="hidden"
+            disabled={uploading}
+            onChange={(e) => {
+              void insertImage(e.target.files?.[0] ?? null);
+              e.target.value = "";
+            }}
+          />
+        </label>
       </div>
       <EditorContent editor={editor} />
       <input type="hidden" name={name} value={jsonValue} readOnly />

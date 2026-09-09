@@ -1,5 +1,6 @@
 import { upsertProduct } from "@/features/products/admin-actions";
 import { fromBani } from "@/lib/money";
+import { ImageField } from "@/components/admin/image-field";
 
 type CategoryOption = { id: string; name: string };
 
@@ -19,6 +20,7 @@ export type ProductFormValues = {
   isActive: boolean;
   isFeatured: boolean;
   isPopular: boolean;
+  mainImageKey: string | null;
 };
 
 export function ProductForm({
@@ -31,6 +33,7 @@ export function ProductForm({
   return (
     <form action={upsertProduct} className="admin-card grid max-w-3xl gap-4 p-5">
       {product ? <input type="hidden" name="id" value={product.id} /> : null}
+      <ImageField name="mainImageKey" label="Imagine principală" defaultValue={product?.mainImageKey} />
       <div>
         <label className="admin-label" htmlFor="name">
           Nume

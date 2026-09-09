@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductCard } from "@/components/public/product-card";
-import { PlaceholderMedia } from "@/components/ui/placeholder-media";
+import { MediaImage } from "@/components/ui/media-image";
 import { getCatalogJourney } from "@/features/products/queries";
 
 export const metadata: Metadata = {
@@ -63,10 +63,11 @@ export default async function ProdusePage() {
                     Explorează {category.name}
                   </Link>
                 </div>
-                <PlaceholderMedia
+                <MediaImage
+                  src={category.imageKey}
                   seed={category.visualTheme?.gradientSeed ?? `category-${category.slug}`}
+                  alt={category.name}
                   ratio="wide"
-                  label={category.name}
                 />
               </div>
 

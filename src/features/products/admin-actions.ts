@@ -30,6 +30,7 @@ const productSchema = z.object({
   isActive: z.coerce.boolean().optional(),
   isFeatured: z.coerce.boolean().optional(),
   isPopular: z.coerce.boolean().optional(),
+  mainImageKey: z.string().trim().optional(),
 });
 
 function parseProductForm(formData: FormData) {
@@ -49,6 +50,7 @@ function parseProductForm(formData: FormData) {
     isActive: formData.get("isActive") === "on" || formData.get("isActive") === "true",
     isFeatured: formData.get("isFeatured") === "on" || formData.get("isFeatured") === "true",
     isPopular: formData.get("isPopular") === "on" || formData.get("isPopular") === "true",
+    mainImageKey: formData.get("mainImageKey") || undefined,
   });
 }
 
@@ -88,6 +90,7 @@ export async function upsertProduct(formData: FormData): Promise<void> {
     isActive: data.isActive ?? true,
     isFeatured: data.isFeatured ?? false,
     isPopular: data.isPopular ?? false,
+    mainImageKey: data.mainImageKey || null,
   };
 
   if (data.id) {

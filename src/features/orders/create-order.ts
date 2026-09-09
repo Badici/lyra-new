@@ -59,6 +59,7 @@ export type CreateOrderResult =
 export async function createOrder(
   raw: unknown,
   userId?: string | null,
+  options?: { createdByAdmin?: boolean },
 ): Promise<CreateOrderResult> {
   const parsed = checkoutSchema.safeParse(raw);
   if (!parsed.success) {
@@ -154,7 +155,7 @@ export async function createOrder(
     orderId: order.id,
     fromStatus: null,
     toStatus: "NEW",
-    note: "Comandă creată",
+    note: options?.createdByAdmin ? "Comandă creată din admin" : "Comandă creată",
   });
 
   // Decrement stock where available (never block order; zero stays zero)

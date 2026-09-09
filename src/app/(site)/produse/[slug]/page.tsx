@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/public/product-card";
-import { PlaceholderMedia } from "@/components/ui/placeholder-media";
+import { MediaImage } from "@/components/ui/media-image";
 import { AddToCartButton } from "@/features/cart/add-to-cart-button";
 import {
   getProductBySlug,
@@ -63,10 +63,12 @@ export default async function ProductPage({ params }: Props) {
         </nav>
 
         <div className="grid gap-10 lg:grid-cols-2">
-          <PlaceholderMedia
+          <MediaImage
+            src={product.mainImageKey}
             seed={`product-${product.slug}`}
+            alt={product.name}
             ratio="square"
-            label={product.name}
+            priority
           />
 
           <div>

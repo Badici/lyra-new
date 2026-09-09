@@ -23,9 +23,11 @@
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
     "@neondatabase/serverless": "^1.0.2",
+    "@tiptap/extension-image": "^3.31.3",
     "@tiptap/pm": "^3.20.0",
     "@tiptap/react": "^3.20.0",
     "@tiptap/starter-kit": "^3.20.0",
+    "@vercel/blob": "^2.8.0",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.7.3",
     "clsx": "^2.1.1",
