@@ -1,84 +1,56 @@
 import type { Metadata } from "next";
-import { DM_Sans, Instrument_Serif } from "next/font/google";
-import { CartProvider } from "@/components/cart/CartProvider";
+import { Bebas_Neue, Caveat, Inter } from "next/font/google";
+import { Toaster } from "sonner";
+import { CartProvider } from "@/features/cart/cart-context";
+import { PRODUCTION_SITE_URL, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 import "./globals.css";
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin", "latin-ext"],
-});
-
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
-  subsets: ["latin"],
+const bebasNeue = Bebas_Neue({
   weight: "400",
+  subsets: ["latin"],
+  variable: "--font-bebas",
+  display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lyrabaits.ro";
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  variable: "--font-caveat",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(PRODUCTION_SITE_URL),
   title: {
-    default: "LyraBaits a devenit 24Baits",
-    template: "%s | 24Baits",
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "LyraBaits a devenit 24Baits. Găsește produsele noastre pe 24baits.ro.",
-  applicationName: "LyraBaits → 24Baits",
-  keywords: [
-    "pelete crap",
-    "pungi PVA",
-    "monturi crap",
-    "forface crap",
-    "accesorii pescuit",
-    "Lyra Baits",
-    "pescuit la crap România",
-  ],
-  alternates: {
-    canonical: "/",
-  },
+  description: SITE_TAGLINE,
   openGraph: {
     type: "website",
     locale: "ro_RO",
-    url: "/",
-    siteName: "LyraBaits → 24Baits",
-    title: "LyraBaits a devenit 24Baits",
-    description: "Produsele LyraBaits sunt acum disponibile pe 24baits.ro.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "LyraBaits a devenit 24Baits",
-    description: "Găsește produsele noastre pe 24baits.ro.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_TAGLINE,
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ro">
-      <body
-        className={`${dmSans.variable} ${instrumentSerif.variable} font-sans antialiased`}
-      >
-        <CartProvider>{children}</CartProvider>
+    <html
+      lang="ro"
+      className={`${bebasNeue.variable} ${inter.variable} ${caveat.variable} h-full antialiased`}
+    >
+      <body className="flex min-h-full flex-col font-sans">
+        <CartProvider>
+          {children}
+          <Toaster position="top-center" richColors closeButton />
+        </CartProvider>
       </body>
     </html>
   );

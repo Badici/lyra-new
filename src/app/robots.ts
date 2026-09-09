@@ -1,16 +1,13 @@
 import type { MetadataRoute } from "next";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lyrabaits.ro";
+import { PRODUCTION_SITE_URL } from "@/lib/constants";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [
-      {
-        userAgent: "*",
-        allow: "/",
-      },
-    ],
-    sitemap: `${siteUrl}/sitemap.xml`,
-    host: siteUrl,
+    rules: {
+      userAgent: "*",
+      allow: "/",
+      disallow: ["/admin", "/cont", "/checkout", "/cos"],
+    },
+    sitemap: `${PRODUCTION_SITE_URL}/sitemap.xml`,
   };
 }
