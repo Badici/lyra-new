@@ -19,12 +19,12 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lyrabaits.ro";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "LyraBaits a devenit 24Baits",
-    template: "%s | 24Baits",
+    default: "LyraBaits se va întoarce în curând",
+    template: "%s | LyraBaits",
   },
   description:
-    "LyraBaits a devenit 24Baits. Găsește produsele noastre pe 24baits.ro.",
-  applicationName: "LyraBaits → 24Baits",
+    "LyraBaits se va întoarce în curând. Ne vedem la târgul de pescuit de la Bacău, 23–25 octombrie.",
+  applicationName: "LyraBaits",
   keywords: [
     "pelete crap",
     "pungi PVA",
@@ -33,6 +33,8 @@ export const metadata: Metadata = {
     "accesorii pescuit",
     "Lyra Baits",
     "pescuit la crap România",
+    "Hunting Moldavia",
+    "târg pescuit Bacău",
   ],
   alternates: {
     canonical: "/",
@@ -41,15 +43,18 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ro_RO",
     url: "/",
-    siteName: "LyraBaits → 24Baits",
-    title: "LyraBaits a devenit 24Baits",
-    description: "Produsele LyraBaits sunt acum disponibile pe 24baits.ro.",
+    siteName: "LyraBaits",
+    title: "LyraBaits se va întoarce în curând",
+    description:
+      "Ne vedem la târgul de pescuit de la Bacău, 23–25 octombrie. Contact: 0728 241 412.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "LyraBaits a devenit 24Baits",
-    description: "Găsește produsele noastre pe 24baits.ro.",
+    title: "LyraBaits se va întoarce în curând",
+    description:
+      "Ne vedem la târgul de pescuit de la Bacău, 23–25 octombrie. Contact: 0728 241 412.",
   },
+
   robots: {
     index: true,
     follow: true,

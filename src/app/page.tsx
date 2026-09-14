@@ -3,16 +3,17 @@ import type { Metadata } from "next";
 import { ShutdownLanding } from "@/components/ShutdownLanding";
 
 export const metadata: Metadata = {
-  title: "LyraBaits a devenit 24Baits",
+  title: "LyraBaits se va întoarce în curând",
   description:
-    "LyraBaits a devenit 24Baits. Găsește produsele noastre pe 24baits.ro — nada, monturi și accesorii pentru pescuit la crap.",
+    "LyraBaits se va întoarce în curând. Ne vedem la târgul de pescuit de la Bacău, 23–25 octombrie, Sala de Atletism Doina Melinte.",
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "LyraBaits a devenit 24Baits",
-    description: "Produsele LyraBaits sunt acum disponibile pe 24baits.ro.",
+    title: "LyraBaits se va întoarce în curând",
+    description:
+      "Ne vedem la târgul de pescuit de la Bacău, 23–25 octombrie. Contact: 0728 241 412.",
     type: "website",
     url: "/",
   },
