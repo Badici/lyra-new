@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
-import { LegalNotice } from "@/components/public/legal-notice";
+
+const DESCRIPTION =
+  "Ce date păstrează LyraBaits când îți faci cont, plasezi o comandă sau ne scrii.";
 
 export const metadata: Metadata = {
   title: "Politica de confidențialitate",
-  description: "Politica de confidențialitate LyraBaits — șablon GDPR.",
+  description: DESCRIPTION,
+  openGraph: {
+    title: "Politica de confidențialitate",
+    description: DESCRIPTION,
+    url: "/politica-de-confidentialitate",
+  },
 };
 
 export default function ConfidentialitatePage() {
@@ -13,12 +20,18 @@ export default function ConfidentialitatePage() {
         <h1 className="mb-6 font-display text-5xl tracking-wide">
           Politica de confidențialitate
         </h1>
-        <LegalNotice />
         <div className="space-y-4 text-muted">
           <p>
-            Descrie ce date personale sunt colectate (cont, comenzi, mesaje contact), temeiul legal,
-            durata stocării și drepturile persoanei vizate. Versiunea finală trebuie aliniată la
-            GDPR și la procesatorii folosiți (hosting, email).
+            Când îți faci cont, plasezi o comandă sau ne scrii, păstrăm datele necesare ca să îți
+            răspundem și să livrăm: nume, email, telefon și adresă.
+          </p>
+          <p>Le folosim doar pentru cont, comenzi și mesaje.</p>
+          <p>
+            Dacă vrei să le corectăm sau să le ștergem, scrie-ne la{" "}
+            <a href="mailto:contact@lyrabaits.ro" className="text-accent underline-offset-4 hover:underline">
+              contact@lyrabaits.ro
+            </a>
+            .
           </p>
         </div>
       </div>

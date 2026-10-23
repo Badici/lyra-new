@@ -78,9 +78,7 @@ export default async function EpisodePage({ params }: Props) {
 
         {episode.description ? (
           <p className="leading-relaxed text-muted">{episode.description}</p>
-        ) : (
-          <p className="text-muted">Descriere episod — placeholder editorial.</p>
-        )}
+        ) : null}
       </div>
     </article>
   );

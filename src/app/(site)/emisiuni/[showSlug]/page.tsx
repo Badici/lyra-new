@@ -50,11 +50,11 @@ export default async function ShowPage({ params }: Props) {
           />
           <div>
             <h1 className="mb-4 font-display text-5xl tracking-wide">{show.name}</h1>
-            <p className="leading-relaxed text-muted">
-              {show.description ??
-                show.shortDescription ??
-                "Descriere emisiune — placeholder editorial."}
-            </p>
+            {show.description || show.shortDescription ? (
+              <p className="leading-relaxed text-muted">
+                {show.description ?? show.shortDescription}
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -93,7 +93,7 @@ export default async function ShowPage({ params }: Props) {
             })}
           </ul>
         ) : (
-          <p className="text-muted">Nu există episoade publicate pentru această emisiune.</p>
+          <p className="text-muted">Momentan nu există episoade pentru această emisiune.</p>
         )}
       </div>
     </div>

@@ -176,7 +176,6 @@ export function HeroCarousel({ slides }: Props) {
               <PlaceholderMedia
                 seed={slide.seed}
                 ratio="wide"
-                label="Placeholder editorial"
                 className="relative shadow-soft ring-1 ring-cream/15"
               />
               <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-depth/50 via-transparent to-transparent" />

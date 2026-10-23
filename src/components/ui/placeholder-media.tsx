@@ -24,7 +24,7 @@ export function PlaceholderMedia({
   return (
     <div
       role="img"
-      aria-label={label ?? "Imagine placeholder LyraBaits"}
+      aria-label={label ?? "Imagine LyraBaits"}
       className={cn(
         "placeholder-media relative overflow-hidden rounded-2xl",
         ratios[ratio],

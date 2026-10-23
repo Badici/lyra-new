@@ -34,8 +34,7 @@ export default async function ContactPage() {
           <p className="font-hand mb-2 text-2xl text-accent">Scrie-ne</p>
           <h1 className="mb-4 font-display text-5xl tracking-wide">Contact</h1>
           <p className="mb-6 max-w-md leading-relaxed text-muted">
-            Trimite un mesaj prin formular sau scrie-ne direct pe WhatsApp — pentru acum acesta
-            este canalul rapid de contact.
+            Trimite un mesaj prin formular sau scrie-ne direct pe WhatsApp.
           </p>
           <dl className="mb-8 space-y-3 text-sm">
             <div>

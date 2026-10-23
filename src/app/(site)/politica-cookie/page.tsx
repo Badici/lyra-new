@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
-import { LegalNotice } from "@/components/public/legal-notice";
+
+const DESCRIPTION = "Cookie-urile folosite pe lyrabaits.ro.";
 
 export const metadata: Metadata = {
   title: "Politica cookie",
-  description: "Politica cookie LyraBaits — șablon pentru consimțământ și categorii.",
+  description: DESCRIPTION,
+  openGraph: {
+    title: "Politica cookie",
+    description: DESCRIPTION,
+    url: "/politica-cookie",
+  },
 };
 
 export default function PoliticaCookiePage() {
@@ -11,11 +17,10 @@ export default function PoliticaCookiePage() {
     <div className="section-lyra">
       <div className="container-lyra max-w-3xl">
         <h1 className="mb-6 font-display text-5xl tracking-wide">Politica cookie</h1>
-        <LegalNotice />
         <div className="space-y-4 text-muted">
           <p>
-            Enumeră cookie-urile esențiale (sesiune, coș), analitice și de marketing — dacă vor fi
-            folosite — plus modalitatea de gestionare a preferințelor.
+            Folosim cookie-uri esențiale ca să rămâi autentificat și ca site-ul să funcționeze,
+            inclusiv pentru coș. Nu folosim cookie-uri de publicitate.
           </p>
         </div>
       </div>

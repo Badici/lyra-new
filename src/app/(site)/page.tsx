@@ -30,7 +30,7 @@ const HERO_SLIDES: HeroSlide[] = [
     id: "produse",
     title: "Produse pentru apă și poveste",
     subtitle:
-      "Monturi, nade și accesorii prezentate editorial — nu ca un catalog generic, ci ca un traseu prin universul LyraBaits.",
+      "Monturi, forface, nade și accesorii alese pentru pescuitul la crap.",
     seed: "hero-produse",
     href: "/produse",
     cta: "Descoperă produsele",
@@ -39,7 +39,7 @@ const HERO_SLIDES: HeroSlide[] = [
     id: "articole",
     title: "Articole din teren",
     subtitle:
-      "Ghiduri, observații și materiale editoriale pentru pescari — conținut care poate fi înlocuit cu articole reale din admin.",
+      "Ghiduri, observații și povești de pe mal, pentru pescarii de crap.",
     seed: "hero-articole",
     href: "/articole",
     cta: "Citește articole",
@@ -48,7 +48,7 @@ const HERO_SLIDES: HeroSlide[] = [
     id: "emisiuni",
     title: "Emisiuni LyraBaits",
     subtitle:
-      "Serii video și episoade publicate progresiv. Placeholder editorial până la conținut final.",
+      "Serii video de pe apă: partide, sfaturi și oameni care pescuiesc la crap.",
     seed: "hero-emisiuni",
     href: "/emisiuni",
     cta: "Vezi emisiunile",
@@ -57,7 +57,7 @@ const HERO_SLIDES: HeroSlide[] = [
     id: "poveste",
     title: "Povestea din spatele brandului",
     subtitle:
-      "Un hub creat de pescari — produse, conținut și comunitate într-un singur ritm editorial.",
+      "Un hub creat de pescari: produse, povești și emisiuni, în același loc.",
     seed: "hero-poveste",
     href: "/povestea-noastra",
     cta: "Povestea noastră",
@@ -126,10 +126,7 @@ export default async function HomePage() {
               ))}
             </Stagger>
           ) : (
-            <p className="text-muted">
-              Nu există încă produse publicate. Revino curând sau explorează structura
-              catalogului.
-            </p>
+            <p className="text-muted">Momentan nu există produse disponibile.</p>
           )}
         </div>
       </section>
@@ -143,7 +140,7 @@ export default async function HomePage() {
           <Reveal>
             <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="font-hand mb-2 text-2xl text-accent">Editorial</p>
+                <p className="font-hand mb-2 text-2xl text-accent">De pe mal</p>
                 <h2 className="font-display text-4xl tracking-wide md:text-5xl">
                   Ultimele articole
                 </h2>
@@ -167,7 +164,7 @@ export default async function HomePage() {
               </Stagger>
             </div>
           ) : (
-            <p className="text-muted">Articolele vor apărea aici după publicare.</p>
+            <p className="text-muted">Momentan nu există articole.</p>
           )}
         </div>
       </section>
@@ -192,7 +189,7 @@ export default async function HomePage() {
               ))}
             </Stagger>
           ) : (
-            <p className="text-muted">Emisiunile vor fi listate aici când sunt publicate.</p>
+            <p className="text-muted">Momentan nu există emisiuni.</p>
           )}
         </div>
       </section>
@@ -207,7 +204,7 @@ export default async function HomePage() {
                 Mai mult decât un magazin
               </h2>
               <p className="mb-6 max-w-lg text-sm leading-relaxed text-cream/80 md:text-base">
-                De mici pe mal, apoi un atelier de monturi și forfacuri. Azi construim
+                De mici pe mal, apoi un atelier de monturi și forface. Azi construim
                 LyraBaits ca un hub pentru pescari: produse alese, știri și emisiuni.
               </p>
               <LinkButton href="/povestea-noastra" variant="accent">

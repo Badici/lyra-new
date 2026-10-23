@@ -12,7 +12,7 @@ export default function CheckoutPage() {
     <div className="section-lyra">
       <div className="container-lyra">
         <p className="font-hand mb-2 text-2xl text-accent">Comandă</p>
-        <h1 className="mb-8 font-display text-5xl tracking-wide">Checkout ramburs</h1>
+        <h1 className="mb-8 font-display text-5xl tracking-wide">Finalizează comanda</h1>
         <CheckoutForm />
       </div>
     </div>

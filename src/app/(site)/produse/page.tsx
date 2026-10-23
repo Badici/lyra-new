@@ -7,7 +7,7 @@ import { getCatalogJourney } from "@/features/products/queries";
 export const metadata: Metadata = {
   title: "Produse",
   description:
-    "Parcurge catalogul LyraBaits pe categorii — monturi, nade, accesorii și altele, prezentate editorial.",
+    "Catalogul LyraBaits: monturi, forface, nade și accesorii pentru pescuitul la crap.",
 };
 
 export default async function ProdusePage() {
@@ -22,11 +22,10 @@ export default async function ProdusePage() {
     <div>
       <section className="surface-depth py-16 md:py-20">
         <div className="container-lyra">
-          <p className="font-hand mb-2 text-2xl text-sand">Catalog editorial</p>
+          <p className="font-hand mb-2 text-2xl text-sand">Catalog</p>
           <h1 className="mb-4 font-display text-5xl tracking-wide md:text-6xl">Produse</h1>
           <p className="max-w-2xl text-cream/80">
-            Un traseu prin categorii — fiecare secțiune poate fi personalizată din admin cu
-            titluri hero, descrieri și teme vizuale.
+            Monturi, forface, nade și accesorii alese pentru pescuitul la crap.
           </p>
         </div>
       </section>
@@ -34,10 +33,7 @@ export default async function ProdusePage() {
       {sections.length === 0 ? (
         <section className="section-lyra">
           <div className="container-lyra">
-            <p className="text-muted">
-              Catalogul nu conține încă categorii active. Rulează seed-ul sau adaugă categorii din
-              admin.
-            </p>
+            <p className="text-muted">Momentan nu există produse disponibile.</p>
           </div>
         </section>
       ) : (
@@ -50,12 +46,15 @@ export default async function ProdusePage() {
                   <h2 className="mb-3 font-display text-4xl tracking-wide md:text-5xl">
                     {category.heroTitle ?? category.name}
                   </h2>
-                  <p className="max-w-xl text-muted">
-                    {category.heroDescription ??
-                      category.shortDescription ??
-                      category.description ??
-                      "Descriere categorie — placeholder până la conținut final."}
-                  </p>
+                  {category.heroDescription ||
+                  category.shortDescription ||
+                  category.description ? (
+                    <p className="max-w-xl text-muted">
+                      {category.heroDescription ??
+                        category.shortDescription ??
+                        category.description}
+                    </p>
+                  ) : null}
                   <Link
                     href={`#${category.slug}`}
                     className="mt-4 inline-block text-sm text-accent underline-offset-4 hover:underline"
@@ -79,7 +78,7 @@ export default async function ProdusePage() {
                 </div>
               ) : (
                 <p className="text-sm text-muted">
-                  Nu există produse active în această categorie momentan.
+                  Momentan nu există produse disponibile în această categorie.
                 </p>
               )}
             </div>

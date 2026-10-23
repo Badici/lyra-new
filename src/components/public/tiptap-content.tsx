@@ -115,12 +115,12 @@ function renderNode(node: TipTapNode, index: number): ReactNode {
 
 export function TipTapContent({ content }: { content: unknown }) {
   if (!content || typeof content !== "object") {
-    return <p className="text-muted">Conținut editorial în curs de publicare.</p>;
+    return <p className="text-muted">Momentan acest articol nu are conținut.</p>;
   }
 
   const nodes = (content as TipTapNode).content;
   if (!nodes?.length) {
-    return <p className="text-muted">Conținut editorial în curs de publicare.</p>;
+    return <p className="text-muted">Momentan acest articol nu are conținut.</p>;
   }
 
   return <div className="space-y-4">{nodes.map((node, i) => renderNode(node, i))}</div>;

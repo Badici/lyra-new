@@ -5,7 +5,7 @@ import { Parallax } from "@/components/motion/parallax";
 import { LinkButton } from "@/components/ui/link-button";
 
 const DESCRIPTION =
-  "Povestea LyraBaits: de la pasiunea pentru pescuitul sportiv la crap, la monturi și forfacuri legate cu grijă, și mai departe către un hub pentru pescari.";
+  "Povestea LyraBaits: de la pasiunea pentru pescuitul sportiv la crap, la monturi și forface legate cu grijă, și mai departe către un hub pentru pescari.";
 
 export const metadata: Metadata = {
   title: "Povestea noastră",
@@ -20,8 +20,8 @@ export const metadata: Metadata = {
 const CHAPTERS = [
   {
     id: "01",
-    title: "Pasiunea de la mal",
-    body: "Pescuitul ne-a prins de mici. Diminețile pe baltă, lansetele sprijinite în iarbă și răbdarea de a aștepta o trăsătură au rămas cu noi. În timp, pasiunea s-a așezat pe pescuitul sportiv la crap — acolo am învățat și am perfecționat partea care ne definește: legatul monturilor și al forfacurilor. Noduri, prezentări, detalii mici, repetate până ies cum trebuie.",
+    title: "Pasiunea de pe malul lacului",
+    body: "Pescuitul ne-a prins de mici. Diminețile pe baltă, lansetele sprijinite în iarbă și răbdarea de a aștepta o trăsătură au rămas cu noi. În timp, pasiunea s-a orientat către pescuitul sportiv la crap — acolo am învățat și am perfecționat partea care ne definește: legatul monturilor și al forfacelor. Noduri, prezentări, detalii mici, repetate până ies cum trebuie.",
     image: "/despre_noi_1.jpeg",
     alt: "Copil lângă lansete de pescuit, la începutul pasiunii pentru apă",
     quote: "De mici pe mal, cu undița în mână.",
@@ -31,10 +31,10 @@ const CHAPTERS = [
   {
     id: "02",
     title: "LyraBaits prinde contur",
-    body: "Din orele petrecute la legat s-a născut LyraBaits. Am lansat firma ca un atelier de monturi și forfacuri, făcute cu aceeași grijă cu care le pregătim și pentru propriile partide. Fiecare piesă pleacă din experiența de pe apă: simplă, sigură și gândită pentru pescuitul la crap.",
+    body: "Din zecile de ore petrecute legând monturi s-a născut LyraBaits. Am lansat firma ca un atelier de monturi și forface, făcute cu aceeași grijă cu care le pregătim și pentru propriile partide. Fiecare produs pleacă din experiența de pe apă: forface simple, sigure și gândite pentru pescuitul eficient.",
     image: "/despre_noi_2.jpeg",
     alt: "Pescar LyraBaits ținând un crap, la apus, pe malul apei",
-    quote: "Monturi și forfacuri legate cum le vrem și noi pe fir.",
+    quote: "Monturi și forface legate cum trebuie.",
     aspect: "aspect-[4/3]",
     focus: "object-center",
   },

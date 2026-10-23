@@ -21,7 +21,7 @@ export default async function EmisiuniPage() {
         <p className="font-hand mb-2 text-2xl text-accent">Video</p>
         <h1 className="mb-4 font-display text-5xl tracking-wide md:text-6xl">Emisiuni</h1>
         <p className="mb-10 max-w-2xl text-muted">
-          Serii publicate progresiv. Thumbnail-urile sunt placeholder local până la media finală.
+          Serii video de pe apă: partide, sfaturi și oameni care pescuiesc la crap.
         </p>
 
         {shows.length > 0 ? (
@@ -31,7 +31,7 @@ export default async function EmisiuniPage() {
             ))}
           </div>
         ) : (
-          <p className="text-muted">Nu există emisiuni publicate momentan.</p>
+          <p className="text-muted">Momentan nu există emisiuni.</p>
         )}
       </div>
     </div>

@@ -4,7 +4,7 @@ import { getPublishedArticles } from "@/features/products/queries";
 
 export const metadata: Metadata = {
   title: "Articole",
-  description: "Articole editoriale LyraBaits — ghiduri, observații și materiale pentru pescari.",
+  description: "Articole LyraBaits — ghiduri, observații și povești pentru pescari.",
 };
 
 export default async function ArticolePage() {
@@ -18,11 +18,10 @@ export default async function ArticolePage() {
   return (
     <div className="section-lyra">
       <div className="container-lyra">
-        <p className="font-hand mb-2 text-2xl text-accent">Editorial</p>
+        <p className="font-hand mb-2 text-2xl text-accent">De pe mal</p>
         <h1 className="mb-4 font-display text-5xl tracking-wide md:text-6xl">Articole</h1>
         <p className="mb-10 max-w-2xl text-muted">
-          Materiale publicate din admin. Dacă baza de date este goală, această pagină rămâne
-          pregătită pentru conținut real.
+          Ghiduri, observații și povești pentru pescarii de crap.
         </p>
 
         {articles.length > 0 ? (
@@ -32,7 +31,7 @@ export default async function ArticolePage() {
             ))}
           </div>
         ) : (
-          <p className="text-muted">Nu există articole publicate momentan.</p>
+          <p className="text-muted">Momentan nu există articole.</p>
         )}
       </div>
     </div>

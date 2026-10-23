@@ -201,8 +201,7 @@ export function CheckoutForm() {
           <span>{formatRon(subtotalBani)}</span>
         </div>
         <p className="mb-6 text-xs leading-relaxed text-muted">
-          Plata la livrare (ramburs). Comanda se înregistrează în sistem; un membru Lyra te
-          contactează dacă e nevoie de confirmarea termenului de livrare.
+          Plata se face la livrare. Te contactăm dacă trebuie confirmat termenul.
         </p>
         <Button type="submit" variant="accent" size="lg" className="w-full" disabled={pending}>
           {pending ? "Se trimite…" : "Plasează comanda"}
