@@ -1,117 +1,108 @@
-# Lyra Baits – Site prezentare
+# LyraBaits
 
-Site de prezentare single-page pentru Lyra Baits. Comenzile se fac **prin WhatsApp**: +40 728 241 412.
+Digital hub for the LyraBaits fishing brand: products, editorial content, shows, and storytelling — deployed on Vercel with Neon Postgres.
 
-## Rulare
+Production domain: [https://lyrabaits.ro](https://lyrabaits.ro)
+
+**Before changing code, read [`PROJECT_RULES.md`](./PROJECT_RULES.md).**
+
+## Stack
+
+- Next.js (App Router) + TypeScript strict
+- Tailwind CSS + bespoke design tokens
+- Neon PostgreSQL + Drizzle ORM
+- Better Auth (email/password, roles: CUSTOMER / ADMIN)
+- Zod validation, React Hook Form on complex client forms
+- Resend email abstraction (optional in development)
+- Vitest + Playwright
+
+## Architecture
+
+```
+src/app          routes (public + /admin + API)
+src/components   layout, public, admin, ui primitives
+src/features     products, orders, cart, articles, …
+src/db           schema, migrations, seed
+src/server       auth, email, whatsapp
+src/lib          env, money (bani), stock rules, validators
+```
+
+## Requirements
+
+- Node.js 22+
+- Neon Postgres database (free tier is fine for launch)
+- Environment variables from `.env.example`
+
+## Local setup
 
 ```bash
+cp .env.example .env.local
+# Fill DATABASE_URL, BETTER_AUTH_SECRET (>=32 chars), SEED_ADMIN_PASSWORD
 npm install
+npm run db:migrate
+npm run db:seed
 npm run dev
 ```
 
-Deschide [http://localhost:3000](http://localhost:3000).
+Admin login after seed: `SEED_ADMIN_EMAIL` (default `raresbadici@gmail.com`) with `SEED_ADMIN_PASSWORD`.
 
-## Dimensiuni foto
+## Environment variables
 
-### Nadă (groundbait) – o imagine per variantă
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `DATABASE_URL` | yes | Neon connection string |
+| `BETTER_AUTH_SECRET` | yes | ≥32 random chars |
+| `BETTER_AUTH_URL` | recommended | e.g. `http://localhost:3000` |
+| `NEXT_PUBLIC_SITE_URL` | yes | Public site URL |
+| `SEED_ADMIN_EMAIL` | for seed | Default admin email |
+| `SEED_ADMIN_PASSWORD` | for seed | Never commit |
+| `RESEND_API_KEY` | optional | Without it, orders still work; emails are skipped with a warning |
+| `MAIL_FROM` | optional | Sender identity |
+| `ADMIN_NOTIFICATION_EMAIL` | optional | New-order alerts |
+| `WHATSAPP_PHONE` | recommended | Digits only, country code |
+| `CONTACT_EMAIL` | optional | Public contact |
+| `ORDER_NUMBER_PREFIX` | optional | Default `LYRA` |
+| `ALLOW_DB_RESET` | danger | Must be `true` to run `db:reset` |
 
-Cele 4 sortimente: **Vanilie**, **Tutti Frutti**, **Capsuni și miere**, **Larve**. Câte o imagine per variantă, afișată pe card.
+Never commit `.env` / `.env.local`. Never put secrets in `NEXT_PUBLIC_*`.
 
-| Utilizare | Dimensiuni (lățime × înălțime) | Format |
-|-----------|--------------------------------|--------|
-| **Poza variantă nadă** | **800 × 800 px** (pătrat) sau **600 × 600 px** | JPG sau WebP |
-
-- Datele sunt în `src/data/nada.ts`: fiecare variantă are câmpul `image?: string`. Ex: `image: "/nada/vanilie.jpg"`.
-
-### Monturi (secțiunea Monturi și plumburi)
-
-O imagine per montură, **îngustă și înaltă** (forma monturii).
-
-| Utilizare | Dimensiuni (lățime × înălțime) | Format |
-|-----------|--------------------------------|--------|
-| **Foto montură** | **360 × 600 px** (raport 3:5, portrait) | JPG sau WebP |
-
-- Pozele se referă în `src/data/products.ts` în array-ul `monturi`, câmpul `image` pe fiecare obiect. Ex: `image: "/monturi/montor-inline-leadcore.jpg"`.
-
-### Boillies (secțiunea Boillies)
-
-Imaginile se referă în `src/data/products.ts`: array-ul `bigFishProducts` (câmpul `image` pe fiecare produs) și obiectul `mixDeNadire` (câmpul `image`).
-
-| Utilizare | Dimensiuni (lățime × înălțime) | Raport | Format |
-|-----------|--------------------------------|--------|--------|
-| **BigFish (4 produse)** | **450 × 600 px** (1×) sau **900 × 1200 px** (retina) | 3:4 (portrait, dreptunghi vertical) | JPG sau WebP |
-| **Mix de nădire (1 imagine)** | **1200 × 750 px** (1×) sau **2400 × 1500 px** (retina) | 16:10 (landscape) | JPG sau WebP |
-
-- **BigFish:** chenarul pe desktop are `aspect-[3/4]` (portrait); în inspect element afișajul e ~446 × 594 px. Imaginile trebuie **dreptunghi vertical 3:4** (lățime × înălțime), nu pătrat — ex. **450×600** (1×), **900×1200** (retina).
-- **Mix de nădire:** containerul are pe mobile `aspect-[16/10]`; pe desktop lățimea este 48% din container. O imagine **16:10** (ex. 1200×750) evită tăieri inutile. `sizes` este `48vw` → pe ecrane mari ~922px lățime, de unde **1200×750** (1×) și **2400×1500** (retina).
-
-### PVA (secțiunea PVA umplute)
-
-O imagine per produs (Pungă PVA, Saculeți PVA).
-
-| Utilizare | Dimensiuni (lățime × înălțime) | Format |
-|-----------|--------------------------------|--------|
-| **Foto PVA** | **800 × 800 px** (pătrat) | JPG sau WebP |
-
-- Pozele se referă în `src/data/products.ts` în array-ul `pvaProducts`, câmpul `image`. Ex: `image: "/punga-pva.jpg"`.
-
-### Momeală plastic (hookbaits)
-
-O imagine per produs (porumb galben, viermi multicolori). Raport 4:5 (portrait).
-
-| Utilizare | Dimensiuni (lățime × înălțime) | Format |
-|-----------|--------------------------------|--------|
-| **Foto momeală plastic** | **640 × 800 px** (raport 4:5) | JPG sau WebP |
-
-- În `src/data/products.ts`, array-ul `plasticBaits`, câmpul `image`. Ex: `image: "/porumb-plastic.png"`.
-
-### Capturile noastre (galerie, ultima secțiune)
-
-| Utilizare | Dimensiuni (lățime × înălțime) | Format |
-|-----------|--------------------------------|--------|
-| **Foto captură** | **600 × 800 px** (raport 3:4, portrait) | JPG sau WebP |
-
-- Pozele se referă în `src/data/catches.ts` (câmpul `image` pe fiecare intrare), ex: `image: "/catches/crap-12kg.jpg"`. Opțional: `caption`, `weight`, `location`.
-
-### Hero (secțiunea principală de sus)
-
-| Utilizare | Dimensiuni (lățime × înălțime) | Format |
-|-----------|--------------------------------|--------|
-| **Fundal hero** | **1920 × 1080 px** (Full HD) sau **1440 × 900 px** | JPG sau WebP |
-
-### Logo (header)
-
-Ca să arate clar în navbar, exportă logo-ul cu **înălțime 80 px** (sau **160 px** pentru ecrane retina). Lățimea în funcție de raportul tău (ex. 3:1 → 240×80 px sau 480×160 px). Fișier: `public/logo-lyra.png`.
-
-### Unde pui pozele
-
-- **Boillies:** în `public/` (ex: `public/bile-bigfish-20mm-tari.jpg`, `public/mix-nadire.jpg`). Referințe în `src/data/products.ts`: `bigFishProducts[].image` (4 produse; 2 au deja imagine: bile-carligi-mici.png, pasta-bile.png) și `mixDeNadire.image` (1 imagine).
-- **Capturi:** `public/catches/` și referințe în `src/data/catches.ts`.
-- **Hero:** secțiunea Hero din `src/app/page.tsx` (acum placeholder).
-
-## Structură site
-
-- **Acasă** – Hero + CTA
-- **Nadă** – 4 sortimente (Vanilie, Tutti Frutti, Capsuni și miere, Larve), câte o imagine per variantă
-- **Accesorii** – grid bento
-- **Boillies** – gama BigFish (4 produse + pastă), mix de nădire, boillie fruity în curând
-- **Monturi și plumburi** – 4 monturi cu imagine + text; ofertă monturi/forfecă la comandă
-- **PVA** – rând compact (pills)
-- **Momeală silicon** – un produs evidențiat + grid
-- **Contact** – WhatsApp +40 728 241 412
-- **Capturile noastre** – galerie foto (ultima secțiune, înainte de footer)
-
-Prețurile sunt placeholder (`— RON`). Nadă: `src/data/nada.ts`. Restul: `src/data/products.ts`.
-
-## Tehnologii
-
-- Next.js (App Router), React, TypeScript
-- Tailwind CSS
-- Framer Motion (animații)
-
-## Build pentru producție
+## Database
 
 ```bash
-npm run build
-npm start
+npm run db:generate   # after schema changes
+npm run db:migrate    # apply migrations
+npm run db:seed       # demo data + admin
+npm run db:seed:admin # admin only (idempotent)
+npm run db:reset      # wipe tables — requires ALLOW_DB_RESET=true
+npm run db:studio     # Drizzle Studio
 ```
+
+Money is stored as integer **bani**. Stock ≤ 0 does **not** block purchase; orders get `requiresDeliveryConfirmation`.
+
+## Scripts
+
+```bash
+npm run dev
+npm run build && npm start
+npm run lint
+npm run typecheck
+npm run test
+npm run test:e2e
+```
+
+## Deployment (Vercel + Neon)
+
+1. Create a Neon project; copy the pooled/serverless connection string to Vercel `DATABASE_URL`.
+2. Import the Git repo in Vercel.
+3. Set all required env vars in the Vercel project (including `BETTER_AUTH_SECRET`, `NEXT_PUBLIC_SITE_URL=https://lyrabaits.ro`, `BETTER_AUTH_URL=https://lyrabaits.ro`).
+4. Run migrations against Neon (`npm run db:migrate` locally with production `DATABASE_URL`, or a one-off CI job). Do not hand-edit production schema.
+5. Run `npm run db:seed:admin` once with production admin password in env (not in git).
+6. Deploy via Vercel Git integration — GitHub Actions only runs quality checks, not deploy.
+
+## Brand assets
+
+Logos live in `public/brand/`. A full backup of legacy media is in `_preserved_brand/` (not used by the new app until curated).
+
+## Testing notes
+
+Seed data is labeled `[DEV]` / `demonstrativ`. Analytics and listings should treat it as development content, not production catalog.
