@@ -11,6 +11,10 @@ function authTrustedOrigins(): string[] {
     primary,
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://lyrabaits.ro",
+    "https://www.lyrabaits.ro",
+    "https://lyrabaits.com",
+    "https://www.lyrabaits.com",
     process.env.BETTER_AUTH_URL,
     process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
   ].filter((v): v is string => Boolean(v));
