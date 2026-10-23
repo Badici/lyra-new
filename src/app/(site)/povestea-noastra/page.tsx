@@ -3,9 +3,9 @@ import Image from "next/image";
 import { Reveal } from "@/components/motion/reveal";
 import { Parallax } from "@/components/motion/parallax";
 import { LinkButton } from "@/components/ui/link-button";
+import { SECTION_COPY } from "@/lib/section-copy";
 
-const DESCRIPTION =
-  "Povestea LyraBaits: de la pasiunea pentru pescuitul sportiv la crap, la monturi și forface legate cu grijă, și mai departe către un hub pentru pescari.";
+const DESCRIPTION = SECTION_COPY.poveste.subtitle;
 
 export const metadata: Metadata = {
   title: "Povestea noastră",
@@ -59,12 +59,9 @@ export default function PovesteaNoastraPage() {
           <Reveal>
             <p className="font-hand mb-3 text-3xl text-sand">Trei pași</p>
             <h1 className="mb-4 font-display text-5xl tracking-wide md:text-7xl">
-              Povestea noastră
+              {SECTION_COPY.poveste.title}
             </h1>
-            <p className="text-cream/80 md:text-lg">
-              De la malul apei, la un atelier de monturi, și mai departe către un loc
-              făcut pentru pescari. Aceeași pasiune, spusă în trei pași.
-            </p>
+            <p className="text-cream/80 md:text-lg">{SECTION_COPY.poveste.subtitle}</p>
           </Reveal>
         </div>
       </section>

@@ -10,10 +10,12 @@ import { LinkButton } from "@/components/ui/link-button";
 import Image from "next/image";
 import {
   getPopularProducts,
+  getProductsWithImages,
   getPublishedArticles,
   getPublishedShows,
 } from "@/features/products/queries";
 import { PRODUCTION_SITE_URL, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
+import { ABOUT_IMAGE, EXAMPLE_PRODUCT_IMAGES, SECTION_COPY } from "@/lib/section-copy";
 
 export const metadata: Metadata = {
   title: "Acasă",
@@ -25,65 +27,75 @@ export const metadata: Metadata = {
   },
 };
 
-const HERO_SLIDES: HeroSlide[] = [
-  {
-    id: "produse",
-    title: "Produse pentru apă și poveste",
-    subtitle:
-      "Monturi, forface, nade și accesorii alese pentru pescuitul la crap.",
-    seed: "hero-produse",
-    href: "/produse",
-    cta: "Descoperă produsele",
-  },
-  {
-    id: "articole",
-    title: "Articole din teren",
-    subtitle:
-      "Ghiduri, observații și povești de pe mal, pentru pescarii de crap.",
-    seed: "hero-articole",
-    href: "/articole",
-    cta: "Citește articole",
-  },
-  {
-    id: "emisiuni",
-    title: "Emisiuni LyraBaits",
-    subtitle:
-      "Serii video de pe apă: partide, sfaturi și oameni care pescuiesc la crap.",
-    seed: "hero-emisiuni",
-    href: "/emisiuni",
-    cta: "Vezi emisiunile",
-  },
-  {
-    id: "poveste",
-    title: "Povestea din spatele brandului",
-    subtitle:
-      "Un hub creat de pescari: produse, povești și emisiuni, în același loc.",
-    seed: "hero-poveste",
-    href: "/povestea-noastra",
-    cta: "Povestea noastră",
-  },
-];
+function productPhoto(product: {
+  name: string;
+  mainImageKey: string | null;
+  gallery: string[] | null;
+}) {
+  const src = product.mainImageKey || product.gallery?.[0];
+  if (!src) return null;
+  return { src, alt: product.name };
+}
+
+function heroSlides(
+  productImages: { src: string; alt: string }[],
+): HeroSlide[] {
+  const photos = EXAMPLE_PRODUCT_IMAGES.map((image, index) => productImages[index] ?? image);
+
+  return [
+    {
+      id: "produse",
+      ...SECTION_COPY.produse,
+      seed: "hero-produse",
+      image: photos[0]?.src,
+      imageAlt: photos[0]?.alt,
+    },
+    {
+      id: "articole",
+      ...SECTION_COPY.articole,
+      seed: "hero-articole",
+      image: photos[1]?.src,
+      imageAlt: photos[1]?.alt,
+    },
+    {
+      id: "emisiuni",
+      ...SECTION_COPY.emisiuni,
+      seed: "hero-emisiuni",
+      image: photos[2]?.src,
+      imageAlt: photos[2]?.alt,
+    },
+    {
+      id: "poveste",
+      ...SECTION_COPY.poveste,
+      seed: "hero-poveste",
+      image: ABOUT_IMAGE.src,
+      imageAlt: ABOUT_IMAGE.alt,
+    },
+  ];
+}
 
 async function loadHomeData() {
   try {
-    const [articles, shows, products] = await Promise.all([
+    const [articles, shows, products, picturedProducts] = await Promise.all([
       getPublishedArticles(4),
       getPublishedShows(),
       getPopularProducts(4),
+      getProductsWithImages(3),
     ]);
     return {
       articles,
       shows: shows.slice(0, 3),
       products,
+      picturedProducts,
     };
   } catch (error) {
     console.error("[home]", error);
-    return { articles: [], shows: [], products: [] };
+    return { articles: [], shows: [], products: [], picturedProducts: [] };
   }
 }
 
 export default async function HomePage() {
-  const { articles, shows, products } = await loadHomeData();
+  const { articles, shows, products, picturedProducts } = await loadHomeData();
   const [featuredArticle, ...restArticles] = articles;
 
   const orgJsonLd = {
@@ -102,7 +114,11 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
       />
 
-      <HeroCarousel slides={HERO_SLIDES} />
+      <HeroCarousel
+        slides={heroSlides(
+          picturedProducts.map(productPhoto).filter((photo) => photo !== null),
+        )}
+      />
 
       <section className="section-lyra section-veil">
         <div className="container-lyra relative">
@@ -201,11 +217,10 @@ export default async function HomePage() {
             <div>
               <p className="font-hand mb-2 text-2xl text-sand">Poveste</p>
               <h2 className="mb-4 font-display text-4xl tracking-wide md:text-5xl">
-                Mai mult decât un magazin
+                {SECTION_COPY.poveste.title}
               </h2>
               <p className="mb-6 max-w-lg text-sm leading-relaxed text-cream/80 md:text-base">
-                De mici pe mal, apoi un atelier de monturi și forface. Azi construim
-                LyraBaits ca un hub pentru pescari: produse alese, știri și emisiuni.
+                {SECTION_COPY.poveste.subtitle}
               </p>
               <LinkButton href="/povestea-noastra" variant="accent">
                 Povestea noastră
@@ -215,8 +230,8 @@ export default async function HomePage() {
           <Parallax offset={40} speed={0.85}>
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-depth shadow-soft ring-1 ring-cream/10">
               <Image
-                src="/despre_noi_2.jpeg"
-                alt="Pescar LyraBaits ținând un crap, la apus, pe malul apei"
+                src={ABOUT_IMAGE.src}
+                alt={ABOUT_IMAGE.alt}
                 fill
                 sizes="(min-width: 768px) 36rem, 100vw"
                 className="object-cover"

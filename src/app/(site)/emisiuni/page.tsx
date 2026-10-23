@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { ShowCard } from "@/components/public/show-card";
+import { MediaImage } from "@/components/ui/media-image";
 import { getPublishedShows } from "@/features/products/queries";
+import { EXAMPLE_PRODUCT_IMAGES, SECTION_COPY } from "@/lib/section-copy";
 
 export const metadata: Metadata = {
   title: "Emisiuni",
-  description: "Emisiuni video LyraBaits — serii și episoade pentru comunitatea de pescari.",
+  description: SECTION_COPY.emisiuni.subtitle,
 };
 
 export default async function EmisiuniPage() {
@@ -18,11 +20,21 @@ export default async function EmisiuniPage() {
   return (
     <div className="section-lyra">
       <div className="container-lyra">
-        <p className="font-hand mb-2 text-2xl text-accent">Video</p>
-        <h1 className="mb-4 font-display text-5xl tracking-wide md:text-6xl">Emisiuni</h1>
-        <p className="mb-10 max-w-2xl text-muted">
-          Serii video de pe apă: partide, sfaturi și oameni care pescuiesc la crap.
-        </p>
+        <div className="mb-12 grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <p className="font-hand mb-2 text-2xl text-accent">Video</p>
+            <h1 className="mb-4 font-display text-5xl tracking-wide md:text-6xl">
+              {SECTION_COPY.emisiuni.title}
+            </h1>
+            <p className="max-w-2xl text-muted">{SECTION_COPY.emisiuni.subtitle}</p>
+          </div>
+          <MediaImage
+            src={EXAMPLE_PRODUCT_IMAGES[2].src}
+            seed="emisiuni-lead"
+            alt={EXAMPLE_PRODUCT_IMAGES[2].alt}
+            ratio="wide"
+          />
+        </div>
 
         {shows.length > 0 ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">

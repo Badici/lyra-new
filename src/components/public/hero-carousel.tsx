@@ -8,6 +8,7 @@ import { Parallax } from "@/components/motion/parallax";
 import { useMotionSafe } from "@/components/motion/use-motion-safe";
 import { PlaceholderMedia } from "@/components/ui/placeholder-media";
 import { LinkButton } from "@/components/ui/link-button";
+import { mediaUrl } from "@/lib/media-url";
 import { cn } from "@/lib/utils";
 
 export type HeroSlide = {
@@ -17,6 +18,8 @@ export type HeroSlide = {
   seed: string;
   href: string;
   cta: string;
+  image?: string | null;
+  imageAlt?: string;
 };
 
 type Props = {
@@ -156,9 +159,11 @@ export function HeroCarousel({ slides }: Props) {
             <LinkButton href={slide.href} variant="accent">
               {slide.cta}
             </LinkButton>
-            <LinkButton href="/articole" variant="secondary">
-              Citește articole
-            </LinkButton>
+            {slide.href === "/articole" ? null : (
+              <LinkButton href="/articole" variant="secondary">
+                Citește articole
+              </LinkButton>
+            )}
           </div>
         </div>
 
@@ -173,11 +178,22 @@ export function HeroCarousel({ slides }: Props) {
               className="relative"
             >
               <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-accent/20 via-transparent to-sand/10 blur-2xl" />
-              <PlaceholderMedia
-                seed={slide.seed}
-                ratio="wide"
-                className="relative shadow-soft ring-1 ring-cream/15"
-              />
+              {mediaUrl(slide.image) ? (
+                <div className="relative aspect-[16/10] overflow-hidden rounded-2xl shadow-soft ring-1 ring-cream/15">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={mediaUrl(slide.image) ?? ""}
+                    alt={slide.imageAlt || slide.title}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <PlaceholderMedia
+                  seed={slide.seed}
+                  ratio="wide"
+                  className="relative shadow-soft ring-1 ring-cream/15"
+                />
+              )}
               <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-depth/50 via-transparent to-transparent" />
             </motion.div>
           </AnimatePresence>

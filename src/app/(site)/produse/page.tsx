@@ -3,11 +3,11 @@ import Link from "next/link";
 import { ProductCard } from "@/components/public/product-card";
 import { MediaImage } from "@/components/ui/media-image";
 import { getCatalogJourney } from "@/features/products/queries";
+import { EXAMPLE_PRODUCT_IMAGES, SECTION_COPY } from "@/lib/section-copy";
 
 export const metadata: Metadata = {
   title: "Produse",
-  description:
-    "Catalogul LyraBaits: monturi, forface, nade și accesorii pentru pescuitul la crap.",
+  description: SECTION_COPY.produse.subtitle,
 };
 
 export default async function ProdusePage() {
@@ -18,15 +18,33 @@ export default async function ProdusePage() {
     console.error("[produse]", error);
   }
 
+  const leadProduct = sections
+    .flatMap((section) => section.products)
+    .find((product) => product.mainImageKey || product.gallery?.[0]);
+  const leadImage = leadProduct
+    ? {
+        src: leadProduct.mainImageKey || leadProduct.gallery?.[0],
+        alt: leadProduct.name,
+      }
+    : EXAMPLE_PRODUCT_IMAGES[0];
+
   return (
     <div>
       <section className="surface-depth py-16 md:py-20">
-        <div className="container-lyra">
-          <p className="font-hand mb-2 text-2xl text-sand">Catalog</p>
-          <h1 className="mb-4 font-display text-5xl tracking-wide md:text-6xl">Produse</h1>
-          <p className="max-w-2xl text-cream/80">
-            Monturi, forface, nade și accesorii alese pentru pescuitul la crap.
-          </p>
+        <div className="container-lyra grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <p className="font-hand mb-2 text-2xl text-sand">Catalog</p>
+            <h1 className="mb-4 font-display text-5xl tracking-wide md:text-6xl">
+              {SECTION_COPY.produse.title}
+            </h1>
+            <p className="max-w-2xl text-cream/80">{SECTION_COPY.produse.subtitle}</p>
+          </div>
+          <MediaImage
+            src={leadImage.src}
+            seed="produse-lead"
+            alt={leadImage.alt}
+            ratio="wide"
+          />
         </div>
       </section>
 
@@ -37,7 +55,14 @@ export default async function ProdusePage() {
           </div>
         </section>
       ) : (
-        sections.map(({ category, products }) => (
+        sections.map(({ category, products }) => {
+          const sample = products.find(
+            (product) => product.mainImageKey || product.gallery?.[0],
+          );
+          const sampleSrc =
+            sample?.mainImageKey || sample?.gallery?.[0] || category.imageKey;
+
+          return (
           <section key={category.id} id={category.slug} className="section-lyra border-t border-border">
             <div className="container-lyra">
               <div className="mb-10 grid items-center gap-8 lg:grid-cols-[1fr_1.1fr]">
@@ -63,9 +88,9 @@ export default async function ProdusePage() {
                   </Link>
                 </div>
                 <MediaImage
-                  src={category.imageKey}
+                  src={sampleSrc}
                   seed={category.visualTheme?.gradientSeed ?? `category-${category.slug}`}
-                  alt={category.name}
+                  alt={sample?.name ?? category.name}
                   ratio="wide"
                 />
               </div>
@@ -83,7 +108,8 @@ export default async function ProdusePage() {
               )}
             </div>
           </section>
-        ))
+          );
+        })
       )}
     </div>
   );

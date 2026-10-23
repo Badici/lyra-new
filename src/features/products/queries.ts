@@ -22,6 +22,15 @@ export async function getProductsByCategory(categoryId: string) {
   });
 }
 
+export async function getProductsWithImages(limit = 6) {
+  const rows = await db.query.products.findMany({
+    where: eq(products.isActive, true),
+    orderBy: [desc(products.isFeatured), desc(products.updatedAt)],
+    limit: 24,
+  });
+  return rows.filter((product) => product.mainImageKey || product.gallery?.[0]).slice(0, limit);
+}
+
 export async function getPopularProducts(limit = 8) {
   return db.query.products.findMany({
     where: and(eq(products.isActive, true), eq(products.isPopular, true)),
