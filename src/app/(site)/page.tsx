@@ -7,7 +7,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { Stagger } from "@/components/motion/stagger";
 import { Parallax } from "@/components/motion/parallax";
 import { LinkButton } from "@/components/ui/link-button";
-import { PlaceholderMedia } from "@/components/ui/placeholder-media";
+import Image from "next/image";
 import {
   getPopularProducts,
   getPublishedArticles,
@@ -207,8 +207,8 @@ export default async function HomePage() {
                 Mai mult decât un magazin
               </h2>
               <p className="mb-6 max-w-lg text-sm leading-relaxed text-cream/80 md:text-base">
-                Secțiune narativă cu placeholder artistic — fără istoric inventat. Conținutul
-                final va fi adăugat de echipă.
+                De mici pe mal, apoi un atelier de monturi și forfacuri. Azi construim
+                LyraBaits ca un hub pentru pescari: produse alese, știri și emisiuni.
               </p>
               <LinkButton href="/povestea-noastra" variant="accent">
                 Povestea noastră
@@ -216,12 +216,15 @@ export default async function HomePage() {
             </div>
           </Reveal>
           <Parallax offset={40} speed={0.85}>
-            <PlaceholderMedia
-              seed="story-preview"
-              ratio="portrait"
-              label="Placeholder poveste"
-              className="ring-1 ring-cream/10 shadow-soft"
-            />
+            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-depth shadow-soft ring-1 ring-cream/10">
+              <Image
+                src="/despre_noi_2.jpeg"
+                alt="Pescar LyraBaits ținând un crap, la apus, pe malul apei"
+                fill
+                sizes="(min-width: 768px) 36rem, 100vw"
+                className="object-cover"
+              />
+            </div>
           </Parallax>
         </div>
       </section>
