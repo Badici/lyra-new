@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/admin/page-header";
 import { ArticleStatusBadge } from "@/components/admin/status-badge";
 import { getAdminArticles } from "@/features/articles/admin-queries";
+import { formatViews } from "@/lib/views";
 
 export default async function AdminArticlesPage() {
   const articles = await getAdminArticles();
@@ -23,6 +24,7 @@ export default async function AdminArticlesPage() {
               <tr>
                 <th>Titlu</th>
                 <th>Status</th>
+                <th>Vizite</th>
                 <th>Publicat</th>
               </tr>
             </thead>
@@ -37,6 +39,7 @@ export default async function AdminArticlesPage() {
                   <td>
                     <ArticleStatusBadge status={a.status} />
                   </td>
+                  <td>{formatViews(a.viewCount)}</td>
                   <td className="text-muted">
                     {a.publishedAt ? a.publishedAt.toISOString().slice(0, 10) : "—"}
                   </td>

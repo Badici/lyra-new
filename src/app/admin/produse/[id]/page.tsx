@@ -5,6 +5,7 @@ import { ConfirmDeleteForm } from "@/components/admin/confirm-delete-form";
 import { deleteProduct } from "@/features/products/admin-actions";
 import { getAdminProductById } from "@/features/products/admin-queries";
 import { getActiveCategories } from "@/features/products/queries";
+import { formatViews } from "@/lib/views";
 
 type Params = Promise<{ id: string }>;
 
@@ -18,7 +19,11 @@ export default async function EditProductPage({ params }: { params: Params }) {
 
   return (
     <div className="space-y-6 p-4 md:p-8">
-      <PageHeader title={product.name} backHref="/admin/produse" />
+      <PageHeader
+        title={product.name}
+        description={formatViews(product.viewCount)}
+        backHref="/admin/produse"
+      />
       <ProductForm categories={categories} product={product} />
       <ConfirmDeleteForm
         action={deleteProduct}

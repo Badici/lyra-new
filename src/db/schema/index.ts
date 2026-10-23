@@ -190,6 +190,7 @@ export const products = pgTable(
     isActive: boolean("is_active").default(true).notNull(),
     isFeatured: boolean("is_featured").default(false).notNull(),
     isPopular: boolean("is_popular").default(false).notNull(),
+    viewCount: integer("view_count").default(0).notNull(),
     mainImageKey: text("main_image_key"),
     gallery: jsonb("gallery").$type<string[]>().default([]),
     metadata: jsonb("metadata").$type<Record<string, string>>().default({}),
@@ -240,6 +241,7 @@ export const articles = pgTable(
     authorName: text("author_name").default("LyraBaits"),
     status: articleStatusEnum("status").default("DRAFT").notNull(),
     isFeatured: boolean("is_featured").default(false).notNull(),
+    viewCount: integer("view_count").default(0).notNull(),
     tags: jsonb("tags").$type<string[]>().default([]),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     seoTitle: text("seo_title"),
@@ -398,6 +400,13 @@ export const contactMessages = pgTable("contact_messages", {
   message: text("message").notNull(),
   ipHash: text("ip_hash"),
   ...timestamps,
+});
+
+export const mediaAssets = pgTable("media_assets", {
+  id: text("id").primaryKey(),
+  contentType: text("content_type").notNull(),
+  data: text("data").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const siteSettings = pgTable("site_settings", {

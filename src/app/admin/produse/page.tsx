@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/admin/page-header";
 import { StockStatusBadge } from "@/components/admin/status-badge";
 import { getAdminProducts } from "@/features/products/admin-queries";
 import { formatRon } from "@/lib/money";
+import { formatViews } from "@/lib/views";
 
 export default async function AdminProductsPage() {
   const items = await getAdminProducts();
@@ -28,13 +29,14 @@ export default async function AdminProductsPage() {
                 <th>Categorie</th>
                 <th>Preț</th>
                 <th>Stoc</th>
+                <th>Vizite</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-muted">
+                  <td colSpan={6} className="text-muted">
                     Niciun produs.
                   </td>
                 </tr>
@@ -50,6 +52,7 @@ export default async function AdminProductsPage() {
                     <td>{p.category?.name ?? "—"}</td>
                     <td>{formatRon(p.priceBani)}</td>
                     <td>{p.stockQuantity}</td>
+                    <td>{formatViews(p.viewCount)}</td>
                     <td>
                       <StockStatusBadge status={p.stockStatus} />
                       {!p.isActive ? (

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageStats } from "@/components/public/page-stats";
 import { ProductCard } from "@/components/public/product-card";
 import { MediaImage } from "@/components/ui/media-image";
 import { AddToCartButton } from "@/features/cart/add-to-cart-button";
@@ -8,20 +9,33 @@ import {
   getProductBySlug,
   getRelatedProducts,
 } from "@/features/products/queries";
+import { getPublicSiteUrl } from "@/lib/env";
+import { absoluteMedia } from "@/lib/media-url";
 import { formatRon } from "@/lib/money";
 import { stockMessageRo } from "@/lib/stock";
 
 type Props = { params: Promise<{ slug: string }> };
+
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   try {
     const product = await getProductBySlug(slug);
     if (!product) return { title: "Produs negăsit" };
+    const title = product.seoTitle ?? product.name;
+    const description =
+      product.seoDescription ?? product.shortDescription ?? product.description ?? undefined;
+    const image = absoluteMedia(product.mainImageKey, getPublicSiteUrl());
     return {
-      title: product.seoTitle ?? product.name,
-      description:
-        product.seoDescription ?? product.shortDescription ?? product.description ?? undefined,
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        url: `${getPublicSiteUrl()}/produse/${product.slug}`,
+        ...(image ? { images: [{ url: image, alt: product.name }] } : {}),
+      },
     };
   } catch {
     return { title: "Produs" };
@@ -73,6 +87,12 @@ export default async function ProductPage({ params }: Props) {
 
           <div>
             <h1 className="mb-3 font-display text-5xl tracking-wide">{product.name}</h1>
+            <PageStats
+              kind="product"
+              slug={product.slug}
+              initialCount={product.viewCount}
+              title={product.name}
+            />
             <p className="mb-4 text-2xl font-medium">{formatRon(product.priceBani)}</p>
             {product.compareAtPriceBani ? (
               <p className="mb-4 text-sm text-muted line-through">

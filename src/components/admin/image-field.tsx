@@ -79,7 +79,8 @@ export function ImageField({
         ) : null}
       </div>
       <input
-        type="url"
+        type="text"
+        inputMode="url"
         className="admin-input"
         placeholder="sau lipește un URL de imagine"
         value={url}

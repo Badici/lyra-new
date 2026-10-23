@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductCard } from "@/components/public/product-card";
 import { MediaImage } from "@/components/ui/media-image";
+import { PlaceholderMedia } from "@/components/ui/placeholder-media";
 import { getCatalogJourney } from "@/features/products/queries";
 import { EXAMPLE_PRODUCT_IMAGES, SECTION_COPY } from "@/lib/section-copy";
 
@@ -56,12 +57,6 @@ export default async function ProdusePage() {
         </section>
       ) : (
         sections.map(({ category, products }) => {
-          const sample = products.find(
-            (product) => product.mainImageKey || product.gallery?.[0],
-          );
-          const sampleSrc =
-            sample?.mainImageKey || sample?.gallery?.[0] || category.imageKey;
-
           return (
           <section key={category.id} id={category.slug} className="section-lyra border-t border-border">
             <div className="container-lyra">
@@ -87,11 +82,10 @@ export default async function ProdusePage() {
                     Explorează {category.name}
                   </Link>
                 </div>
-                <MediaImage
-                  src={sampleSrc}
+                <PlaceholderMedia
                   seed={category.visualTheme?.gradientSeed ?? `category-${category.slug}`}
-                  alt={sample?.name ?? category.name}
                   ratio="wide"
+                  label={category.name}
                 />
               </div>
 

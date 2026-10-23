@@ -5,6 +5,7 @@ import { TiptapEditor } from "@/components/admin/tiptap-editor";
 import { upsertArticle } from "@/features/articles/admin-actions";
 import { getAdminArticleById } from "@/features/articles/admin-queries";
 import { ARTICLE_STATUSES } from "@/lib/constants";
+import { formatViews } from "@/lib/views";
 
 type Params = Promise<{ id: string }>;
 
@@ -15,7 +16,11 @@ export default async function EditArticlePage({ params }: { params: Params }) {
 
   return (
     <div className="space-y-6 p-4 md:p-8">
-      <PageHeader title={article.title} backHref="/admin/articole" />
+      <PageHeader
+        title={article.title}
+        description={formatViews(article.viewCount)}
+        backHref="/admin/articole"
+      />
       <form action={upsertArticle} className="admin-card grid max-w-3xl gap-4 p-5">
         <input type="hidden" name="id" value={article.id} />
         <ImageField
