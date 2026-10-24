@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db } from "@/db/client";
 import { siteSettings } from "@/db/schema";
 import { requireAdmin } from "@/server/auth/session";
+import { saveFailure, validationError, type FormResult } from "@/server/forms/result";
 
 const settingsSchema = z.object({
   contactEmail: z.string().trim().email(),
@@ -15,7 +16,8 @@ const settingsSchema = z.object({
   orderPrefix: z.string().trim().min(2).max(20),
 });
 
-export async function updateSiteSettings(formData: FormData): Promise<void> {
+export async function updateSiteSettings(formData: FormData): Promise<FormResult> {
+  try {
   await requireAdmin();
 
   const parsed = settingsSchema.safeParse({
@@ -27,7 +29,7 @@ export async function updateSiteSettings(formData: FormData): Promise<void> {
     orderPrefix: formData.get("orderPrefix"),
   });
 
-  if (!parsed.success) return;
+  if (!parsed.success) return { ok: false, error: validationError(parsed.error) };
 
   const data = parsed.data;
 
@@ -83,4 +85,8 @@ export async function updateSiteSettings(formData: FormData): Promise<void> {
     });
 
   revalidatePath("/admin/setari");
+  return { ok: true, message: "Setările au fost salvate." };
+  } catch (error) {
+    return saveFailure(error);
+  }
 }

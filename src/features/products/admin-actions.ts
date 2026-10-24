@@ -2,7 +2,6 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db/client";
 import { products } from "@/db/schema";
@@ -10,6 +9,7 @@ import { toBani } from "@/lib/money";
 import { slugify, uniqueSlug } from "@/lib/slug";
 import { resolveStockStatus } from "@/lib/stock";
 import { requireAdmin } from "@/server/auth/session";
+import { decimalInput, saveFailure, validationError, type FormResult } from "@/server/forms/result";
 
 const productSchema = z.object({
   id: z.string().uuid().optional(),
@@ -44,8 +44,8 @@ function parseProductForm(formData: FormData) {
     description: formData.get("description") || undefined,
     story: formData.get("story") || undefined,
     usageInstructions: formData.get("usageInstructions") || undefined,
-    priceRon: formData.get("priceRon"),
-    compareAtPriceRon: formData.get("compareAtPriceRon") || undefined,
+    priceRon: decimalInput(formData.get("priceRon")),
+    compareAtPriceRon: decimalInput(formData.get("compareAtPriceRon")),
     stockQuantity: formData.get("stockQuantity"),
     isActive: formData.get("isActive") === "on" || formData.get("isActive") === "true",
     isFeatured: formData.get("isFeatured") === "on" || formData.get("isFeatured") === "true",
@@ -60,60 +60,68 @@ async function ensureUniqueSlug(base: string, excludeId?: string) {
   return uniqueSlug(base, slugs);
 }
 
-export async function upsertProduct(formData: FormData): Promise<void> {
-  await requireAdmin();
-  const parsed = parseProductForm(formData);
-  if (!parsed.success) return;
+export async function upsertProduct(formData: FormData): Promise<FormResult> {
+  try {
+    await requireAdmin();
+    const parsed = parseProductForm(formData);
+    if (!parsed.success) return { ok: false, error: validationError(parsed.error) };
 
-  const data = parsed.data;
-  const slug = data.slug?.trim()
-    ? slugify(data.slug)
-    : await ensureUniqueSlug(data.name, data.id);
-  const priceBani = toBani(data.priceRon);
-  const compareAtPriceBani =
-    data.compareAtPriceRon != null ? toBani(data.compareAtPriceRon) : null;
-  const stockStatus = resolveStockStatus(data.stockQuantity);
+    const data = parsed.data;
+    const slug = data.slug?.trim()
+      ? slugify(data.slug)
+      : await ensureUniqueSlug(data.name, data.id);
+    if (!slug) return { ok: false, error: "Slug-ul nu este valid." };
 
-  const payload = {
-    name: data.name,
-    slug,
-    sku: data.sku,
-    categoryId: data.categoryId,
-    shortDescription: data.shortDescription ?? null,
-    description: data.description ?? null,
-    story: data.story ?? null,
-    usageInstructions: data.usageInstructions ?? null,
-    priceBani,
-    compareAtPriceBani,
-    stockQuantity: data.stockQuantity,
-    stockStatus,
-    isActive: data.isActive ?? true,
-    isFeatured: data.isFeatured ?? false,
-    isPopular: data.isPopular ?? false,
-    mainImageKey: data.mainImageKey || null,
-  };
+    const priceBani = toBani(data.priceRon);
+    const compareAtPriceBani =
+      data.compareAtPriceRon != null ? toBani(data.compareAtPriceRon) : null;
+    const stockStatus = resolveStockStatus(data.stockQuantity);
 
-  if (data.id) {
-    await db.update(products).set(payload).where(eq(products.id, data.id));
+    const payload = {
+      name: data.name,
+      slug,
+      sku: data.sku,
+      categoryId: data.categoryId,
+      shortDescription: data.shortDescription ?? null,
+      ...(formData.has("description") ? { description: data.description ?? null } : {}),
+      story: data.story ?? null,
+      usageInstructions: data.usageInstructions ?? null,
+      priceBani,
+      compareAtPriceBani,
+      stockQuantity: data.stockQuantity,
+      stockStatus,
+      isActive: data.isActive ?? true,
+      isFeatured: data.isFeatured ?? false,
+      isPopular: data.isPopular ?? false,
+      mainImageKey: data.mainImageKey || null,
+    };
+
+    if (data.id) {
+      await db.update(products).set(payload).where(eq(products.id, data.id));
+    } else {
+      const [created] = await db.insert(products).values(payload).returning({ id: products.id });
+      if (!created) return { ok: false, error: "Nu am putut salva produsul." };
+    }
+
     revalidatePath("/admin/produse");
-    revalidatePath(`/admin/produse/${data.id}`);
     revalidatePath("/admin/stoc");
-    return;
+    revalidatePath("/produse");
+    return { ok: true, message: data.id ? "Produsul a fost salvat." : "Produsul a fost adăugat." };
+  } catch (error) {
+    return saveFailure(error);
   }
-
-  const [created] = await db.insert(products).values(payload).returning({ id: products.id });
-  if (!created) return;
-
-  revalidatePath("/admin/produse");
-  revalidatePath("/admin/stoc");
-  redirect(`/admin/produse/${created.id}`);
 }
 
-export async function deleteProduct(formData: FormData): Promise<void> {
-  await requireAdmin();
-  const id = z.string().uuid().parse(formData.get("id"));
-  await db.delete(products).where(eq(products.id, id));
-  revalidatePath("/admin/produse");
-  revalidatePath("/admin/stoc");
-  redirect("/admin/produse");
+export async function deleteProduct(formData: FormData): Promise<FormResult> {
+  try {
+    await requireAdmin();
+    const id = z.string().uuid().parse(formData.get("id"));
+    await db.delete(products).where(eq(products.id, id));
+    revalidatePath("/admin/produse");
+    revalidatePath("/admin/stoc");
+    revalidatePath("/produse");
+    return { ok: true, message: "Produsul a fost șters." };
+  } catch (error) {
+    return saveFailure(error);
+  }
 }

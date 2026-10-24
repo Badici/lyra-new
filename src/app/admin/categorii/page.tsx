@@ -1,6 +1,8 @@
+import { AdminForm } from "@/components/admin/admin-form";
 import { PageHeader } from "@/components/admin/page-header";
 import { ConfirmDeleteForm } from "@/components/admin/confirm-delete-form";
 import { ImageField } from "@/components/admin/image-field";
+import { SubmitButton } from "@/components/admin/submit-button";
 import { deleteCategory, upsertCategory } from "@/features/categories/admin-actions";
 import { getAdminCategories } from "@/features/categories/queries";
 
@@ -14,9 +16,9 @@ export default async function AdminCategoriesPage() {
         description="CRUD categorii. Ștergerea este blocată dacă există produse."
       />
 
-      <form action={upsertCategory} className="admin-card grid max-w-2xl gap-3 p-5">
+      <AdminForm action={upsertCategory} className="admin-card grid max-w-2xl gap-3 p-5">
         <h2 className="font-display text-2xl">Categorie nouă</h2>
-        <ImageField name="imageKey" label="Imagine categorie" />
+        <ImageField name="imageKey" label="Imagine categorie" hint="2100×900 px" />
         <input name="name" required placeholder="Nume" className="admin-input" />
         <input name="slug" placeholder="Slug (opțional)" className="admin-input" />
         <textarea name="shortDescription" placeholder="Descriere scurtă" className="admin-textarea" />
@@ -25,20 +27,19 @@ export default async function AdminCategoriesPage() {
           <input type="checkbox" name="isActive" defaultChecked />
           Activă
         </label>
-        <button type="submit" className="rounded-xl bg-accent px-4 py-2 text-sm text-cream">
-          Adaugă
-        </button>
-      </form>
+        <SubmitButton label="Adaugă" pendingLabel="Se salvează…" variant="accent" />
+      </AdminForm>
 
       <div className="space-y-4">
         {categories.map((cat) => (
           <div key={cat.id} className="admin-card p-5">
-            <form action={upsertCategory} className="grid gap-3 md:grid-cols-2">
+            <AdminForm action={upsertCategory} className="grid gap-3 md:grid-cols-2">
               <input type="hidden" name="id" value={cat.id} />
               <div className="md:col-span-2">
                 <ImageField
                   name="imageKey"
                   label="Imagine categorie"
+                  hint="2100×900 px"
                   defaultValue={cat.imageKey}
                 />
               </div>
@@ -59,10 +60,8 @@ export default async function AdminCategoriesPage() {
                 <input type="checkbox" name="isActive" defaultChecked={cat.isActive} />
                 Activă · {cat.productCount} produse
               </label>
-              <button type="submit" className="rounded-xl bg-moss px-4 py-2 text-sm text-cream">
-                Salvează
-              </button>
-            </form>
+              <SubmitButton label="Salvează" pendingLabel="Se salvează…" />
+            </AdminForm>
             {cat.productCount === 0 ? (
               <div className="mt-3">
                 <ConfirmDeleteForm

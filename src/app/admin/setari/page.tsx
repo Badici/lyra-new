@@ -1,4 +1,6 @@
+import { AdminForm } from "@/components/admin/admin-form";
 import { PageHeader } from "@/components/admin/page-header";
+import { SubmitButton } from "@/components/admin/submit-button";
 import { updateSiteSettings } from "@/features/settings/admin-actions";
 import { getSiteSettings } from "@/features/settings/queries";
 
@@ -11,7 +13,7 @@ export default async function AdminSettingsPage() {
         title="Setări"
         description="Informații de business non-secrete. Secretele rămân în variabilele de mediu."
       />
-      <form action={updateSiteSettings} className="admin-card grid max-w-xl gap-4 p-5">
+      <AdminForm action={updateSiteSettings} className="admin-card grid max-w-xl gap-4 p-5">
         <div>
           <label className="admin-label" htmlFor="contactEmail">
             Email contact
@@ -82,10 +84,8 @@ export default async function AdminSettingsPage() {
             className="admin-input"
           />
         </div>
-        <button type="submit" className="rounded-xl bg-accent px-4 py-2 text-sm text-cream">
-          Salvează setările
-        </button>
-      </form>
+        <SubmitButton label="Salvează setările" pendingLabel="Se salvează…" variant="accent" />
+      </AdminForm>
     </div>
   );
 }

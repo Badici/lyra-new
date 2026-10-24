@@ -1,3 +1,4 @@
+import { AdminForm } from "@/components/admin/admin-form";
 import { ConfirmDeleteForm } from "@/components/admin/confirm-delete-form";
 import { ImageField } from "@/components/admin/image-field";
 import { SubmitButton } from "@/components/admin/submit-button";
@@ -19,13 +20,14 @@ const statusLabels = {
 export function ArticleForm({ article }: ArticleFormProps) {
   return (
     <div className="max-w-4xl space-y-6">
-      <form action={upsertArticle} className="space-y-4">
+      <AdminForm action={upsertArticle} returnTo="/admin/articole" className="space-y-4">
         {article && <input type="hidden" name="id" value={article.id} />}
 
         <div className="admin-card space-y-4 p-5">
           <ImageField
             name="coverImageKey"
             label="Banner / cover"
+            hint="2100×900 px"
             defaultValue={article?.coverImageKey}
           />
           <div>
@@ -94,13 +96,14 @@ export function ArticleForm({ article }: ArticleFormProps) {
         </div>
 
         <SubmitButton label={article ? "Salvează articol" : "Creează articol"} variant="accent" />
-      </form>
+      </AdminForm>
 
       {article && (
         <ConfirmDeleteForm
           action={deleteArticle}
           confirmMessage="Sigur ștergi acest articol?"
           hiddenFields={{ id: article.id }}
+          returnTo="/admin/articole"
         />
       )}
     </div>

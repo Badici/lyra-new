@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { AdminForm } from "@/components/admin/admin-form";
 import { ConfirmDeleteForm } from "@/components/admin/confirm-delete-form";
 import { ImageField } from "@/components/admin/image-field";
 import { PageHeader } from "@/components/admin/page-header";
@@ -37,12 +38,13 @@ export default async function AdminShowDetailPage({
         backHref="/admin/emisiuni"
       />
 
-      <form action={upsertShow} className="admin-card mb-8 space-y-4 p-5">
+      <AdminForm action={upsertShow} returnTo="/admin/emisiuni" className="admin-card mb-8 space-y-4 p-5">
         <input type="hidden" name="id" value={show.id} />
         <h2 className="font-display text-lg text-cream">Detalii emisiune</h2>
         <ImageField
           name="coverImageKey"
           label="Copertă emisiune"
+          hint="2100×900 px"
           defaultValue={show.coverImageKey}
         />
         <div className="grid gap-4 sm:grid-cols-2">
@@ -83,15 +85,16 @@ export default async function AdminShowDetailPage({
             rows={3}
           />
         </div>
-        <div className="flex flex-wrap gap-3">
-          <SubmitButton label="Salvează emisiune" variant="accent" />
-          <ConfirmDeleteForm
-            action={deleteShow}
-            confirmMessage={`Sigur ștergi emisiunea „${show.name}" și toate episoadele?`}
-            hiddenFields={{ id: show.id }}
-          />
-        </div>
-      </form>
+        <SubmitButton label="Salvează emisiune" variant="accent" />
+      </AdminForm>
+      <div className="mb-8">
+        <ConfirmDeleteForm
+          action={deleteShow}
+          confirmMessage={`Sigur ștergi emisiunea „${show.name}" și toate episoadele?`}
+          hiddenFields={{ id: show.id }}
+          returnTo="/admin/emisiuni"
+        />
+      </div>
 
       <section className="mb-6">
         <h2 className="mb-4 font-display text-xl text-cream">Episoade</h2>
@@ -119,7 +122,7 @@ export default async function AdminShowDetailPage({
                     </div>
                   </div>
                 </div>
-                <form action={upsertEpisode} className="space-y-3">
+                <AdminForm action={upsertEpisode} returnTo="/admin/emisiuni" className="space-y-3">
                   <input type="hidden" name="id" value={episode.id} />
                   <input type="hidden" name="showId" value={show.id} />
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -186,22 +189,23 @@ export default async function AdminShowDetailPage({
                       />
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-3">
-                    <SubmitButton label="Salvează episod" />
-                    <ConfirmDeleteForm
-                      action={deleteEpisode}
-                      confirmMessage={`Sigur ștergi episodul „${episode.title}"?`}
-                      hiddenFields={{ id: episode.id }}
-                    />
-                  </div>
-                </form>
+                  <SubmitButton label="Salvează episod" />
+                </AdminForm>
+                <div className="mt-3">
+                  <ConfirmDeleteForm
+                    action={deleteEpisode}
+                    confirmMessage={`Sigur ștergi episodul „${episode.title}"?`}
+                    hiddenFields={{ id: episode.id }}
+                    returnTo="/admin/emisiuni"
+                  />
+                </div>
               </div>
             );
           })}
         </div>
       </section>
 
-      <form action={upsertEpisode} className="admin-card space-y-4 p-5">
+      <AdminForm action={upsertEpisode} returnTo="/admin/emisiuni" className="admin-card space-y-4 p-5">
         <h3 className="font-display text-lg text-cream">Episod nou</h3>
         <input type="hidden" name="showId" value={show.id} />
         <div className="grid gap-4 sm:grid-cols-2">
@@ -244,7 +248,7 @@ export default async function AdminShowDetailPage({
           </div>
         </div>
         <SubmitButton label="Adaugă episod" variant="accent" />
-      </form>
+      </AdminForm>
     </div>
   );
 }

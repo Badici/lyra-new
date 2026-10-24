@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { AdminForm } from "@/components/admin/admin-form";
 import { PageHeader } from "@/components/admin/page-header";
+import { SubmitButton } from "@/components/admin/submit-button";
 import { ContentStatusBadge } from "@/components/admin/status-badge";
 import { ImageField } from "@/components/admin/image-field";
 import { upsertShow } from "@/features/shows/admin-actions";
@@ -16,9 +18,9 @@ export default async function AdminShowsPage() {
         description="Emisiunea este grupul; episoadele sunt înregistrările cu link YouTube."
       />
 
-      <form action={upsertShow} className="admin-card grid max-w-2xl gap-3 p-5">
+      <AdminForm action={upsertShow} className="admin-card grid max-w-2xl gap-3 p-5">
         <h2 className="font-display text-2xl">Emisiune nouă</h2>
-        <ImageField name="coverImageKey" label="Copertă emisiune" />
+        <ImageField name="coverImageKey" label="Copertă emisiune" hint="2100×900 px" />
         <input name="name" required placeholder="Nume emisiune" className="admin-input" />
         <textarea name="shortDescription" placeholder="Descriere scurtă" className="admin-textarea" />
         <select name="status" defaultValue="DRAFT" className="admin-select">
@@ -29,10 +31,8 @@ export default async function AdminShowsPage() {
           ))}
         </select>
         <input name="sortOrder" type="number" defaultValue={0} className="admin-input" />
-        <button type="submit" className="rounded-xl bg-accent px-4 py-2 text-sm text-cream">
-          Adaugă emisiune
-        </button>
-      </form>
+        <SubmitButton label="Adaugă emisiune" pendingLabel="Se salvează…" variant="accent" />
+      </AdminForm>
 
       <div className="space-y-4">
         {shows.map((show) => (

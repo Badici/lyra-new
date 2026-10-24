@@ -2,7 +2,6 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db/client";
 import { episodes, shows } from "@/db/schema";
@@ -14,6 +13,7 @@ import {
   youtubeThumbnailUrl,
 } from "@/lib/youtube";
 import { requireAdmin } from "@/server/auth/session";
+import { saveFailure, validationError, type FormResult } from "@/server/forms/result";
 
 const showSchema = z.object({
   id: z.string().uuid().optional(),
@@ -54,7 +54,8 @@ async function ensureEpisodeSlug(showId: string, base: string, excludeId?: strin
   return uniqueSlug(base, slugs);
 }
 
-export async function upsertShow(formData: FormData): Promise<void> {
+export async function upsertShow(formData: FormData): Promise<FormResult> {
+  try {
   await requireAdmin();
   const parsed = showSchema.safeParse({
     id: formData.get("id") || undefined,
@@ -67,12 +68,13 @@ export async function upsertShow(formData: FormData): Promise<void> {
     coverImageKey: formData.get("coverImageKey") || undefined,
   });
 
-  if (!parsed.success) return;
+  if (!parsed.success) return { ok: false, error: validationError(parsed.error) };
 
   const data = parsed.data;
   const slug = data.slug?.trim()
     ? slugify(data.slug)
     : await ensureShowSlug(data.name, data.id);
+  if (!slug) return { ok: false, error: "Slug-ul nu este valid." };
 
   const showPayload = {
     name: data.name,
@@ -86,30 +88,37 @@ export async function upsertShow(formData: FormData): Promise<void> {
 
   if (data.id) {
     await db.update(shows).set(showPayload).where(eq(shows.id, data.id));
-    revalidatePath("/admin/emisiuni");
-    revalidatePath(`/admin/emisiuni/${data.id}`);
-    revalidatePath("/emisiuni");
-    return;
+  } else {
+    const [created] = await db.insert(shows).values(showPayload).returning({ id: shows.id });
+    if (!created) return { ok: false, error: "Nu am putut salva emisiunea." };
   }
 
-  const [created] = await db.insert(shows).values(showPayload).returning({ id: shows.id });
-  if (!created) return;
-
   revalidatePath("/admin/emisiuni");
   revalidatePath("/emisiuni");
-  redirect(`/admin/emisiuni/${created.id}`);
+  return {
+    ok: true,
+    message: data.id ? "Emisiunea a fost salvată." : "Emisiunea a fost adăugată.",
+  };
+  } catch (error) {
+    return saveFailure(error);
+  }
 }
 
-export async function deleteShow(formData: FormData): Promise<void> {
-  await requireAdmin();
-  const id = z.string().uuid().parse(formData.get("id"));
-  await db.delete(shows).where(eq(shows.id, id));
-  revalidatePath("/admin/emisiuni");
-  revalidatePath("/emisiuni");
-  redirect("/admin/emisiuni");
+export async function deleteShow(formData: FormData): Promise<FormResult> {
+  try {
+    await requireAdmin();
+    const id = z.string().uuid().parse(formData.get("id"));
+    await db.delete(shows).where(eq(shows.id, id));
+    revalidatePath("/admin/emisiuni");
+    revalidatePath("/emisiuni");
+    return { ok: true, message: "Emisiunea a fost ștearsă." };
+  } catch (error) {
+    return saveFailure(error);
+  }
 }
 
-export async function upsertEpisode(formData: FormData): Promise<void> {
+export async function upsertEpisode(formData: FormData): Promise<FormResult> {
+  try {
   await requireAdmin();
   const parsed = episodeSchema.safeParse({
     id: formData.get("id") || undefined,
@@ -124,12 +133,13 @@ export async function upsertEpisode(formData: FormData): Promise<void> {
     status: formData.get("status"),
   });
 
-  if (!parsed.success) return;
+  if (!parsed.success) return { ok: false, error: validationError(parsed.error) };
 
   const data = parsed.data;
   const slug = data.slug?.trim()
     ? slugify(data.slug)
     : await ensureEpisodeSlug(data.showId, data.title, data.id);
+  if (!slug) return { ok: false, error: "Slug-ul nu este valid." };
 
   const ytId = extractYoutubeId(data.videoUrl);
   const watchUrl = normalizeYoutubeWatchUrl(data.videoUrl);
@@ -167,16 +177,25 @@ export async function upsertEpisode(formData: FormData): Promise<void> {
   revalidatePath("/admin/emisiuni");
   revalidatePath(`/admin/emisiuni/${data.showId}`);
   revalidatePath("/emisiuni");
+  return { ok: true, message: data.id ? "Episodul a fost salvat." : "Episodul a fost adăugat." };
+  } catch (error) {
+    return saveFailure(error);
+  }
 }
 
-export async function deleteEpisode(formData: FormData): Promise<void> {
-  await requireAdmin();
-  const id = z.string().uuid().parse(formData.get("id"));
-  const episode = await db.query.episodes.findFirst({ where: eq(episodes.id, id) });
-  if (!episode) return;
+export async function deleteEpisode(formData: FormData): Promise<FormResult> {
+  try {
+    await requireAdmin();
+    const id = z.string().uuid().parse(formData.get("id"));
+    const episode = await db.query.episodes.findFirst({ where: eq(episodes.id, id) });
+    if (!episode) return { ok: false, error: "Episodul nu mai există." };
 
-  await db.delete(episodes).where(eq(episodes.id, id));
-  revalidatePath("/admin/emisiuni");
-  revalidatePath(`/admin/emisiuni/${episode.showId}`);
-  revalidatePath("/emisiuni");
+    await db.delete(episodes).where(eq(episodes.id, id));
+    revalidatePath("/admin/emisiuni");
+    revalidatePath(`/admin/emisiuni/${episode.showId}`);
+    revalidatePath("/emisiuni");
+    return { ok: true, message: "Episodul a fost șters." };
+  } catch (error) {
+    return saveFailure(error);
+  }
 }

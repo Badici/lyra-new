@@ -1,5 +1,7 @@
+import { AdminForm } from "@/components/admin/admin-form";
 import { PageHeader } from "@/components/admin/page-header";
 import { ImageField } from "@/components/admin/image-field";
+import { SubmitButton } from "@/components/admin/submit-button";
 import { TiptapEditor } from "@/components/admin/tiptap-editor";
 import { upsertArticle } from "@/features/articles/admin-actions";
 import { ARTICLE_STATUSES } from "@/lib/constants";
@@ -8,8 +10,8 @@ export default function NewArticlePage() {
   return (
     <div className="space-y-6 p-4 md:p-8">
       <PageHeader title="Articol nou" backHref="/admin/articole" />
-      <form action={upsertArticle} className="admin-card grid max-w-3xl gap-4 p-5">
-        <ImageField name="coverImageKey" label="Banner / cover" />
+      <AdminForm action={upsertArticle} returnTo="/admin/articole" className="admin-card grid max-w-3xl gap-4 p-5">
+        <ImageField name="coverImageKey" label="Banner / cover" hint="2100×900 px" />
         <input name="title" required placeholder="Titlu" className="admin-input" />
         <input name="slug" placeholder="Slug (opțional)" className="admin-input" />
         <textarea name="excerpt" placeholder="Rezumat" className="admin-textarea" />
@@ -28,10 +30,8 @@ export default function NewArticlePage() {
           <input type="checkbox" name="isFeatured" />
           Featured
         </label>
-        <button type="submit" className="rounded-xl bg-accent px-4 py-2 text-sm text-cream">
-          Salvează
-        </button>
-      </form>
+        <SubmitButton label="Salvează" pendingLabel="Se salvează…" variant="accent" />
+      </AdminForm>
     </div>
   );
 }

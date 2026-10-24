@@ -2,13 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db/client";
 import { orderStatusHistory, orders } from "@/db/schema";
 import { ORDER_STATUSES } from "@/lib/constants";
 import { createOrder } from "@/features/orders/create-order";
 import { requireAdmin } from "@/server/auth/session";
+import { saveFailure, validationError, type FormResult } from "@/server/forms/result";
 
 const updateStatusSchema = z.object({
   orderId: z.string().uuid(),
@@ -16,7 +16,8 @@ const updateStatusSchema = z.object({
   note: z.string().trim().optional(),
 });
 
-export async function updateOrderStatus(formData: FormData): Promise<void> {
+export async function updateOrderStatus(formData: FormData): Promise<FormResult> {
+  try {
   const session = await requireAdmin();
   const parsed = updateStatusSchema.safeParse({
     orderId: formData.get("orderId"),
@@ -24,11 +25,14 @@ export async function updateOrderStatus(formData: FormData): Promise<void> {
     note: formData.get("note") || undefined,
   });
 
-  if (!parsed.success) return;
+  if (!parsed.success) return { ok: false, error: validationError(parsed.error) };
 
   const { orderId, status, note } = parsed.data;
   const existing = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
-  if (!existing || existing.status === status) return;
+  if (!existing) return { ok: false, error: "Comanda nu mai există." };
+  if (existing.status === status) {
+    return { ok: false, error: "Statusul este deja acesta." };
+  }
 
   await db.update(orders).set({ status }).where(eq(orders.id, orderId));
 
@@ -43,9 +47,15 @@ export async function updateOrderStatus(formData: FormData): Promise<void> {
   revalidatePath("/admin/comenzi");
   revalidatePath(`/admin/comenzi/${orderId}`);
   revalidatePath("/admin");
+  return { ok: true, message: "Statusul comenzii a fost salvat." };
+  } catch (error) {
+    return saveFailure(error);
+  }
 }
 
 export type AdminCreateOrderState = {
+  ok?: boolean;
+  message?: string;
   error?: string;
   fieldErrors?: Record<string, string[]>;
 };
@@ -94,5 +104,5 @@ export async function createAdminOrderAction(
 
   revalidatePath("/admin/comenzi");
   revalidatePath("/admin");
-  redirect(`/admin/comenzi/${result.orderId}`);
+  return { ok: true, message: "Comanda a fost plasată." };
 }

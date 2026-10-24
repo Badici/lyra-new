@@ -1,6 +1,8 @@
+import { AdminForm } from "@/components/admin/admin-form";
+import { ImageField } from "@/components/admin/image-field";
+import { SubmitButton } from "@/components/admin/submit-button";
 import { upsertProduct } from "@/features/products/admin-actions";
 import { fromBani } from "@/lib/money";
-import { ImageField } from "@/components/admin/image-field";
 
 type CategoryOption = { id: string; name: string };
 
@@ -31,14 +33,19 @@ export function ProductForm({
   product?: ProductFormValues;
 }) {
   return (
-    <form action={upsertProduct} className="admin-card grid max-w-3xl gap-4 p-5">
+    <AdminForm action={upsertProduct} returnTo="/admin/produse" className="admin-card grid max-w-3xl gap-4 p-5">
       {product ? <input type="hidden" name="id" value={product.id} /> : null}
-      <ImageField name="mainImageKey" label="Imagine principală" defaultValue={product?.mainImageKey} />
+      <ImageField
+        name="mainImageKey"
+        label="Imagine principală"
+        hint="1600×1600 px"
+        defaultValue={product?.mainImageKey}
+      />
       <div>
         <label className="admin-label" htmlFor="name">
           Nume
         </label>
-        <input id="name" name="name" required defaultValue={product?.name} className="admin-input" />
+        <input id="name" name="name" required minLength={2} defaultValue={product?.name} className="admin-input" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
@@ -51,7 +58,7 @@ export function ProductForm({
           <label className="admin-label" htmlFor="sku">
             SKU
           </label>
-          <input id="sku" name="sku" required defaultValue={product?.sku} className="admin-input" />
+          <input id="sku" name="sku" required minLength={2} defaultValue={product?.sku} className="admin-input" />
         </div>
       </div>
       <div>
@@ -105,6 +112,17 @@ export function ProductForm({
         </div>
       </div>
       <div>
+        <label className="admin-label" htmlFor="description">
+          Descriere
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          defaultValue={product?.description ?? ""}
+          className="admin-textarea"
+        />
+      </div>
+      <div>
         <label className="admin-label" htmlFor="shortDescription">
           Descriere scurtă
         </label>
@@ -146,9 +164,7 @@ export function ProductForm({
           Popular
         </label>
       </div>
-      <button type="submit" className="rounded-xl bg-accent px-4 py-2 text-sm text-cream">
-        Salvează
-      </button>
-    </form>
+      <SubmitButton label="Salvează" pendingLabel="Se salvează…" variant="accent" />
+    </AdminForm>
   );
 }

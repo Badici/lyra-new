@@ -8,6 +8,7 @@ type SubmitButtonProps = {
   pendingLabel?: string;
   variant?: "primary" | "accent" | "danger";
   className?: string;
+  disabled?: boolean;
 };
 
 export function SubmitButton({
@@ -15,8 +16,10 @@ export function SubmitButton({
   pendingLabel = "Se salvează…",
   variant = "primary",
   className,
+  disabled = false,
 }: SubmitButtonProps) {
   const { pending } = useFormStatus();
+  const locked = pending || disabled;
 
   const variants = {
     primary: "bg-forest text-cream hover:bg-moss border border-moss/30",
@@ -27,9 +30,10 @@ export function SubmitButton({
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={locked}
+      aria-busy={pending}
       className={cn(
-        "inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-medium transition disabled:opacity-50",
+        "inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-medium transition duration-300 ease-out hover:scale-[1.03] hover:shadow-md active:scale-[0.97] active:brightness-90 disabled:pointer-events-none disabled:opacity-60",
         variants[variant],
         className,
       )}

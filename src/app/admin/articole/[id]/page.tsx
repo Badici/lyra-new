@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
+import { AdminForm } from "@/components/admin/admin-form";
 import { PageHeader } from "@/components/admin/page-header";
 import { ImageField } from "@/components/admin/image-field";
+import { SubmitButton } from "@/components/admin/submit-button";
 import { TiptapEditor } from "@/components/admin/tiptap-editor";
 import { upsertArticle } from "@/features/articles/admin-actions";
 import { getAdminArticleById } from "@/features/articles/admin-queries";
@@ -21,11 +23,12 @@ export default async function EditArticlePage({ params }: { params: Params }) {
         description={formatViews(article.viewCount)}
         backHref="/admin/articole"
       />
-      <form action={upsertArticle} className="admin-card grid max-w-3xl gap-4 p-5">
+      <AdminForm action={upsertArticle} returnTo="/admin/articole" className="admin-card grid max-w-3xl gap-4 p-5">
         <input type="hidden" name="id" value={article.id} />
         <ImageField
           name="coverImageKey"
           label="Banner / cover"
+          hint="2100×900 px"
           defaultValue={article.coverImageKey}
         />
         <input name="title" required defaultValue={article.title} className="admin-input" />
@@ -53,10 +56,8 @@ export default async function EditArticlePage({ params }: { params: Params }) {
           <input type="checkbox" name="isFeatured" defaultChecked={article.isFeatured} />
           Featured
         </label>
-        <button type="submit" className="rounded-xl bg-accent px-4 py-2 text-sm text-cream">
-          Salvează
-        </button>
-      </form>
+        <SubmitButton label="Salvează" pendingLabel="Se salvează…" variant="accent" />
+      </AdminForm>
     </div>
   );
 }

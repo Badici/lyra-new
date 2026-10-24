@@ -1,6 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { SubmitButton } from "@/components/admin/submit-button";
 import {
   createAdminOrderAction,
   type AdminCreateOrderState,
@@ -19,7 +22,17 @@ type Line = { key: string; productId: string; quantity: number };
 const initial: AdminCreateOrderState = {};
 
 export function AdminCreateOrderForm({ products }: { products: ProductOption[] }) {
+  const router = useRouter();
+  const confirmed = useRef(false);
   const [state, action, pending] = useActionState(createAdminOrderAction, initial);
+  useEffect(() => {
+    if (!state.ok || confirmed.current) return;
+    confirmed.current = true;
+    toast.success(state.message ?? "Comanda a fost plasată.");
+    const timer = window.setTimeout(() => router.push("/admin/comenzi"), 450);
+    return () => window.clearTimeout(timer);
+  }, [router, state.message, state.ok]);
+
   const [lines, setLines] = useState<Line[]>([
     { key: crypto.randomUUID(), productId: products[0]?.id ?? "", quantity: 1 },
   ]);
@@ -150,13 +163,12 @@ export function AdminCreateOrderForm({ products }: { products: ProductOption[] }
         <textarea name="notes" className="admin-textarea" rows={3} />
       </div>
 
-      <button
-        type="submit"
-        disabled={pending || products.length === 0}
-        className="rounded-xl bg-accent px-4 py-2.5 text-sm text-cream disabled:opacity-50"
-      >
-        {pending ? "Se creează…" : "Plasează comanda"}
-      </button>
+      <SubmitButton
+        label="Plasează comanda"
+        pendingLabel="Se creează…"
+        variant="accent"
+        disabled={pending || Boolean(state.ok) || products.length === 0}
+      />
     </form>
   );
 }

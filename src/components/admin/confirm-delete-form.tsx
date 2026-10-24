@@ -1,13 +1,17 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { SubmitButton } from "@/components/admin/submit-button";
+import type { FormResult } from "@/server/forms/result";
 
 type ConfirmDeleteFormProps = {
-  action: (formData: FormData) => void | Promise<void>;
+  action: (formData: FormData) => Promise<FormResult>;
   confirmMessage: string;
   hiddenFields?: Record<string, string>;
   label?: string;
+  returnTo?: string;
 };
 
 export function ConfirmDeleteForm({
@@ -15,15 +19,40 @@ export function ConfirmDeleteForm({
   confirmMessage,
   hiddenFields = {},
   label = "Șterge",
+  returnTo,
 }: ConfirmDeleteFormProps) {
+  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
+  const lock = useRef(false);
+  const [pending, setPending] = useState(false);
 
   return (
     <form
       ref={formRef}
       action={async (formData) => {
+        if (lock.current) return;
         if (!window.confirm(confirmMessage)) return;
-        await action(formData);
+        lock.current = true;
+        setPending(true);
+        try {
+          const result = await action(formData);
+          if (!result.ok) {
+            toast.error(result.error);
+            return;
+          }
+          toast.success(result.message);
+          await new Promise((resolve) => setTimeout(resolve, 450));
+          if (returnTo) router.push(returnTo);
+          else router.refresh();
+        } catch {
+          toast.error("Nu am putut șterge.");
+        } finally {
+          lock.current = false;
+          setPending(false);
+        }
+      }}
+      onSubmit={(event) => {
+        if (lock.current || pending) event.preventDefault();
       }}
     >
       {Object.entries(hiddenFields).map(([key, value]) => (

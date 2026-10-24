@@ -96,7 +96,7 @@ export function TiptapEditor({ name, initialContent, className }: TiptapEditorPr
           onClick={() => editor?.chain().focus().toggleOrderedList().run()}
         />
         <label className="cursor-pointer rounded-lg px-2.5 py-1 text-xs font-medium text-muted hover:bg-forest/60 hover:text-cream">
-          {uploading ? "…" : "Imagine"}
+          {uploading ? "…" : "Imagine (1600×900 px)"}
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"

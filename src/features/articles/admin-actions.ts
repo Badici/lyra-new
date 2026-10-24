@@ -2,13 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db/client";
 import { articles } from "@/db/schema";
 import { ARTICLE_STATUSES } from "@/lib/constants";
 import { slugify, uniqueSlug } from "@/lib/slug";
 import { requireAdmin } from "@/server/auth/session";
+import { saveFailure, validationError, type FormResult } from "@/server/forms/result";
 
 const articleSchema = z.object({
   id: z.string().uuid().optional(),
@@ -44,64 +44,72 @@ async function ensureUniqueSlug(base: string, excludeId?: string) {
   return uniqueSlug(base, slugs);
 }
 
-export async function upsertArticle(formData: FormData): Promise<void> {
-  const session = await requireAdmin();
-  const parsed = parseArticleForm(formData);
-  if (!parsed.success) return;
-
-  const data = parsed.data;
-  let content: Record<string, unknown>;
+export async function upsertArticle(formData: FormData): Promise<FormResult> {
   try {
-    content = JSON.parse(data.contentJson) as Record<string, unknown>;
-  } catch {
-    return;
-  }
+    const session = await requireAdmin();
+    const parsed = parseArticleForm(formData);
+    if (!parsed.success) return { ok: false, error: validationError(parsed.error) };
 
-  const slug = data.slug?.trim()
-    ? slugify(data.slug)
-    : await ensureUniqueSlug(data.title, data.id);
-  const tags = data.tags ? data.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+    const data = parsed.data;
+    let content: Record<string, unknown>;
+    try {
+      content = JSON.parse(data.contentJson) as Record<string, unknown>;
+    } catch {
+      return { ok: false, error: "Conținutul articolului nu este valid." };
+    }
 
-  const payload = {
-    title: data.title,
-    slug,
-    excerpt: data.excerpt ?? null,
-    content,
-    status: data.status,
-    authorId: session.user.id,
-    authorName: data.authorName ?? "LyraBaits",
-    isFeatured: data.isFeatured ?? false,
-    tags,
-    publishedAt: data.status === "PUBLISHED" ? new Date() : null,
-    coverImageKey: data.coverImageKey || null,
-  };
+    const slug = data.slug?.trim()
+      ? slugify(data.slug)
+      : await ensureUniqueSlug(data.title, data.id);
+    if (!slug) return { ok: false, error: "Slug-ul nu este valid." };
+    const tags = data.tags ? data.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
 
-  if (data.id) {
-    const existing = await db.query.articles.findFirst({ where: eq(articles.id, data.id) });
-    await db
-      .update(articles)
-      .set({
-        ...payload,
-        publishedAt:
-          data.status === "PUBLISHED" ? (existing?.publishedAt ?? new Date()) : null,
-      })
-      .where(eq(articles.id, data.id));
+    const payload = {
+      title: data.title,
+      slug,
+      excerpt: data.excerpt ?? null,
+      content,
+      status: data.status,
+      authorId: session.user.id,
+      authorName: data.authorName ?? "LyraBaits",
+      isFeatured: data.isFeatured ?? false,
+      tags,
+      publishedAt: data.status === "PUBLISHED" ? new Date() : null,
+      coverImageKey: data.coverImageKey || null,
+    };
+
+    if (data.id) {
+      const existing = await db.query.articles.findFirst({ where: eq(articles.id, data.id) });
+      await db
+        .update(articles)
+        .set({
+          ...payload,
+          publishedAt:
+            data.status === "PUBLISHED" ? (existing?.publishedAt ?? new Date()) : null,
+        })
+        .where(eq(articles.id, data.id));
+    } else {
+      const [created] = await db.insert(articles).values(payload).returning({ id: articles.id });
+      if (!created) return { ok: false, error: "Nu am putut salva articolul." };
+    }
+
     revalidatePath("/admin/articole");
-    revalidatePath(`/admin/articole/${data.id}`);
-    return;
+    revalidatePath("/articole");
+    return { ok: true, message: data.id ? "Articolul a fost salvat." : "Articolul a fost adăugat." };
+  } catch (error) {
+    return saveFailure(error);
   }
-
-  const [created] = await db.insert(articles).values(payload).returning({ id: articles.id });
-  if (!created) return;
-
-  revalidatePath("/admin/articole");
-  redirect(`/admin/articole/${created.id}`);
 }
 
-export async function deleteArticle(formData: FormData): Promise<void> {
-  await requireAdmin();
-  const id = z.string().uuid().parse(formData.get("id"));
-  await db.delete(articles).where(eq(articles.id, id));
-  revalidatePath("/admin/articole");
-  redirect("/admin/articole");
+export async function deleteArticle(formData: FormData): Promise<FormResult> {
+  try {
+    await requireAdmin();
+    const id = z.string().uuid().parse(formData.get("id"));
+    await db.delete(articles).where(eq(articles.id, id));
+    revalidatePath("/admin/articole");
+    revalidatePath("/articole");
+    return { ok: true, message: "Articolul a fost șters." };
+  } catch (error) {
+    return saveFailure(error);
+  }
 }

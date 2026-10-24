@@ -1,4 +1,6 @@
+import { AdminForm } from "@/components/admin/admin-form";
 import { PageHeader } from "@/components/admin/page-header";
+import { SubmitButton } from "@/components/admin/submit-button";
 import { StockStatusBadge } from "@/components/admin/status-badge";
 import { adjustStock } from "@/features/inventory/admin-actions";
 import { getProductsForStockAdmin } from "@/features/products/admin-queries";
@@ -24,7 +26,7 @@ export default async function AdminStockPage() {
                 </p>
               </div>
             </div>
-            <form action={adjustStock} className="flex flex-wrap items-end gap-3">
+            <AdminForm action={adjustStock} className="flex flex-wrap items-end gap-3">
               <input type="hidden" name="productId" value={p.id} />
               <div className="min-w-[10rem] flex-1">
                 <label className="admin-label" htmlFor={`delta-${p.id}`}>
@@ -39,10 +41,8 @@ export default async function AdminStockPage() {
                   className="admin-input"
                 />
               </div>
-              <button type="submit" className="rounded-xl bg-accent px-4 py-2 text-sm text-cream">
-                Ajustează
-              </button>
-            </form>
+              <SubmitButton label="Ajustează" pendingLabel="Se salvează…" variant="accent" />
+            </AdminForm>
             {p.inventoryMovements?.length ? (
               <ul className="mt-3 space-y-1 text-xs text-muted">
                 {p.inventoryMovements.map((m) => (

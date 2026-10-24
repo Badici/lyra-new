@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/admin/page-header";
+import { SubmitButton } from "@/components/admin/submit-button";
 import { OrderStatusBadge } from "@/components/admin/status-badge";
 import { getAdminOrders } from "@/features/orders/queries";
 import { ORDER_STATUSES, ORDER_STATUS_LABELS, type OrderStatus } from "@/lib/constants";
@@ -54,9 +55,7 @@ export default async function AdminOrdersPage({
             </option>
           ))}
         </select>
-        <button type="submit" className="rounded-xl bg-accent px-4 py-2 text-sm text-cream">
-          Filtrează
-        </button>
+        <SubmitButton label="Filtrează" pendingLabel="Se caută…" variant="accent" />
       </form>
 
       <div className="admin-card overflow-hidden">

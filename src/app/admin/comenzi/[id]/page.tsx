@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AdminForm } from "@/components/admin/admin-form";
+import { SubmitButton } from "@/components/admin/submit-button";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/admin/page-header";
 import { OrderStatusBadge } from "@/components/admin/status-badge";
@@ -55,7 +57,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Params 
             <h2 className="font-display text-2xl">Status</h2>
             <OrderStatusBadge status={order.status} />
           </div>
-          <form action={updateOrderStatus} className="space-y-3">
+          <AdminForm action={updateOrderStatus} returnTo="/admin/comenzi" className="space-y-3">
             <input type="hidden" name="orderId" value={order.id} />
             <label className="admin-label" htmlFor="status">
               Actualizează status
@@ -72,10 +74,8 @@ export default async function AdminOrderDetailPage({ params }: { params: Params 
               placeholder="Notă opțională"
               className="admin-textarea"
             />
-            <button type="submit" className="rounded-xl bg-accent px-4 py-2 text-sm text-cream">
-              Salvează status
-            </button>
-          </form>
+            <SubmitButton label="Salvează status" pendingLabel="Se salvează…" variant="accent" />
+          </AdminForm>
         </section>
       </div>
 

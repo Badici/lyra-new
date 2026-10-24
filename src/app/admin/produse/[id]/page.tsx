@@ -30,6 +30,7 @@ export default async function EditProductPage({ params }: { params: Params }) {
         hiddenFields={{ id: product.id }}
         label="Șterge produsul"
         confirmMessage="Confirmi ștergerea produsului?"
+        returnTo="/admin/produse"
       />
     </div>
   );

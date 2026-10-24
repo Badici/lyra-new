@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { mediaUrl } from "@/lib/media-url";
 import { cn } from "@/lib/utils";
 
 type ImageFieldProps = {
   name: string;
   label?: string;
+  hint?: string;
   defaultValue?: string | null;
   className?: string;
 };
@@ -14,11 +16,13 @@ type ImageFieldProps = {
 export function ImageField({
   name,
   label = "Imagine",
+  hint,
   defaultValue,
   className,
 }: ImageFieldProps) {
   const [url, setUrl] = useState(defaultValue ?? "");
   const [uploading, setUploading] = useState(false);
+  const preview = mediaUrl(url);
 
   async function onFileChange(file: File | null) {
     if (!file) return;
@@ -43,12 +47,15 @@ export function ImageField({
 
   return (
     <div className={cn("space-y-2", className)}>
-      <label className="admin-label">{label}</label>
+      <label className="admin-label">
+        {label}
+        {hint ? <span className="font-normal text-muted"> ({hint})</span> : null}
+      </label>
       <input type="hidden" name={name} value={url} />
-      {url ? (
+      {preview ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={url}
+          src={preview}
           alt=""
           className="mb-2 h-36 w-full rounded-xl object-cover ring-1 ring-border"
         />
