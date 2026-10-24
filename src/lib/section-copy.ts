@@ -28,6 +28,22 @@ export const SECTION_COPY = {
   },
 } as const;
 
+/** Header-ele paginilor de catalog, articole și emisiuni, folosite și pe carusel. */
+export const SECTION_IMAGES = {
+  produse: {
+    src: "/pagina-produse.png",
+    alt: "Standul LyraBaits, cu monturi, nade și accesorii de pescuit expuse pe perete",
+  },
+  articole: {
+    src: "/pagina-articole.png",
+    alt: "Pescar pe malul apei, lângă lansetele așezate pe suport, vorbind despre partidă",
+  },
+  emisiuni: {
+    src: "/pagina-emisiuni.png",
+    alt: "Pescar pe ponton, aplecat peste o lansetă, cu lacul și copacii în spate",
+  },
+} as const;
+
 /** A doua fotografie din povestea brandului. */
 export const ABOUT_IMAGE = {
   src: "/despre_noi_2.jpeg",

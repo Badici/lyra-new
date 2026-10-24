@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ProductCard } from "@/components/public/product-card";
 import { MediaImage } from "@/components/ui/media-image";
 import { getCatalogJourney } from "@/features/products/queries";
-import { ABOUT_IMAGE, SECTION_COPY } from "@/lib/section-copy";
+import { SECTION_COPY, SECTION_IMAGES } from "@/lib/section-copy";
 
 export const metadata: Metadata = {
   title: "Produse",
@@ -30,9 +30,9 @@ export default async function ProdusePage() {
             <p className="max-w-2xl text-cream/80">{SECTION_COPY.produse.subtitle}</p>
           </div>
           <MediaImage
-            src={ABOUT_IMAGE.src}
+            src={SECTION_IMAGES.produse.src}
             seed="produse-lead"
-            alt={ABOUT_IMAGE.alt}
+            alt={SECTION_IMAGES.produse.alt}
             ratio="wide"
           />
         </div>

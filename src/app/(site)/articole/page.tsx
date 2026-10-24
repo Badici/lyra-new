@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ArticleCard } from "@/components/public/article-card";
 import { MediaImage } from "@/components/ui/media-image";
 import { getPublishedArticles } from "@/features/products/queries";
-import { SECTION_COPY } from "@/lib/section-copy";
+import { SECTION_COPY, SECTION_IMAGES } from "@/lib/section-copy";
 
 export const metadata: Metadata = {
   title: "Articole",
@@ -29,9 +29,9 @@ export default async function ArticolePage() {
             <p className="max-w-2xl text-muted">{SECTION_COPY.articole.subtitle}</p>
           </div>
           <MediaImage
-            src="/tancabesti2.jpeg"
+            src={SECTION_IMAGES.articole.src}
             seed="articole-lead"
-            alt="Vedere aeriană a lacului de la Tăncăbești, cu malul, copacii și satul în zare"
+            alt={SECTION_IMAGES.articole.alt}
             ratio="wide"
           />
         </div>

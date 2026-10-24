@@ -10,12 +10,11 @@ import { LinkButton } from "@/components/ui/link-button";
 import Image from "next/image";
 import {
   getPopularProducts,
-  getProductsWithImages,
   getPublishedArticles,
   getPublishedShows,
 } from "@/features/products/queries";
 import { PRODUCTION_SITE_URL, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
-import { ABOUT_IMAGE, EXAMPLE_PRODUCT_IMAGES, SECTION_COPY } from "@/lib/section-copy";
+import { ABOUT_IMAGE, SECTION_COPY, SECTION_IMAGES } from "@/lib/section-copy";
 
 export const metadata: Metadata = {
   title: "Acasă",
@@ -27,42 +26,28 @@ export const metadata: Metadata = {
   },
 };
 
-function productPhoto(product: {
-  name: string;
-  mainImageKey: string | null;
-  gallery: string[] | null;
-}) {
-  const src = product.mainImageKey || product.gallery?.[0];
-  if (!src) return null;
-  return { src, alt: product.name };
-}
-
-function heroSlides(
-  productImages: { src: string; alt: string }[],
-): HeroSlide[] {
-  const photos = EXAMPLE_PRODUCT_IMAGES.map((image, index) => productImages[index] ?? image);
-
+function heroSlides(): HeroSlide[] {
   return [
     {
       id: "produse",
       ...SECTION_COPY.produse,
       seed: "hero-produse",
-      image: photos[0]?.src,
-      imageAlt: photos[0]?.alt,
+      image: SECTION_IMAGES.produse.src,
+      imageAlt: SECTION_IMAGES.produse.alt,
     },
     {
       id: "articole",
       ...SECTION_COPY.articole,
       seed: "hero-articole",
-      image: photos[1]?.src,
-      imageAlt: photos[1]?.alt,
+      image: SECTION_IMAGES.articole.src,
+      imageAlt: SECTION_IMAGES.articole.alt,
     },
     {
       id: "emisiuni",
       ...SECTION_COPY.emisiuni,
       seed: "hero-emisiuni",
-      image: photos[2]?.src,
-      imageAlt: photos[2]?.alt,
+      image: SECTION_IMAGES.emisiuni.src,
+      imageAlt: SECTION_IMAGES.emisiuni.alt,
     },
     {
       id: "poveste",
@@ -76,26 +61,24 @@ function heroSlides(
 
 async function loadHomeData() {
   try {
-    const [articles, shows, products, picturedProducts] = await Promise.all([
+    const [articles, shows, products] = await Promise.all([
       getPublishedArticles(4),
       getPublishedShows(),
       getPopularProducts(4),
-      getProductsWithImages(3),
     ]);
     return {
       articles,
       shows: shows.slice(0, 3),
       products,
-      picturedProducts,
     };
   } catch (error) {
     console.error("[home]", error);
-    return { articles: [], shows: [], products: [], picturedProducts: [] };
+    return { articles: [], shows: [], products: [] };
   }
 }
 
 export default async function HomePage() {
-  const { articles, shows, products, picturedProducts } = await loadHomeData();
+  const { articles, shows, products } = await loadHomeData();
   const [featuredArticle, ...restArticles] = articles;
 
   const orgJsonLd = {
@@ -114,11 +97,7 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
       />
 
-      <HeroCarousel
-        slides={heroSlides(
-          picturedProducts.map(productPhoto).filter((photo) => photo !== null),
-        )}
-      />
+      <HeroCarousel slides={heroSlides()} />
 
       <section className="section-lyra section-veil">
         <div className="container-lyra relative">

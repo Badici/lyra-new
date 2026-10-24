@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ShowCard } from "@/components/public/show-card";
 import { MediaImage } from "@/components/ui/media-image";
 import { getPublishedShows } from "@/features/products/queries";
-import { SECTION_COPY } from "@/lib/section-copy";
+import { SECTION_COPY, SECTION_IMAGES } from "@/lib/section-copy";
 
 export const metadata: Metadata = {
   title: "Emisiuni",
@@ -29,9 +29,9 @@ export default async function EmisiuniPage() {
             <p className="max-w-2xl text-muted">{SECTION_COPY.emisiuni.subtitle}</p>
           </div>
           <MediaImage
-            src="/monutri.png"
+            src={SECTION_IMAGES.emisiuni.src}
             seed="emisiuni-lead"
-            alt="Monturi de crap legate, cu plumb, momitor și boilies, pe o masă de lemn"
+            alt={SECTION_IMAGES.emisiuni.alt}
             ratio="wide"
           />
         </div>
