@@ -4,7 +4,7 @@ import { ProductCard } from "@/components/public/product-card";
 import { MediaImage } from "@/components/ui/media-image";
 import { PlaceholderMedia } from "@/components/ui/placeholder-media";
 import { getCatalogJourney } from "@/features/products/queries";
-import { EXAMPLE_PRODUCT_IMAGES, SECTION_COPY } from "@/lib/section-copy";
+import { ABOUT_IMAGE, SECTION_COPY } from "@/lib/section-copy";
 
 export const metadata: Metadata = {
   title: "Produse",
@@ -19,16 +19,6 @@ export default async function ProdusePage() {
     console.error("[produse]", error);
   }
 
-  const leadProduct = sections
-    .flatMap((section) => section.products)
-    .find((product) => product.mainImageKey || product.gallery?.[0]);
-  const leadImage = leadProduct
-    ? {
-        src: leadProduct.mainImageKey || leadProduct.gallery?.[0],
-        alt: leadProduct.name,
-      }
-    : EXAMPLE_PRODUCT_IMAGES[0];
-
   return (
     <div>
       <section className="surface-depth py-16 md:py-20">
@@ -41,9 +31,9 @@ export default async function ProdusePage() {
             <p className="max-w-2xl text-cream/80">{SECTION_COPY.produse.subtitle}</p>
           </div>
           <MediaImage
-            src={leadImage.src}
+            src={ABOUT_IMAGE.src}
             seed="produse-lead"
-            alt={leadImage.alt}
+            alt={ABOUT_IMAGE.alt}
             ratio="wide"
           />
         </div>
