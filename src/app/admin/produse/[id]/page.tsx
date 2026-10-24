@@ -4,7 +4,7 @@ import { ProductForm } from "@/components/admin/product-form";
 import { ConfirmDeleteForm } from "@/components/admin/confirm-delete-form";
 import { deleteProduct } from "@/features/products/admin-actions";
 import { getAdminProductById } from "@/features/products/admin-queries";
-import { getActiveCategories } from "@/features/products/queries";
+import { getAdminCategories } from "@/features/categories/queries";
 import { formatViews } from "@/lib/views";
 
 type Params = Promise<{ id: string }>;
@@ -13,7 +13,7 @@ export default async function EditProductPage({ params }: { params: Params }) {
   const { id } = await params;
   const [product, categories] = await Promise.all([
     getAdminProductById(id),
-    getActiveCategories(),
+    getAdminCategories(),
   ]);
   if (!product) notFound();
 

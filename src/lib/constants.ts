@@ -34,10 +34,16 @@ export type ContentStatus = (typeof CONTENT_STATUSES)[number];
 export const STOCK_STATUSES = ["IN_STOCK", "LOW_STOCK", "MADE_TO_ORDER"] as const;
 export type StockStatus = (typeof STOCK_STATUSES)[number];
 
-export const LOW_STOCK_THRESHOLD = 5;
+/** Stock below this count is shown as almost gone. 20 itself stays in stock. */
+export const LOW_STOCK_THRESHOLD = 20;
 
 export const OUT_OF_STOCK_MESSAGE_RO =
   "Produs disponibil la comandă. Un membru al echipei Lyra vă va contacta pentru a discuta termenul de livrare.";
+
+export const LOW_STOCK_MESSAGE_RO =
+  "Stoc aproape epuizat. Mai sunt puține bucăți — comandă acum.";
+
+export const IN_STOCK_MESSAGE_RO = "În stoc. Poți adăuga produsul direct în coș.";
 
 export const REQUIRES_DELIVERY_CONFIRMATION_LABEL_RO =
   "Necesită confirmarea termenului de livrare";

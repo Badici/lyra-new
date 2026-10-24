@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { MagneticHover } from "@/components/motion/magnetic-hover";
 import { MediaImage } from "@/components/ui/media-image";
+import { StockNotice } from "@/components/public/stock-notice";
 import { formatRon } from "@/lib/money";
-import { stockMessageRo } from "@/lib/stock";
+import { publicOffer, type OfferVariant } from "@/lib/offer";
 
 type ProductCardData = {
   id: string;
@@ -12,10 +13,11 @@ type ProductCardData = {
   priceBani: number;
   stockQuantity: number;
   mainImageKey?: string | null;
+  variants?: OfferVariant[];
 };
 
 export function ProductCard({ product }: { product: ProductCardData }) {
-  const stockMsg = stockMessageRo(product.stockQuantity);
+  const offer = publicOffer(product.priceBani, product.stockQuantity, product.variants ?? []);
 
   return (
     <MagneticHover>
@@ -36,10 +38,10 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           {product.shortDescription ? (
             <p className="mt-1 line-clamp-2 text-sm text-muted">{product.shortDescription}</p>
           ) : null}
-          <p className="mt-2 text-base font-medium">{formatRon(product.priceBani)}</p>
-          {stockMsg ? (
-            <p className="mt-2 text-xs leading-relaxed text-muted">{stockMsg}</p>
-          ) : null}
+          <p className="mt-2 text-base font-medium">
+            {offer.fromPrice ? `de la ${formatRon(offer.priceBani)}` : formatRon(offer.priceBani)}
+          </p>
+          <StockNotice stockQuantity={offer.stockQuantity} compact />
         </Link>
       </article>
     </MagneticHover>

@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/admin/page-header";
 import { StockStatusBadge } from "@/components/admin/status-badge";
 import { getAdminProducts } from "@/features/products/admin-queries";
 import { formatRon } from "@/lib/money";
+import { resolveStockStatus } from "@/lib/stock";
 import { formatViews } from "@/lib/views";
 
 export default async function AdminProductsPage() {
@@ -54,7 +55,11 @@ export default async function AdminProductsPage() {
                     <td>{p.stockQuantity}</td>
                     <td>{formatViews(p.viewCount)}</td>
                     <td>
-                      <StockStatusBadge status={p.stockStatus} />
+                      <StockStatusBadge
+                        status={resolveStockStatus(
+                          Math.max(p.stockQuantity, ...(p.variants ?? []).map((variant) => variant.stockQuantity)),
+                        )}
+                      />
                       {!p.isActive ? (
                         <span className="ml-2 text-xs text-muted">inactiv</span>
                       ) : null}

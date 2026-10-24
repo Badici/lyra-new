@@ -5,7 +5,7 @@ import {
   resolveStockStatus,
   stockMessageRo,
 } from "@/lib/stock";
-import { OUT_OF_STOCK_MESSAGE_RO } from "@/lib/constants";
+import { IN_STOCK_MESSAGE_RO, LOW_STOCK_MESSAGE_RO, OUT_OF_STOCK_MESSAGE_RO } from "@/lib/constants";
 
 describe("stock rules", () => {
   it("allows purchase when active regardless of stock", () => {
@@ -19,10 +19,13 @@ describe("stock rules", () => {
     expect(stockMessageRo(0)).toBe(OUT_OF_STOCK_MESSAGE_RO);
   });
 
-  it("does not require confirmation when stock is positive", () => {
+  it("lets a positive stock be bought directly and warns below 20", () => {
     expect(requiresDeliveryConfirmation(1)).toBe(false);
-    expect(stockMessageRo(10)).toBeNull();
+    expect(stockMessageRo(10)).toBe(LOW_STOCK_MESSAGE_RO);
+    expect(stockMessageRo(19)).toBe(LOW_STOCK_MESSAGE_RO);
+    expect(stockMessageRo(20)).toBe(IN_STOCK_MESSAGE_RO);
     expect(resolveStockStatus(3)).toBe("LOW_STOCK");
+    expect(resolveStockStatus(19)).toBe("LOW_STOCK");
     expect(resolveStockStatus(20)).toBe("IN_STOCK");
   });
 });

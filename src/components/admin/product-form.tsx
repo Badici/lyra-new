@@ -1,6 +1,7 @@
 import { AdminForm } from "@/components/admin/admin-form";
 import { ImageField } from "@/components/admin/image-field";
 import { SubmitButton } from "@/components/admin/submit-button";
+import { VariantFields, type VariantFieldValue } from "@/components/admin/variant-fields";
 import { upsertProduct } from "@/features/products/admin-actions";
 import { fromBani } from "@/lib/money";
 
@@ -23,6 +24,8 @@ export type ProductFormValues = {
   isFeatured: boolean;
   isPopular: boolean;
   mainImageKey: string | null;
+  categoryLinks?: { categoryId: string }[];
+  variants?: VariantFieldValue[];
 };
 
 export function ProductForm({
@@ -32,6 +35,9 @@ export function ProductForm({
   categories: CategoryOption[];
   product?: ProductFormValues;
 }) {
+  const selected = new Set(product ? [product.categoryId] : []);
+  for (const link of product?.categoryLinks ?? []) selected.add(link.categoryId);
+
   return (
     <AdminForm action={upsertProduct} returnTo="/admin/produse" className="admin-card grid max-w-3xl gap-4 p-5">
       {product ? <input type="hidden" name="id" value={product.id} /> : null}
@@ -61,25 +67,22 @@ export function ProductForm({
           <input id="sku" name="sku" required minLength={2} defaultValue={product?.sku} className="admin-input" />
         </div>
       </div>
-      <div>
-        <label className="admin-label" htmlFor="categoryId">
-          Categorie
-        </label>
-        <select
-          id="categoryId"
-          name="categoryId"
-          required
-          defaultValue={product?.categoryId}
-          className="admin-select"
-        >
-          <option value="">Selectează</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
+      <fieldset>
+        <legend className="admin-label">Categorii</legend>
+        <div className="flex flex-wrap gap-3">
+          {categories.map((category) => (
+            <label key={category.id} className="inline-flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="categoryIds"
+                value={category.id}
+                defaultChecked={selected.has(category.id)}
+              />
+              {category.name}
+            </label>
           ))}
-        </select>
-      </div>
+        </div>
+      </fieldset>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="admin-label" htmlFor="priceRon">
@@ -100,6 +103,11 @@ export function ProductForm({
           <label className="admin-label" htmlFor="stockQuantity">
             Stoc
           </label>
+          <p className="mb-2 text-xs leading-relaxed text-muted">
+            De la 1 bucată, clientul pune produsul direct în coș. Sub 20 apare alerta de stoc
+            aproape epuizat. 0 înseamnă la comandă. Dacă adaugi variante, stocul lor îl înlocuiește
+            pe acesta.
+          </p>
           <input
             id="stockQuantity"
             name="stockQuantity"
@@ -150,6 +158,7 @@ export function ProductForm({
           className="admin-textarea"
         />
       </div>
+      <VariantFields variants={product?.variants} />
       <div className="flex flex-wrap gap-4 text-sm">
         <label className="inline-flex items-center gap-2">
           <input type="checkbox" name="isActive" defaultChecked={product?.isActive ?? true} />

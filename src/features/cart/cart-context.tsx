@@ -10,7 +10,9 @@ import {
 } from "react";
 
 export type CartItem = {
+  lineId: string;
   productId: string;
+  variantId?: string | null;
   slug: string;
   name: string;
   priceBani: number;
@@ -22,14 +24,15 @@ type CartContextValue = {
   items: CartItem[];
   itemCount: number;
   subtotalBani: number;
-  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  setQuantity: (productId: string, quantity: number) => void;
+  addItem: (item: Omit<CartItem, "quantity" | "lineId">, quantity?: number) => void;
+  removeItem: (lineId: string) => void;
+  setQuantity: (lineId: string, quantity: number) => void;
   clear: () => void;
   hydrated: boolean;
 };
 
 const STORAGE_KEY = "lyra.cart.v1";
+const EMPTY_CART: CartItem[] = [];
 
 const CartContext = createContext<CartContextValue | null>(null);
 
@@ -46,7 +49,12 @@ function readStorage(): CartItem[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as CartItem[];
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item) => ({
+      ...item,
+      variantId: item.variantId ?? null,
+      lineId: item.lineId || (item.variantId ? `${item.productId}:${item.variantId}` : item.productId),
+    }));
   } catch {
     return [];
   }
@@ -70,7 +78,7 @@ function getSnapshot() {
 }
 
 function getServerSnapshot(): CartItem[] {
-  return [];
+  return EMPTY_CART;
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -81,28 +89,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     emit();
   }, []);
 
-  const addItem = useCallback((item: Omit<CartItem, "quantity">, quantity = 1) => {
+  const addItem = useCallback((item: Omit<CartItem, "quantity" | "lineId">, quantity = 1) => {
+    const lineId = item.variantId ? `${item.productId}:${item.variantId}` : item.productId;
+    const cap = item.stockQuantity > 0 ? item.stockQuantity : 99;
     const prev = memoryCart;
-    const existing = prev.find((p) => p.productId === item.productId);
+    const existing = prev.find((entry) => entry.lineId === lineId);
+    const nextQuantity = Math.min((existing?.quantity ?? 0) + quantity, cap);
     const next = existing
-      ? prev.map((p) =>
-          p.productId === item.productId
-            ? { ...p, ...item, quantity: p.quantity + quantity }
-            : p,
+      ? prev.map((entry) =>
+          entry.lineId === lineId
+            ? { ...entry, ...item, lineId, quantity: nextQuantity }
+            : entry,
         )
-      : [...prev, { ...item, quantity }];
+      : [...prev, { ...item, lineId, quantity: Math.min(quantity, cap) }];
     writeStorage(next);
   }, []);
 
-  const removeItem = useCallback((productId: string) => {
-    writeStorage(memoryCart.filter((p) => p.productId !== productId));
+  const removeItem = useCallback((lineId: string) => {
+    writeStorage(memoryCart.filter((entry) => entry.lineId !== lineId));
   }, []);
 
-  const setQuantity = useCallback((productId: string, quantity: number) => {
+  const setQuantity = useCallback((lineId: string, quantity: number) => {
     writeStorage(
       memoryCart
-        .map((p) => (p.productId === productId ? { ...p, quantity } : p))
-        .filter((p) => p.quantity > 0),
+        .map((entry) => {
+          if (entry.lineId !== lineId) return entry;
+          const cap = entry.stockQuantity > 0 ? entry.stockQuantity : 99;
+          return { ...entry, quantity: Math.min(quantity, cap) };
+        })
+        .filter((entry) => entry.quantity > 0),
     );
   }, []);
 

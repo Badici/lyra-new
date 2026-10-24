@@ -4,6 +4,7 @@ import { SubmitButton } from "@/components/admin/submit-button";
 import { StockStatusBadge } from "@/components/admin/status-badge";
 import { adjustStock } from "@/features/inventory/admin-actions";
 import { getProductsForStockAdmin } from "@/features/products/admin-queries";
+import { resolveStockStatus } from "@/lib/stock";
 
 export default async function AdminStockPage() {
   const products = await getProductsForStockAdmin();
@@ -12,7 +13,7 @@ export default async function AdminStockPage() {
     <div className="space-y-6 p-4 md:p-8">
       <PageHeader
         title="Stoc"
-        description="Stoc 0 nu blochează comenzile — marchează livrarea la confirmare."
+        description="De la 1 bucată clientul pune produsul direct în coș. Sub 20 apare alerta de stoc aproape epuizat. 0 înseamnă la comandă și nu blochează comanda. Stocul variantelor se schimbă din formularul produsului."
       />
 
       <div className="space-y-4">
@@ -22,8 +23,22 @@ export default async function AdminStockPage() {
               <div>
                 <p className="font-medium">{p.name}</p>
                 <p className="text-xs text-muted">
-                  Stoc curent: {p.stockQuantity} · <StockStatusBadge status={p.stockStatus} />
+                  Stoc produs: {p.stockQuantity} ·{" "}
+                  <StockStatusBadge
+                    status={resolveStockStatus(
+                      Math.max(p.stockQuantity, ...(p.variants ?? []).map((variant) => variant.stockQuantity)),
+                    )}
+                  />
                 </p>
+                {p.variants?.length ? (
+                  <ul className="mt-2 space-y-1 text-xs text-muted">
+                    {p.variants.map((variant) => (
+                      <li key={variant.id}>
+                        {variant.name}: {variant.stockQuantity} buc.
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </div>
             </div>
             <AdminForm action={adjustStock} className="flex flex-wrap items-end gap-3">

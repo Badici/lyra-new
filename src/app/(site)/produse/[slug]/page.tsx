@@ -3,16 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageStats } from "@/components/public/page-stats";
 import { ProductCard } from "@/components/public/product-card";
+import { ProductPurchase } from "@/components/public/product-purchase";
 import { MediaImage } from "@/components/ui/media-image";
-import { AddToCartButton } from "@/features/cart/add-to-cart-button";
 import {
   getProductBySlug,
   getRelatedProducts,
 } from "@/features/products/queries";
 import { getPublicSiteUrl } from "@/lib/env";
 import { absoluteMedia } from "@/lib/media-url";
-import { formatRon } from "@/lib/money";
-import { stockMessageRo } from "@/lib/stock";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -59,8 +57,6 @@ export default async function ProductPage({ params }: Props) {
 
   if (!product) notFound();
 
-  const stockMsg = stockMessageRo(product.stockQuantity);
-
   return (
     <article className="section-lyra">
       <div className="container-lyra">
@@ -93,26 +89,22 @@ export default async function ProductPage({ params }: Props) {
               initialCount={product.viewCount}
               title={product.name}
             />
-            <p className="mb-4 text-2xl font-medium">{formatRon(product.priceBani)}</p>
-            {product.compareAtPriceBani ? (
-              <p className="mb-4 text-sm text-muted line-through">
-                {formatRon(product.compareAtPriceBani)}
-              </p>
-            ) : null}
-            {stockMsg ? (
-              <p className="mb-6 rounded-xl border border-border bg-fog/40 px-4 py-3 text-sm leading-relaxed text-muted">
-                {stockMsg}
-              </p>
-            ) : null}
             {product.shortDescription ? (
               <p className="mb-6 text-muted">{product.shortDescription}</p>
             ) : null}
-            <AddToCartButton
+            <ProductPurchase
               productId={product.id}
               slug={product.slug}
               name={product.name}
               priceBani={product.priceBani}
+              compareAtPriceBani={product.compareAtPriceBani}
               stockQuantity={product.stockQuantity}
+              variants={product.variants.map((variant) => ({
+                id: variant.id,
+                name: variant.name,
+                priceBani: variant.priceBani,
+                stockQuantity: variant.stockQuantity,
+              }))}
             />
           </div>
         </div>

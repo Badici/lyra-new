@@ -5,6 +5,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -207,6 +208,38 @@ export const products = pgTable(
   ],
 );
 
+export const productCategories = pgTable(
+  "product_categories",
+  {
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => categories.id, { onDelete: "cascade" }),
+  },
+  (t) => [primaryKey({ columns: [t.productId, t.categoryId] })],
+);
+
+export const productVariants = pgTable(
+  "product_variants",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    sku: varchar("sku", { length: 64 }),
+    /** Null means the variant uses the product price. */
+    priceBani: integer("price_bani"),
+    stockQuantity: integer("stock_quantity").default(0).notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    ...timestamps,
+  },
+  (t) => [index("product_variants_product_idx").on(t.productId)],
+);
+
 export const inventoryMovements = pgTable(
   "inventory_movements",
   {
@@ -366,6 +399,10 @@ export const orderItems = pgTable(
     requiresDeliveryConfirmation: boolean("requires_delivery_confirmation")
       .default(false)
       .notNull(),
+    variantId: uuid("variant_id").references(() => productVariants.id, {
+      onDelete: "set null",
+    }),
+    variantName: text("variant_name"),
     ...timestamps,
   },
   (t) => [index("order_items_order_idx").on(t.orderId)],
@@ -436,7 +473,27 @@ export const productsRelations = relations(products, ({ one, many }) => ({
     fields: [products.categoryId],
     references: [categories.id],
   }),
+  categoryLinks: many(productCategories),
+  variants: many(productVariants),
   inventoryMovements: many(inventoryMovements),
+}));
+
+export const productCategoriesRelations = relations(productCategories, ({ one }) => ({
+  product: one(products, {
+    fields: [productCategories.productId],
+    references: [products.id],
+  }),
+  category: one(categories, {
+    fields: [productCategories.categoryId],
+    references: [categories.id],
+  }),
+}));
+
+export const productVariantsRelations = relations(productVariants, ({ one }) => ({
+  product: one(products, {
+    fields: [productVariants.productId],
+    references: [products.id],
+  }),
 }));
 
 export const inventoryMovementsRelations = relations(inventoryMovements, ({ one }) => ({

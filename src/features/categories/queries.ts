@@ -1,6 +1,6 @@
 import { asc, eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { categories, products } from "@/db/schema";
+import { categories, productCategories } from "@/db/schema";
 
 export async function getAdminCategories() {
   const cats = await db.query.categories.findMany({
@@ -9,11 +9,11 @@ export async function getAdminCategories() {
 
   const counts = await db
     .select({
-      categoryId: products.categoryId,
-      count: sql<number>`count(*)::int`,
+      categoryId: productCategories.categoryId,
+      count: sql<number>`count(distinct ${productCategories.productId})::int`,
     })
-    .from(products)
-    .groupBy(products.categoryId);
+    .from(productCategories)
+    .groupBy(productCategories.categoryId);
 
   const countByCategory = Object.fromEntries(
     counts.map((row) => [row.categoryId, row.count]),
@@ -30,9 +30,9 @@ export async function getAdminCategoryById(id: string) {
 }
 
 export async function getCategoryProductCount(categoryId: string) {
-  const rows = await db.query.products.findMany({
-    where: eq(products.categoryId, categoryId),
-    columns: { id: true },
-  });
+  const rows = await db
+    .select({ productId: productCategories.productId })
+    .from(productCategories)
+    .where(eq(productCategories.categoryId, categoryId));
   return rows.length;
 }

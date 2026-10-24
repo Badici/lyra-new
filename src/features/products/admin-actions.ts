@@ -1,10 +1,10 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq, notInArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db/client";
-import { products } from "@/db/schema";
+import { productCategories, productVariants, products } from "@/db/schema";
 import { toBani } from "@/lib/money";
 import { slugify, uniqueSlug } from "@/lib/slug";
 import { resolveStockStatus } from "@/lib/stock";
@@ -16,7 +16,6 @@ const productSchema = z.object({
   name: z.string().trim().min(2),
   slug: z.string().trim().optional(),
   sku: z.string().trim().min(2).max(64),
-  categoryId: z.string().uuid(),
   shortDescription: z.string().trim().optional(),
   description: z.string().trim().optional(),
   story: z.string().trim().optional(),
@@ -39,7 +38,6 @@ function parseProductForm(formData: FormData) {
     name: formData.get("name"),
     slug: formData.get("slug") || undefined,
     sku: formData.get("sku"),
-    categoryId: formData.get("categoryId"),
     shortDescription: formData.get("shortDescription") || undefined,
     description: formData.get("description") || undefined,
     story: formData.get("story") || undefined,
@@ -52,6 +50,95 @@ function parseProductForm(formData: FormData) {
     isPopular: formData.get("isPopular") === "on" || formData.get("isPopular") === "true",
     mainImageKey: formData.get("mainImageKey") || undefined,
   });
+}
+
+type ParsedVariant = {
+  id?: string;
+  name: string;
+  sku: string | null;
+  priceBani: number | null;
+  stockQuantity: number;
+  sortOrder: number;
+};
+
+function readVariants(
+  formData: FormData,
+): { ok: true; variants: ParsedVariant[] } | { ok: false; error: string } {
+  const names = formData.getAll("variantName").map(String);
+  const prices = formData.getAll("variantPriceRon").map(String);
+  const stocks = formData.getAll("variantStock").map(String);
+  const skus = formData.getAll("variantSku").map(String);
+  const ids = formData.getAll("variantId").map(String);
+  const variants: ParsedVariant[] = [];
+
+  for (let index = 0; index < names.length; index += 1) {
+    const name = names[index]?.trim() ?? "";
+    if (!name) continue;
+    const priceRaw = decimalInput(prices[index] ?? "");
+    let priceBani: number | null = null;
+    if (typeof priceRaw === "string" && priceRaw !== "") {
+      const price = Number(priceRaw);
+      if (!Number.isFinite(price) || price <= 0) {
+        return { ok: false, error: `Prețul variantei „${name}" trebuie să fie mai mare decât 0.` };
+      }
+      priceBani = toBani(price);
+    }
+    const stock = Number(stocks[index] ?? 0);
+    if (!Number.isInteger(stock) || stock < 0) {
+      return { ok: false, error: `Stocul variantei „${name}" nu este valid.` };
+    }
+    const id = ids[index]?.trim();
+    variants.push({
+      id: id && z.string().uuid().safeParse(id).success ? id : undefined,
+      name,
+      sku: skus[index]?.trim() || null,
+      priceBani,
+      stockQuantity: stock,
+      sortOrder: variants.length,
+    });
+  }
+
+  return { ok: true, variants };
+}
+
+async function insertProduct(payload: typeof products.$inferInsert) {
+  const [created] = await db.insert(products).values(payload).returning({ id: products.id });
+  return created?.id;
+}
+
+async function syncVariants(productId: string, variants: ParsedVariant[]) {
+  const keep: string[] = [];
+  for (const variant of variants) {
+    const values = {
+      name: variant.name,
+      sku: variant.sku,
+      priceBani: variant.priceBani,
+      stockQuantity: variant.stockQuantity,
+      sortOrder: variant.sortOrder,
+      isActive: true,
+    };
+    if (variant.id) {
+      await db
+        .update(productVariants)
+        .set(values)
+        .where(and(eq(productVariants.id, variant.id), eq(productVariants.productId, productId)));
+      keep.push(variant.id);
+    } else {
+      const [created] = await db
+        .insert(productVariants)
+        .values({ ...values, productId })
+        .returning({ id: productVariants.id });
+      if (created) keep.push(created.id);
+    }
+  }
+
+  if (keep.length === 0) {
+    await db.delete(productVariants).where(eq(productVariants.productId, productId));
+    return;
+  }
+  await db
+    .delete(productVariants)
+    .where(and(eq(productVariants.productId, productId), notInArray(productVariants.id, keep)));
 }
 
 async function ensureUniqueSlug(base: string, excludeId?: string) {
@@ -72,16 +159,33 @@ export async function upsertProduct(formData: FormData): Promise<FormResult> {
       : await ensureUniqueSlug(data.name, data.id);
     if (!slug) return { ok: false, error: "Slug-ul nu este valid." };
 
+    const categoryIds = [
+      ...new Set(formData.getAll("categoryIds").map(String).map((id) => id.trim()).filter(Boolean)),
+    ];
+    const primaryCategoryId = categoryIds[0];
+    if (
+      !primaryCategoryId ||
+      categoryIds.some((id) => !z.string().uuid().safeParse(id).success)
+    ) {
+      return { ok: false, error: "Alege cel puțin o categorie." };
+    }
+    const variants = readVariants(formData);
+    if (!variants.ok) return variants;
+
     const priceBani = toBani(data.priceRon);
     const compareAtPriceBani =
       data.compareAtPriceRon != null ? toBani(data.compareAtPriceRon) : null;
-    const stockStatus = resolveStockStatus(data.stockQuantity);
+    const stockForStatus = Math.max(
+      data.stockQuantity,
+      ...variants.variants.map((variant) => variant.stockQuantity),
+    );
+    const stockStatus = resolveStockStatus(stockForStatus);
 
     const payload = {
       name: data.name,
       slug,
       sku: data.sku,
-      categoryId: data.categoryId,
+      categoryId: primaryCategoryId,
       shortDescription: data.shortDescription ?? null,
       ...(formData.has("description") ? { description: data.description ?? null } : {}),
       story: data.story ?? null,
@@ -96,16 +200,22 @@ export async function upsertProduct(formData: FormData): Promise<FormResult> {
       mainImageKey: data.mainImageKey || null,
     };
 
+    const productId = data.id ?? (await insertProduct(payload));
+    if (!productId) return { ok: false, error: "Nu am putut salva produsul." };
     if (data.id) {
       await db.update(products).set(payload).where(eq(products.id, data.id));
-    } else {
-      const [created] = await db.insert(products).values(payload).returning({ id: products.id });
-      if (!created) return { ok: false, error: "Nu am putut salva produsul." };
     }
+
+    await db.delete(productCategories).where(eq(productCategories.productId, productId));
+    await db.insert(productCategories).values(
+      categoryIds.map((categoryId) => ({ productId, categoryId })),
+    );
+    await syncVariants(productId, variants.variants);
 
     revalidatePath("/admin/produse");
     revalidatePath("/admin/stoc");
     revalidatePath("/produse");
+    revalidatePath(`/produse/${slug}`);
     return { ok: true, message: data.id ? "Produsul a fost salvat." : "Produsul a fost adăugat." };
   } catch (error) {
     return saveFailure(error);

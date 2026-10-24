@@ -1,6 +1,6 @@
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { articles, categories, episodes, products, shows } from "@/db/schema";
+import { articles, categories, episodes, productCategories, productVariants, products, shows } from "@/db/schema";
 
 export async function getActiveCategories() {
   return db.query.categories.findMany({
@@ -16,16 +16,40 @@ export async function getCategoryBySlug(slug: string) {
 }
 
 export async function getProductsByCategory(categoryId: string) {
+  const links = await db
+    .select({ productId: productCategories.productId })
+    .from(productCategories)
+    .where(eq(productCategories.categoryId, categoryId));
+  const ids = links.map((link) => link.productId);
   return db.query.products.findMany({
-    where: and(eq(products.categoryId, categoryId), eq(products.isActive, true)),
+    where: and(
+      eq(products.isActive, true),
+      ids.length > 0
+        ? or(eq(products.categoryId, categoryId), inArray(products.id, ids))
+        : eq(products.categoryId, categoryId),
+    ),
+    with: {
+      variants: {
+        where: eq(productVariants.isActive, true),
+        orderBy: [asc(productVariants.sortOrder)],
+      },
+    },
     orderBy: [desc(products.isFeatured), asc(products.name)],
   });
 }
+
+const activeVariants = {
+  variants: {
+    where: eq(productVariants.isActive, true),
+    orderBy: [asc(productVariants.sortOrder)],
+  },
+};
 
 export async function getProductsWithImages(limit = 6) {
   const rows = await db.query.products.findMany({
     where: eq(products.isActive, true),
     orderBy: [desc(products.isFeatured), desc(products.updatedAt)],
+    with: activeVariants,
     limit: 24,
   });
   return rows.filter((product) => product.mainImageKey || product.gallery?.[0]).slice(0, limit);
@@ -35,6 +59,7 @@ export async function getPopularProducts(limit = 8) {
   return db.query.products.findMany({
     where: and(eq(products.isActive, true), eq(products.isPopular, true)),
     orderBy: [desc(products.updatedAt)],
+    with: activeVariants,
     limit,
   });
 }
@@ -42,6 +67,7 @@ export async function getPopularProducts(limit = 8) {
 export async function getFeaturedProducts(limit = 4) {
   return db.query.products.findMany({
     where: and(eq(products.isActive, true), eq(products.isFeatured, true)),
+    with: activeVariants,
     limit,
   });
 }
@@ -49,7 +75,13 @@ export async function getFeaturedProducts(limit = 4) {
 export async function getProductBySlug(slug: string) {
   return db.query.products.findFirst({
     where: and(eq(products.slug, slug), eq(products.isActive, true)),
-    with: { category: true },
+    with: {
+      category: true,
+      variants: {
+        where: eq(productVariants.isActive, true),
+        orderBy: [asc(productVariants.sortOrder), asc(productVariants.name)],
+      },
+    },
   });
 }
 

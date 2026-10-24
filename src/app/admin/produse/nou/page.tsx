@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/admin/page-header";
 import { ProductForm } from "@/components/admin/product-form";
-import { getActiveCategories } from "@/features/products/queries";
+import { getAdminCategories } from "@/features/categories/queries";
 
 export default async function NewProductPage() {
-  const categories = await getActiveCategories();
+  const categories = await getAdminCategories();
 
   return (
     <div className="space-y-6 p-4 md:p-8">

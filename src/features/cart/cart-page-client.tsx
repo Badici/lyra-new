@@ -4,9 +4,9 @@ import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { LinkButton } from "@/components/ui/link-button";
 import { PlaceholderMedia } from "@/components/ui/placeholder-media";
+import { StockNotice } from "@/components/public/stock-notice";
 import { useCart } from "@/features/cart/cart-context";
 import { formatRon } from "@/lib/money";
-import { stockMessageRo } from "@/lib/stock";
 
 export function CartPageClient() {
   const { items, subtotalBani, setQuantity, removeItem, hydrated } = useCart();
@@ -36,10 +36,10 @@ export function CartPageClient() {
       <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
         <ul className="space-y-6">
           {items.map((item) => {
-            const stockMsg = stockMessageRo(item.stockQuantity);
+            const maxQuantity = item.stockQuantity > 0 ? item.stockQuantity : 99;
             return (
               <li
-                key={item.productId}
+                key={item.lineId}
                 className="grid gap-4 border-b border-border pb-6 sm:grid-cols-[7rem_1fr_auto]"
               >
                 <PlaceholderMedia seed={`product-${item.slug}`} ratio="square" className="w-28" />
@@ -51,15 +51,13 @@ export function CartPageClient() {
                     {item.name}
                   </Link>
                   <p className="mt-1 text-sm text-muted">{formatRon(item.priceBani)} / buc.</p>
-                  {stockMsg ? (
-                    <p className="mt-2 text-xs leading-relaxed text-muted">{stockMsg}</p>
-                  ) : null}
+                  <StockNotice stockQuantity={item.stockQuantity} compact />
                   <div className="mt-4 flex items-center gap-2">
                     <button
                       type="button"
                       className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-fog/60"
                       aria-label="Scade cantitatea"
-                      onClick={() => setQuantity(item.productId, item.quantity - 1)}
+                      onClick={() => setQuantity(item.lineId, item.quantity - 1)}
                     >
                       <Minus className="h-4 w-4" />
                     </button>
@@ -68,14 +66,15 @@ export function CartPageClient() {
                       type="button"
                       className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-fog/60"
                       aria-label="Crește cantitatea"
-                      onClick={() => setQuantity(item.productId, item.quantity + 1)}
+                      disabled={item.quantity >= maxQuantity}
+                      onClick={() => setQuantity(item.lineId, Math.min(item.quantity + 1, maxQuantity))}
                     >
                       <Plus className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
                       className="ml-2 inline-flex h-9 items-center gap-1 rounded-lg px-2 text-sm text-muted hover:bg-fog/60"
-                      onClick={() => removeItem(item.productId)}
+                      onClick={() => removeItem(item.lineId)}
                     >
                       <Trash2 className="h-4 w-4" />
                       Elimină

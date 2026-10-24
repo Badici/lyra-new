@@ -10,8 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/features/cart/cart-context";
 import { submitOrderAction } from "@/features/orders/actions";
+import { StockNotice } from "@/components/public/stock-notice";
 import { formatRon } from "@/lib/money";
-import { stockMessageRo } from "@/lib/stock";
 
 export function CheckoutForm() {
   const router = useRouter();
@@ -53,7 +53,11 @@ export function CheckoutForm() {
       shippingDetails: String(fd.get("shippingDetails") ?? "") || undefined,
       notes: String(fd.get("notes") ?? "") || undefined,
       termsAccepted: fd.get("termsAccepted") === "on",
-      items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+      items: items.map((i) => ({
+        productId: i.productId,
+        variantId: i.variantId || undefined,
+        quantity: i.quantity,
+      })),
     };
 
     const result = await submitOrderAction(payload);
@@ -179,22 +183,17 @@ export function CheckoutForm() {
       <aside className="h-fit rounded-2xl border border-border bg-surface p-6">
         <h2 className="mb-4 font-display text-3xl tracking-wide">Comanda ta</h2>
         <ul className="mb-6 space-y-4">
-          {items.map((item) => {
-            const stockMsg = stockMessageRo(item.stockQuantity);
-            return (
-              <li key={item.productId} className="border-b border-border pb-4 text-sm">
+          {items.map((item) => (
+              <li key={item.lineId} className="border-b border-border pb-4 text-sm">
                 <div className="flex justify-between gap-4">
                   <span>
                     {item.name} × {item.quantity}
                   </span>
                   <span>{formatRon(item.priceBani * item.quantity)}</span>
                 </div>
-                {stockMsg ? (
-                  <p className="mt-2 text-xs leading-relaxed text-muted">{stockMsg}</p>
-                ) : null}
+                <StockNotice stockQuantity={item.stockQuantity} compact />
               </li>
-            );
-          })}
+            ))}
         </ul>
         <div className="mb-4 flex justify-between text-base font-medium">
           <span>Total (ramburs)</span>

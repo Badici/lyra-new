@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db/client";
-import { categories, products } from "@/db/schema";
+import { categories, productCategories, products } from "@/db/schema";
 import { slugify, uniqueSlug } from "@/lib/slug";
 import { requireAdmin } from "@/server/auth/session";
 import { saveFailure, validationError, type FormResult } from "@/server/forms/result";
@@ -87,10 +87,14 @@ export async function deleteCategory(formData: FormData): Promise<FormResult> {
     await requireAdmin();
     const id = z.string().uuid().parse(formData.get("id"));
 
-    const linked = await db.query.products.findFirst({
-      where: eq(products.categoryId, id),
-      columns: { id: true },
-    });
+    const linked =
+      (await db.query.products.findFirst({
+        where: eq(products.categoryId, id),
+        columns: { id: true },
+      })) ??
+      (await db.query.productCategories.findFirst({
+        where: eq(productCategories.categoryId, id),
+      }));
 
     if (linked) {
       return { ok: false, error: "Categoria are produse și nu poate fi ștearsă." };
