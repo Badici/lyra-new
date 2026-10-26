@@ -10,7 +10,8 @@ import { mediaUrl } from "@/lib/media-url";
 export function ProductGalleryField({ images = [] }: { images?: string[] | null }) {
   const busy = useAdminBusy();
   const [items, setItems] = useState(() => (images ?? []).filter(Boolean));
-  const [file, setFile] = useState<File | null>(null);
+  const [queue, setQueue] = useState<File[]>([]);
+  const [batchTotal, setBatchTotal] = useState(0);
 
   function move(index: number, direction: -1 | 1) {
     const next = index + direction;
@@ -23,24 +24,18 @@ export function ProductGalleryField({ images = [] }: { images?: string[] | null 
   }
 
   async function saveCrop(blob: Blob) {
-    setFile(null);
-    busy.begin();
-    try {
-      const url = await uploadAdminImage(blob);
-      setItems((current) => [...current, url]);
-      toast.success("Poză adăugată");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Upload eșuat");
-    } finally {
-      busy.end();
-    }
+    const url = await uploadAdminImage(blob);
+    setItems((current) => [...current, url]);
+    setQueue((current) => current.slice(1));
+    if (queue.length === 1) toast.success(batchTotal > 1 ? "Pozele au fost adăugate" : "Poză adăugată");
   }
 
   return (
     <fieldset className="space-y-3">
       <legend className="admin-label">Poze (1600×1600 px)</legend>
       <p className="text-xs leading-relaxed text-muted">
-        Prima poză este coperta. Poți schimba ordinea. Fiecare poză se încadrează la 1600×1600 px.
+        Poți alege mai multe poze deodată. Prima rămâne coperta, iar ordinea se schimbă cu Sus și Jos.
+        Fiecare poză se încadrează la 1600×1600 px.
       </p>
       {items.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border px-3 py-6 text-center text-xs text-muted">
@@ -86,24 +81,40 @@ export function ProductGalleryField({ images = [] }: { images?: string[] | null 
         </ul>
       )}
       <label className="inline-flex cursor-pointer items-center rounded-xl bg-moss px-3 py-2 text-xs text-cream">
-        Adaugă poză
+        Adaugă poze
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif"
+          multiple
           className="hidden"
           onChange={(event) => {
-            const next = event.target.files?.[0] ?? null;
+            const next = [...(event.target.files ?? [])];
             event.target.value = "";
-            if (next) setFile(next);
+            if (next.length > 0) {
+              setQueue(next);
+              setBatchTotal(next.length);
+            }
           }}
         />
       </label>
-      {file ? (
+      {queue[0] ? (
         <ImageCropDialog
-          file={file}
+          key={`${queue[0].name}-${queue[0].lastModified}-${queue.length}`}
+          file={queue[0]}
           preset="product"
-          onCancel={() => setFile(null)}
-          onConfirm={(blob) => void saveCrop(blob)}
+          progress={{ index: batchTotal - queue.length + 1, total: batchTotal }}
+          onCancel={() => setQueue([])}
+          onConfirm={async (blob) => {
+            busy.begin();
+            try {
+              await saveCrop(blob);
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : "Upload eșuat");
+              setQueue((current) => current.slice(1));
+            } finally {
+              busy.end();
+            }
+          }}
         />
       ) : null}
     </fieldset>
