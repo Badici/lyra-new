@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { siteSettings } from "@/db/schema";
+import { resolveShopEmail } from "@/lib/constants";
 import { SECTION_IMAGES } from "@/lib/section-copy";
 
 export type ContactSettings = {
@@ -12,6 +13,7 @@ export type SocialSettings = {
   facebook: string;
   instagram: string;
   youtube: string;
+  tiktok: string;
 };
 
 export type OrderSettings = {
@@ -23,14 +25,15 @@ export async function getSiteSettings() {
   const byKey = Object.fromEntries(rows.map((r) => [r.key, r.value]));
 
   return {
-    contact: (byKey.contact as ContactSettings | undefined) ?? {
-      email: "contact@lyrabaits.ro",
-      whatsapp: "40728241412",
+    contact: {
+      email: resolveShopEmail((byKey.contact as ContactSettings | undefined)?.email),
+      whatsapp: (byKey.contact as ContactSettings | undefined)?.whatsapp || "40728241412",
     },
-    social: (byKey.social as SocialSettings | undefined) ?? {
-      facebook: "",
-      instagram: "",
-      youtube: "",
+    social: {
+      facebook: (byKey.social as Partial<SocialSettings> | undefined)?.facebook ?? "",
+      instagram: (byKey.social as Partial<SocialSettings> | undefined)?.instagram ?? "",
+      youtube: (byKey.social as Partial<SocialSettings> | undefined)?.youtube ?? "",
+      tiktok: (byKey.social as Partial<SocialSettings> | undefined)?.tiktok ?? "",
     },
     orders: (byKey.orders as OrderSettings | undefined) ?? { prefix: "LYRA" },
     identity: byKey.site_identity as { isDevelopmentSeed?: boolean } | undefined,

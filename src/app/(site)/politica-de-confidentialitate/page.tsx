@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getSiteSettings } from "@/features/settings/queries";
+import { SHOP_EMAIL } from "@/lib/constants";
 
 const DESCRIPTION =
   "Ce date păstrează LyraBaits când îți faci cont, plasezi o comandă sau ne scrii.";
@@ -13,7 +15,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ConfidentialitatePage() {
+export default async function ConfidentialitatePage() {
+  let email = SHOP_EMAIL;
+  try {
+    const settings = await getSiteSettings();
+    email = settings.contact.email || SHOP_EMAIL;
+  } catch {
+    email = SHOP_EMAIL;
+  }
+
   return (
     <div className="section-lyra">
       <div className="container-lyra max-w-3xl">
@@ -28,8 +38,8 @@ export default function ConfidentialitatePage() {
           <p>Le folosim doar pentru cont, comenzi și mesaje.</p>
           <p>
             Dacă vrei să le corectăm sau să le ștergem, scrie-ne la{" "}
-            <a href="mailto:contact@lyrabaits.ro" className="text-accent underline-offset-4 hover:underline">
-              contact@lyrabaits.ro
+            <a href={`mailto:${email}`} className="text-accent underline-offset-4 hover:underline">
+              {email}
             </a>
             .
           </p>

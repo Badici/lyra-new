@@ -11,7 +11,7 @@ export default async function AdminSettingsPage() {
     <div className="space-y-6 p-4 md:p-8">
       <PageHeader
         title="Setări"
-        description="Informații de business non-secrete. Secretele rămân în variabilele de mediu."
+        description="Emailul de contact apare pe pagina de Contact. Linkurile completate apar în footer. Lasă gol ce nu folosești."
       />
       <AdminForm action={updateSiteSettings} className="admin-card grid max-w-xl gap-4 p-5">
         <div>
@@ -81,6 +81,19 @@ export default async function AdminSettingsPage() {
             id="socialYoutube"
             name="socialYoutube"
             defaultValue={settings.social.youtube}
+            placeholder="https://"
+            className="admin-input"
+          />
+        </div>
+        <div>
+          <label className="admin-label" htmlFor="socialTiktok">
+            TikTok URL
+          </label>
+          <input
+            id="socialTiktok"
+            name="socialTiktok"
+            defaultValue={settings.social.tiktok}
+            placeholder="https://www.tiktok.com/@contul-tau"
             className="admin-input"
           />
         </div>

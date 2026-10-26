@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { cropSourceRect } from "@/lib/image-presets";
-import { buildOrderNotification } from "@/server/email/order-message";
+import { buildCustomerConfirmation, buildOrderNotification } from "@/server/email/order-message";
 
 describe("cropSourceRect", () => {
   it("centers a wide image inside a square frame", () => {
@@ -36,5 +36,25 @@ describe("buildOrderNotification", () => {
     expect(mail.subject).toContain("LYRA-2026-000001");
     expect(mail.message).toContain("ana@example.com");
     expect(mail.message).toContain("Boilie × 2");
+  });
+});
+
+describe("buildCustomerConfirmation", () => {
+  it("tells the customer the order was registered", () => {
+    const mail = buildCustomerConfirmation({
+      orderNumber: "LYRA-2026-000001",
+      customerName: "Ana",
+      customerEmail: "ana@example.com",
+      customerPhone: "0700000000",
+      address: "Strada 1",
+      items: [{ name: "Boilie", quantity: 2, totalLabel: "40,00 RON" }],
+      totalLabel: "40,00 RON",
+      notes: "",
+      requiresDeliveryConfirmation: false,
+    });
+    expect(mail.subject).toContain("LYRA-2026-000001");
+    expect(mail.message).toContain("a fost înregistrată");
+    expect(mail.message).toContain("Ana");
+    expect(mail.message).toContain("40,00 RON");
   });
 });

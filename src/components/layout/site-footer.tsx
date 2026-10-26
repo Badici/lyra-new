@@ -3,7 +3,15 @@ import Image from "next/image";
 import { NAV_LINKS } from "@/lib/constants";
 import type { NavCategory } from "@/components/layout/site-header";
 
-export function SiteFooter({ categories = [] }: { categories?: NavCategory[] }) {
+export type FooterSocial = { label: string; href: string };
+
+export function SiteFooter({
+  categories = [],
+  socials = [],
+}: {
+  categories?: NavCategory[];
+  socials?: FooterSocial[];
+}) {
   return (
     <footer className="surface-depth mt-auto">
       <div className="container-lyra grid gap-10 py-14 md:grid-cols-[1.2fr_1fr_1fr]">
@@ -19,6 +27,22 @@ export function SiteFooter({ categories = [] }: { categories?: NavCategory[] }) 
             Hub digital pentru pescari: produse, articole, emisiuni și povestea
             brandului — construit de pescari, pentru pescari.
           </p>
+          {socials.length > 0 ? (
+            <ul className="mt-6 space-y-2 text-sm text-cream/80">
+              {socials.map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="link-underline hover:text-cream"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
         <div>
           <h2 className="mb-3 font-display text-2xl tracking-wide">Descoperă</h2>

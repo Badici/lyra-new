@@ -48,6 +48,15 @@ export const IN_STOCK_MESSAGE_RO = "În stoc. Poți adăuga produsul direct în 
 export const REQUIRES_DELIVERY_CONFIRMATION_LABEL_RO =
   "Necesită confirmarea termenului de livrare";
 
+export const SHOP_EMAIL = "raresbadici@gmail.com";
+const LEGACY_CONTACT_EMAIL = "contact@lyrabaits.ro";
+
+export function resolveShopEmail(value?: string | null) {
+  const email = value?.trim().toLowerCase();
+  if (!email || email === LEGACY_CONTACT_EMAIL) return SHOP_EMAIL;
+  return value!.trim();
+}
+
 export const SITE_NAME = "LyraBaits";
 export const SITE_TAGLINE = "Mai mult decât echipament de pescuit";
 export const PRODUCTION_SITE_URL = "https://lyrabaits.ro";

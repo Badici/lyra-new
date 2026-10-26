@@ -258,7 +258,7 @@ async function main() {
       {
         key: "contact",
         value: {
-          email: process.env.CONTACT_EMAIL ?? "contact@lyrabaits.ro",
+          email: process.env.CONTACT_EMAIL ?? "raresbadici@gmail.com",
           whatsapp: process.env.WHATSAPP_PHONE ?? "40728241412",
         },
       },
@@ -268,6 +268,7 @@ async function main() {
           facebook: "",
           instagram: "",
           youtube: "",
+          tiktok: "",
         },
       },
       {

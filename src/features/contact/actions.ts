@@ -2,7 +2,9 @@
 
 import { db } from "@/db/client";
 import { contactMessages } from "@/db/schema";
+import { SHOP_EMAIL } from "@/lib/constants";
 import { contactSchema } from "@/lib/validators";
+import { deliverEmail } from "@/server/email/deliver";
 
 export type ContactActionState =
   | { ok: true; message: string }
@@ -36,6 +38,20 @@ export async function submitContactAction(
       phone: parsed.data.phone ?? null,
       subject: parsed.data.subject ?? null,
       message: parsed.data.message,
+    });
+    const lines = [
+      `Nume: ${parsed.data.name}`,
+      `Email: ${parsed.data.email}`,
+      parsed.data.phone ? `Telefon: ${parsed.data.phone}` : "",
+      parsed.data.subject ? `Subiect: ${parsed.data.subject}` : "",
+      "",
+      parsed.data.message,
+    ].filter((line) => line !== "");
+    await deliverEmail({
+      to: SHOP_EMAIL,
+      replyTo: parsed.data.email,
+      subject: `[LyraBaits] Mesaj de la ${parsed.data.name}`,
+      text: lines.join("\n"),
     });
   } catch (error) {
     console.error("[contact]", error);

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ContactForm } from "@/features/contact/contact-form";
 import { getSiteSettings } from "@/features/settings/queries";
+import { SHOP_EMAIL } from "@/lib/constants";
 import { whatsappService } from "@/server/whatsapp";
 
 export const metadata: Metadata = {
@@ -12,9 +13,11 @@ export const metadata: Metadata = {
 export default async function ContactPage() {
   let phoneDisplay = "+40 728 241 412";
   let whatsappUrl = "https://wa.me/40728241412";
+  let email = SHOP_EMAIL;
 
   try {
     const settings = await getSiteSettings();
+    email = settings.contact.email || SHOP_EMAIL;
     const digits = await whatsappService.resolvePhoneDigits();
     phoneDisplay = settings.contact.whatsapp.startsWith("+")
       ? settings.contact.whatsapp
@@ -39,7 +42,11 @@ export default async function ContactPage() {
           <dl className="mb-8 space-y-3 text-sm">
             <div>
               <dt className="text-muted">Email</dt>
-              <dd>contact@lyrabaits.ro</dd>
+              <dd>
+                <a href={`mailto:${email}`} className="hover:text-accent">
+                  {email}
+                </a>
+              </dd>
             </div>
             <div>
               <dt className="text-muted">WhatsApp</dt>

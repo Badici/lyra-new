@@ -214,21 +214,25 @@ export async function createOrder(
     .filter(Boolean)
     .join("\n");
 
-  await emailService.sendNewOrderNotification({
-    orderNumber,
-    customerName: input.customerName,
-    customerEmail: input.customerEmail,
-    customerPhone: input.customerPhone,
-    address,
-    items: lineItems.map((line) => ({
-      name: line.productName,
-      quantity: line.quantity,
-      totalLabel: formatRon(line.lineTotalBani),
-    })),
-    totalLabel,
-    notes: input.notes,
-    requiresDeliveryConfirmation: orderNeedsConfirm,
-  });
+  try {
+    await emailService.sendNewOrderNotification({
+      orderNumber,
+      customerName: input.customerName,
+      customerEmail: input.customerEmail,
+      customerPhone: input.customerPhone,
+      address,
+      items: lineItems.map((line) => ({
+        name: line.productName,
+        quantity: line.quantity,
+        totalLabel: formatRon(line.lineTotalBani),
+      })),
+      totalLabel,
+      notes: input.notes,
+      requiresDeliveryConfirmation: orderNeedsConfirm,
+    });
+  } catch (error) {
+    console.error("[order email]", error);
+  }
 
   const message = whatsappService.buildOrderMessage({
     orderNumber,

@@ -8,12 +8,21 @@ import { SECTION_IMAGES } from "@/lib/section-copy";
 import { requireAdmin } from "@/server/auth/session";
 import { saveFailure, validationError, type FormResult } from "@/server/forms/result";
 
+function socialUrl(value: string | undefined) {
+  const trimmed = (value ?? "").trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.includes(".")) return `https://${trimmed.replace(/^\/+/, "")}`;
+  return "";
+}
+
 const settingsSchema = z.object({
   contactEmail: z.string().trim().email(),
   contactWhatsapp: z.string().trim().min(8).max(32),
   socialFacebook: z.string().trim().optional(),
   socialInstagram: z.string().trim().optional(),
   socialYoutube: z.string().trim().optional(),
+  socialTiktok: z.string().trim().optional(),
   orderPrefix: z.string().trim().min(2).max(20),
 });
 
@@ -27,6 +36,7 @@ export async function updateSiteSettings(formData: FormData): Promise<FormResult
     socialFacebook: formData.get("socialFacebook") || "",
     socialInstagram: formData.get("socialInstagram") || "",
     socialYoutube: formData.get("socialYoutube") || "",
+    socialTiktok: formData.get("socialTiktok") || "",
     orderPrefix: formData.get("orderPrefix"),
   });
 
@@ -58,18 +68,20 @@ export async function updateSiteSettings(formData: FormData): Promise<FormResult
     .values({
       key: "social",
       value: {
-        facebook: data.socialFacebook ?? "",
-        instagram: data.socialInstagram ?? "",
-        youtube: data.socialYoutube ?? "",
+        facebook: socialUrl(data.socialFacebook),
+        instagram: socialUrl(data.socialInstagram),
+        youtube: socialUrl(data.socialYoutube),
+        tiktok: socialUrl(data.socialTiktok),
       },
     })
     .onConflictDoUpdate({
       target: siteSettings.key,
       set: {
         value: {
-          facebook: data.socialFacebook ?? "",
-          instagram: data.socialInstagram ?? "",
-          youtube: data.socialYoutube ?? "",
+          facebook: socialUrl(data.socialFacebook),
+          instagram: socialUrl(data.socialInstagram),
+          youtube: socialUrl(data.socialYoutube),
+          tiktok: socialUrl(data.socialTiktok),
         },
       },
     });
@@ -86,6 +98,7 @@ export async function updateSiteSettings(formData: FormData): Promise<FormResult
     });
 
   revalidatePath("/admin/setari");
+  revalidatePath("/", "layout");
   return { ok: true, message: "Setările au fost salvate." };
   } catch (error) {
     return saveFailure(error);
