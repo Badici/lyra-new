@@ -42,13 +42,14 @@ export const SECTION_IMAGES = {
     src: "/pagina-emisiuni.png",
     alt: "Pescar pe ponton, aplecat peste o lansetă, cu lacul și copacii în spate",
   },
+  poveste: {
+    src: "/despre_noi_2.jpeg",
+    alt: "Pescar LyraBaits ținând un crap, la apus, pe malul apei",
+  },
 } as const;
 
 /** A doua fotografie din povestea brandului. */
-export const ABOUT_IMAGE = {
-  src: "/despre_noi_2.jpeg",
-  alt: "Pescar LyraBaits ținând un crap, la apus, pe malul apei",
-} as const;
+export const ABOUT_IMAGE = SECTION_IMAGES.poveste;
 
 /** Câte o poză de produs, folosită când o secțiune nu are încă imagine proprie. */
 export const EXAMPLE_PRODUCT_IMAGES = [

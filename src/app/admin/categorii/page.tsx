@@ -18,7 +18,7 @@ export default async function AdminCategoriesPage() {
 
       <AdminForm action={upsertCategory} className="admin-card grid max-w-2xl gap-3 p-5">
         <h2 className="font-display text-2xl">Categorie nouă</h2>
-        <ImageField name="imageKey" label="Imagine categorie" hint="2100×900 px" />
+        <ImageField name="imageKey" label="Imagine categorie" preset="banner" />
         <input name="name" required placeholder="Nume" className="admin-input" />
         <input name="slug" placeholder="Slug (opțional)" className="admin-input" />
         <textarea name="shortDescription" placeholder="Descriere scurtă" className="admin-textarea" />
@@ -39,7 +39,7 @@ export default async function AdminCategoriesPage() {
                 <ImageField
                   name="imageKey"
                   label="Imagine categorie"
-                  hint="2100×900 px"
+                  preset="banner"
                   defaultValue={cat.imageKey}
                 />
               </div>

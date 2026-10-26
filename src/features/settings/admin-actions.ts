@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db/client";
 import { siteSettings } from "@/db/schema";
+import { SECTION_IMAGES } from "@/lib/section-copy";
 import { requireAdmin } from "@/server/auth/session";
 import { saveFailure, validationError, type FormResult } from "@/server/forms/result";
 
@@ -86,6 +87,50 @@ export async function updateSiteSettings(formData: FormData): Promise<FormResult
 
   revalidatePath("/admin/setari");
   return { ok: true, message: "Setările au fost salvate." };
+  } catch (error) {
+    return saveFailure(error);
+  }
+}
+
+const sectionImageSchema = z.object({
+  produse: z.string().trim().optional(),
+  articole: z.string().trim().optional(),
+  emisiuni: z.string().trim().optional(),
+  poveste: z.string().trim().optional(),
+});
+
+export async function updateSectionImages(formData: FormData): Promise<FormResult> {
+  try {
+    await requireAdmin();
+    const parsed = sectionImageSchema.safeParse({
+      produse: formData.get("produse") || "",
+      articole: formData.get("articole") || "",
+      emisiuni: formData.get("emisiuni") || "",
+      poveste: formData.get("poveste") || "",
+    });
+    if (!parsed.success) return { ok: false, error: validationError(parsed.error) };
+
+    const value = Object.fromEntries(
+      (Object.keys(SECTION_IMAGES) as (keyof typeof SECTION_IMAGES)[]).map((key) => [
+        key,
+        parsed.data[key] || "",
+      ]),
+    );
+
+    await db
+      .insert(siteSettings)
+      .values({ key: "section_images", value })
+      .onConflictDoUpdate({
+        target: siteSettings.key,
+        set: { value },
+      });
+
+    revalidatePath("/");
+    revalidatePath("/produse");
+    revalidatePath("/articole");
+    revalidatePath("/emisiuni");
+    revalidatePath("/admin/imagini");
+    return { ok: true, message: "Imaginile au fost salvate." };
   } catch (error) {
     return saveFailure(error);
   }

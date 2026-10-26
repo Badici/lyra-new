@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { ShowCard } from "@/components/public/show-card";
 import { MediaImage } from "@/components/ui/media-image";
 import { getPublishedShows } from "@/features/products/queries";
-import { SECTION_COPY, SECTION_IMAGES } from "@/lib/section-copy";
+import { getSectionImages } from "@/features/settings/queries";
+import { SECTION_COPY } from "@/lib/section-copy";
 
 export const metadata: Metadata = {
   title: "Emisiuni",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function EmisiuniPage() {
+  const sectionImages = await getSectionImages();
   let shows: Awaited<ReturnType<typeof getPublishedShows>> = [];
   try {
     shows = await getPublishedShows();
@@ -29,9 +31,9 @@ export default async function EmisiuniPage() {
             <p className="max-w-2xl text-muted">{SECTION_COPY.emisiuni.subtitle}</p>
           </div>
           <MediaImage
-            src={SECTION_IMAGES.emisiuni.src}
+            src={sectionImages.emisiuni.src}
             seed="emisiuni-lead"
-            alt={SECTION_IMAGES.emisiuni.alt}
+            alt={sectionImages.emisiuni.alt}
             ratio="wide"
           />
         </div>

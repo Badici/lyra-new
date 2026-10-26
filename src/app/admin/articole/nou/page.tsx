@@ -11,7 +11,7 @@ export default function NewArticlePage() {
     <div className="space-y-6 p-4 md:p-8">
       <PageHeader title="Articol nou" backHref="/admin/articole" />
       <AdminForm action={upsertArticle} returnTo="/admin/articole" className="admin-card grid max-w-3xl gap-4 p-5">
-        <ImageField name="coverImageKey" label="Banner / cover" hint="2100×900 px" />
+        <ImageField name="coverImageKey" label="Banner / cover" preset="banner" />
         <input name="title" required placeholder="Titlu" className="admin-input" />
         <input name="slug" placeholder="Slug (opțional)" className="admin-input" />
         <textarea name="excerpt" placeholder="Rezumat" className="admin-textarea" />

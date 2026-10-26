@@ -68,6 +68,7 @@ export const ADMIN_NAV = [
   { href: "/admin/stoc", label: "Stoc" },
   { href: "/admin/articole", label: "Articole" },
   { href: "/admin/emisiuni", label: "Emisiuni" },
+  { href: "/admin/imagini", label: "Imagini" },
   { href: "/admin/clienti", label: "Clienți" },
   { href: "/admin/setari", label: "Setări" },
 ] as const;

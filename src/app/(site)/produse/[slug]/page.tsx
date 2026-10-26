@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { PageStats } from "@/components/public/page-stats";
 import { ProductCard } from "@/components/public/product-card";
 import { ProductPurchase } from "@/components/public/product-purchase";
+import { ProductGallery } from "@/components/public/product-gallery";
 import { MediaImage } from "@/components/ui/media-image";
 import {
   getProductBySlug,
@@ -57,6 +58,12 @@ export default async function ProductPage({ params }: Props) {
 
   if (!product) notFound();
 
+  const photos = product.gallery?.length
+    ? product.gallery
+    : product.mainImageKey
+      ? [product.mainImageKey]
+      : [];
+
   return (
     <article className="section-lyra">
       <div className="container-lyra">
@@ -73,13 +80,17 @@ export default async function ProductPage({ params }: Props) {
         </nav>
 
         <div className="grid gap-10 lg:grid-cols-2">
-          <MediaImage
-            src={product.mainImageKey}
-            seed={`product-${product.slug}`}
-            alt={product.name}
-            ratio="square"
-            priority
-          />
+          {photos.length > 0 ? (
+            <ProductGallery images={photos} alt={product.name} />
+          ) : (
+            <MediaImage
+              src={null}
+              seed={`product-${product.slug}`}
+              alt={product.name}
+              ratio="square"
+              priority
+            />
+          )}
 
           <div>
             <h1 className="mb-3 font-display text-5xl tracking-wide">{product.name}</h1>

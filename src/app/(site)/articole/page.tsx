@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { ArticleCard } from "@/components/public/article-card";
 import { MediaImage } from "@/components/ui/media-image";
 import { getPublishedArticles } from "@/features/products/queries";
-import { SECTION_COPY, SECTION_IMAGES } from "@/lib/section-copy";
+import { getSectionImages } from "@/features/settings/queries";
+import { SECTION_COPY } from "@/lib/section-copy";
 
 export const metadata: Metadata = {
   title: "Articole",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ArticolePage() {
+  const sectionImages = await getSectionImages();
   let articles: Awaited<ReturnType<typeof getPublishedArticles>> = [];
   try {
     articles = await getPublishedArticles();
@@ -29,9 +31,9 @@ export default async function ArticolePage() {
             <p className="max-w-2xl text-muted">{SECTION_COPY.articole.subtitle}</p>
           </div>
           <MediaImage
-            src={SECTION_IMAGES.articole.src}
+            src={sectionImages.articole.src}
             seed="articole-lead"
-            alt={SECTION_IMAGES.articole.alt}
+            alt={sectionImages.articole.alt}
             ratio="wide"
           />
         </div>

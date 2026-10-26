@@ -28,7 +28,7 @@ export default async function EditArticlePage({ params }: { params: Params }) {
         <ImageField
           name="coverImageKey"
           label="Banner / cover"
-          hint="2100×900 px"
+          preset="banner"
           defaultValue={article.coverImageKey}
         />
         <input name="title" required defaultValue={article.title} className="admin-input" />

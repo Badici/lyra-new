@@ -12,13 +12,25 @@ import {
   OUT_OF_STOCK_MESSAGE_RO,
   REQUIRES_DELIVERY_CONFIRMATION_LABEL_RO,
 } from "@/lib/constants";
+import { formatDateTime } from "@/lib/dates";
 import { formatRon } from "@/lib/money";
 
 type Params = Promise<{ id: string }>;
 
 export default async function AdminOrderDetailPage({ params }: { params: Params }) {
   const { id } = await params;
-  const order = await getAdminOrderById(id);
+  let order: Awaited<ReturnType<typeof getAdminOrderById>>;
+  try {
+    order = await getAdminOrderById(id);
+  } catch (error) {
+    console.error("[admin order]", error);
+    return (
+      <div className="space-y-6 p-4 md:p-8">
+        <PageHeader title="Comandă" backHref="/admin/comenzi" />
+        <p className="text-sm text-muted">Nu am putut deschide comanda. Reîncearcă din listă.</p>
+      </div>
+    );
+  }
   if (!order) notFound();
 
   return (
@@ -26,7 +38,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Params 
       <PageHeader
         title={order.orderNumber}
         backHref="/admin/comenzi"
-        description={`Creată ${order.createdAt.toISOString()}`}
+        description={`Creată ${formatDateTime(order.createdAt)}`}
       />
 
       {order.requiresDeliveryConfirmation ? (

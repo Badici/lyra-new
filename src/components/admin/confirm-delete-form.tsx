@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAdminBusy } from "@/components/admin/admin-busy";
 import { SubmitButton } from "@/components/admin/submit-button";
 import type { FormResult } from "@/server/forms/result";
 
@@ -22,9 +23,16 @@ export function ConfirmDeleteForm({
   returnTo,
 }: ConfirmDeleteFormProps) {
   const router = useRouter();
+  const busy = useAdminBusy();
   const formRef = useRef<HTMLFormElement>(null);
   const lock = useRef(false);
   const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    if (!pending) return;
+    busy.begin();
+    return () => busy.end();
+  }, [pending, busy]);
 
   return (
     <form

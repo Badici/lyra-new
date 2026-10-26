@@ -7,12 +7,7 @@ export type EmailPayload = {
 
 export interface EmailService {
   send(payload: EmailPayload): Promise<{ ok: boolean; skipped?: boolean }>;
-  sendNewOrderNotification(input: {
-    orderNumber: string;
-    customerName: string;
-    totalLabel: string;
-    requiresDeliveryConfirmation: boolean;
-  }): Promise<void>;
+  sendNewOrderNotification(input: import("@/server/email/order-message").OrderEmailInput): Promise<void>;
   sendOrderConfirmation(input: {
     to: string;
     orderNumber: string;

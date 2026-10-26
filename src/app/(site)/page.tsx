@@ -7,14 +7,14 @@ import { Reveal } from "@/components/motion/reveal";
 import { Stagger } from "@/components/motion/stagger";
 import { Parallax } from "@/components/motion/parallax";
 import { LinkButton } from "@/components/ui/link-button";
-import Image from "next/image";
 import {
   getPopularProducts,
   getPublishedArticles,
   getPublishedShows,
 } from "@/features/products/queries";
 import { PRODUCTION_SITE_URL, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
-import { ABOUT_IMAGE, SECTION_COPY, SECTION_IMAGES } from "@/lib/section-copy";
+import { getSectionImages } from "@/features/settings/queries";
+import { SECTION_COPY } from "@/lib/section-copy";
 
 export const metadata: Metadata = {
   title: "Acasă",
@@ -26,35 +26,35 @@ export const metadata: Metadata = {
   },
 };
 
-function heroSlides(): HeroSlide[] {
+function heroSlides(images: Awaited<ReturnType<typeof getSectionImages>>): HeroSlide[] {
   return [
     {
       id: "produse",
       ...SECTION_COPY.produse,
       seed: "hero-produse",
-      image: SECTION_IMAGES.produse.src,
-      imageAlt: SECTION_IMAGES.produse.alt,
+      image: images.produse.src,
+      imageAlt: images.produse.alt,
     },
     {
       id: "articole",
       ...SECTION_COPY.articole,
       seed: "hero-articole",
-      image: SECTION_IMAGES.articole.src,
-      imageAlt: SECTION_IMAGES.articole.alt,
+      image: images.articole.src,
+      imageAlt: images.articole.alt,
     },
     {
       id: "emisiuni",
       ...SECTION_COPY.emisiuni,
       seed: "hero-emisiuni",
-      image: SECTION_IMAGES.emisiuni.src,
-      imageAlt: SECTION_IMAGES.emisiuni.alt,
+      image: images.emisiuni.src,
+      imageAlt: images.emisiuni.alt,
     },
     {
       id: "poveste",
       ...SECTION_COPY.poveste,
       seed: "hero-poveste",
-      image: ABOUT_IMAGE.src,
-      imageAlt: ABOUT_IMAGE.alt,
+      image: images.poveste.src,
+      imageAlt: images.poveste.alt,
     },
   ];
 }
@@ -78,7 +78,10 @@ async function loadHomeData() {
 }
 
 export default async function HomePage() {
-  const { articles, shows, products } = await loadHomeData();
+  const [{ articles, shows, products }, sectionImages] = await Promise.all([
+    loadHomeData(),
+    getSectionImages(),
+  ]);
   const [featuredArticle, ...restArticles] = articles;
 
   const orgJsonLd = {
@@ -97,7 +100,7 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
       />
 
-      <HeroCarousel slides={heroSlides()} />
+      <HeroCarousel slides={heroSlides(sectionImages)} />
 
       <section className="section-lyra section-veil">
         <div className="container-lyra relative">
@@ -208,12 +211,11 @@ export default async function HomePage() {
           </Reveal>
           <Parallax offset={40} speed={0.85}>
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-depth shadow-soft ring-1 ring-cream/10">
-              <Image
-                src={ABOUT_IMAGE.src}
-                alt={ABOUT_IMAGE.alt}
-                fill
-                sizes="(min-width: 768px) 36rem, 100vw"
-                className="object-cover"
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={sectionImages.poveste.src}
+                alt={sectionImages.poveste.alt}
+                className="absolute inset-0 h-full w-full object-cover"
               />
             </div>
           </Parallax>

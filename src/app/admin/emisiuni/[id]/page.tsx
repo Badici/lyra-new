@@ -44,7 +44,7 @@ export default async function AdminShowDetailPage({
         <ImageField
           name="coverImageKey"
           label="Copertă emisiune"
-          hint="2100×900 px"
+          preset="banner"
           defaultValue={show.coverImageKey}
         />
         <div className="grid gap-4 sm:grid-cols-2">

@@ -20,7 +20,7 @@ export default async function AdminShowsPage() {
 
       <AdminForm action={upsertShow} className="admin-card grid max-w-2xl gap-3 p-5">
         <h2 className="font-display text-2xl">Emisiune nouă</h2>
-        <ImageField name="coverImageKey" label="Copertă emisiune" hint="2100×900 px" />
+        <ImageField name="coverImageKey" label="Copertă emisiune" preset="banner" />
         <input name="name" required placeholder="Nume emisiune" className="admin-input" />
         <textarea name="shortDescription" placeholder="Descriere scurtă" className="admin-textarea" />
         <select name="status" defaultValue="DRAFT" className="admin-select">

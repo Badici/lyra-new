@@ -1,6 +1,6 @@
 import { and, desc, eq, ilike, or } from "drizzle-orm";
 import { db } from "@/db/client";
-import { orderItems, orderStatusHistory, orders } from "@/db/schema";
+import { orderItems, orders } from "@/db/schema";
 import type { OrderStatus } from "@/lib/constants";
 
 export async function getAdminOrders(filters?: {
@@ -42,9 +42,7 @@ export async function getAdminOrderById(id: string) {
     where: eq(orders.id, id),
     with: {
       items: true,
-      statusHistory: {
-        orderBy: [desc(orderStatusHistory.createdAt)],
-      },
+      statusHistory: true,
     },
   });
 }

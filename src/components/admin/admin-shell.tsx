@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X, ExternalLink } from "lucide-react";
+import { AdminBusyProvider } from "@/components/admin/admin-busy";
 import { ADMIN_NAV } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,7 @@ export function AdminShell({ userName, children }: AdminShellProps) {
   );
 
   return (
+    <AdminBusyProvider>
     <div className="admin-shell flex min-h-dvh">
       {/* Desktop sidebar */}
       <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-[var(--surface)] md:flex">
@@ -86,5 +88,6 @@ export function AdminShell({ userName, children }: AdminShellProps) {
         <main className="flex-1 overflow-x-hidden px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
     </div>
+    </AdminBusyProvider>
   );
 }

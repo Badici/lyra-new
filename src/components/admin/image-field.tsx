@@ -2,13 +2,17 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { ImageCropDialog } from "@/components/admin/image-crop-dialog";
+import { useAdminBusy } from "@/components/admin/admin-busy";
+import { uploadAdminImage } from "@/components/admin/upload-client";
+import { IMAGE_PRESETS, type ImagePresetKey } from "@/lib/image-presets";
 import { mediaUrl } from "@/lib/media-url";
 import { cn } from "@/lib/utils";
 
 type ImageFieldProps = {
   name: string;
   label?: string;
-  hint?: string;
+  preset: ImagePresetKey;
   defaultValue?: string | null;
   className?: string;
 };
@@ -16,32 +20,26 @@ type ImageFieldProps = {
 export function ImageField({
   name,
   label = "Imagine",
-  hint,
+  preset,
   defaultValue,
   className,
 }: ImageFieldProps) {
+  const spec = IMAGE_PRESETS[preset];
+  const busy = useAdminBusy();
   const [url, setUrl] = useState(defaultValue ?? "");
-  const [uploading, setUploading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   const preview = mediaUrl(url);
 
-  async function onFileChange(file: File | null) {
-    if (!file) return;
-    setUploading(true);
+  async function saveCrop(blob: Blob) {
+    setFile(null);
+    busy.begin();
     try {
-      const body = new FormData();
-      body.set("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body });
-      const data = (await res.json()) as { url?: string; error?: string };
-      if (!res.ok || !data.url) {
-        toast.error(data.error ?? "Upload eșuat");
-        return;
-      }
-      setUrl(data.url);
+      setUrl(await uploadAdminImage(blob));
       toast.success("Imagine încărcată");
-    } catch {
-      toast.error("Upload eșuat");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload eșuat");
     } finally {
-      setUploading(false);
+      busy.end();
     }
   }
 
@@ -49,7 +47,7 @@ export function ImageField({
     <div className={cn("space-y-2", className)}>
       <label className="admin-label">
         {label}
-        {hint ? <span className="font-normal text-muted"> ({hint})</span> : null}
+        <span className="font-normal text-muted"> ({spec.label})</span>
       </label>
       <input type="hidden" name={name} value={url} />
       {preview ? (
@@ -66,13 +64,16 @@ export function ImageField({
       )}
       <div className="flex flex-wrap gap-2">
         <label className="inline-flex cursor-pointer items-center rounded-xl bg-moss px-3 py-2 text-xs text-cream">
-          {uploading ? "Se încarcă…" : "Încarcă fișier"}
+          Încarcă și încadrează
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
             className="hidden"
-            disabled={uploading}
-            onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
+            onChange={(event) => {
+              const next = event.target.files?.[0] ?? null;
+              event.target.value = "";
+              if (next) setFile(next);
+            }}
           />
         </label>
         {url ? (
@@ -91,8 +92,16 @@ export function ImageField({
         className="admin-input"
         placeholder="sau lipește un URL de imagine"
         value={url}
-        onChange={(e) => setUrl(e.target.value)}
+        onChange={(event) => setUrl(event.target.value)}
       />
+      {file ? (
+        <ImageCropDialog
+          file={file}
+          preset={preset}
+          onCancel={() => setFile(null)}
+          onConfirm={(blob) => void saveCrop(blob)}
+        />
+      ) : null}
     </div>
   );
 }

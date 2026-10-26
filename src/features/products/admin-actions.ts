@@ -172,6 +172,12 @@ export async function upsertProduct(formData: FormData): Promise<FormResult> {
     const variants = readVariants(formData);
     if (!variants.ok) return variants;
 
+    const gallery = formData
+      .getAll("gallery")
+      .map(String)
+      .map((url) => url.trim())
+      .filter(Boolean);
+
     const priceBani = toBani(data.priceRon);
     const compareAtPriceBani =
       data.compareAtPriceRon != null ? toBani(data.compareAtPriceRon) : null;
@@ -197,7 +203,8 @@ export async function upsertProduct(formData: FormData): Promise<FormResult> {
       isActive: data.isActive ?? true,
       isFeatured: data.isFeatured ?? false,
       isPopular: data.isPopular ?? false,
-      mainImageKey: data.mainImageKey || null,
+      mainImageKey: gallery[0] ?? null,
+      gallery,
     };
 
     const productId = data.id ?? (await insertProduct(payload));

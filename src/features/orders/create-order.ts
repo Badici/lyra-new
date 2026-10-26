@@ -206,19 +206,28 @@ export async function createOrder(
   const itemsSummary = lineItems
     .map((l) => `${l.productName} x${l.quantity}`)
     .join(", ");
+  const address = [
+    input.shippingStreetLine,
+    [input.shippingCity, input.shippingCounty, input.shippingPostalCode].filter(Boolean).join(", "),
+    input.shippingDetails,
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   await emailService.sendNewOrderNotification({
     orderNumber,
     customerName: input.customerName,
+    customerEmail: input.customerEmail,
+    customerPhone: input.customerPhone,
+    address,
+    items: lineItems.map((line) => ({
+      name: line.productName,
+      quantity: line.quantity,
+      totalLabel: formatRon(line.lineTotalBani),
+    })),
     totalLabel,
+    notes: input.notes,
     requiresDeliveryConfirmation: orderNeedsConfirm,
-  });
-
-  await emailService.sendOrderConfirmation({
-    to: input.customerEmail,
-    orderNumber,
-    customerName: input.customerName,
-    totalLabel,
   });
 
   const message = whatsappService.buildOrderMessage({

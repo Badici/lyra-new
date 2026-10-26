@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAdminBusy } from "@/components/admin/admin-busy";
 import type { FormResult } from "@/server/forms/result";
 
 type AdminFormProps = {
@@ -14,8 +15,15 @@ type AdminFormProps = {
 
 export function AdminForm({ action, returnTo, className, children }: AdminFormProps) {
   const router = useRouter();
+  const busy = useAdminBusy();
   const lock = useRef(false);
   const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    if (!pending) return;
+    busy.begin();
+    return () => busy.end();
+  }, [pending, busy]);
 
   async function onSubmit(formData: FormData) {
     if (lock.current) return;

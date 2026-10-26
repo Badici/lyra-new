@@ -5,6 +5,9 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ImageCropDialog } from "@/components/admin/image-crop-dialog";
+import { useAdminBusy } from "@/components/admin/admin-busy";
+import { uploadAdminImage } from "@/components/admin/upload-client";
 import { cn } from "@/lib/utils";
 
 type TiptapEditorProps = {
@@ -17,7 +20,8 @@ export function TiptapEditor({ name, initialContent, className }: TiptapEditorPr
   const [jsonValue, setJsonValue] = useState(
     JSON.stringify(initialContent ?? { type: "doc", content: [] }),
   );
-  const [uploading, setUploading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const busy = useAdminBusy();
 
   const editor = useEditor({
     extensions: [
@@ -41,24 +45,18 @@ export function TiptapEditor({ name, initialContent, className }: TiptapEditorPr
     },
   });
 
-  async function insertImage(file: File | null) {
-    if (!file || !editor) return;
-    setUploading(true);
+  async function insertImage(blob: Blob) {
+    if (!editor) return;
+    setFile(null);
+    busy.begin();
     try {
-      const body = new FormData();
-      body.set("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body });
-      const data = (await res.json()) as { url?: string; error?: string };
-      if (!res.ok || !data.url) {
-        toast.error(data.error ?? "Upload eșuat");
-        return;
-      }
-      editor.chain().focus().setImage({ src: data.url }).run();
+      const url = await uploadAdminImage(blob);
+      editor.chain().focus().setImage({ src: url }).run();
       toast.success("Imagine inserată");
-    } catch {
-      toast.error("Upload eșuat");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload eșuat");
     } finally {
-      setUploading(false);
+      busy.end();
     }
   }
 
@@ -96,20 +94,28 @@ export function TiptapEditor({ name, initialContent, className }: TiptapEditorPr
           onClick={() => editor?.chain().focus().toggleOrderedList().run()}
         />
         <label className="cursor-pointer rounded-lg px-2.5 py-1 text-xs font-medium text-muted hover:bg-forest/60 hover:text-cream">
-          {uploading ? "…" : "Imagine (1600×900 px)"}
+          Imagine (1600×900 px)
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
             className="hidden"
-            disabled={uploading}
-            onChange={(e) => {
-              void insertImage(e.target.files?.[0] ?? null);
-              e.target.value = "";
+            onChange={(event) => {
+              const next = event.target.files?.[0] ?? null;
+              event.target.value = "";
+              if (next) setFile(next);
             }}
           />
         </label>
       </div>
       <EditorContent editor={editor} />
+      {file ? (
+        <ImageCropDialog
+          file={file}
+          preset="inline"
+          onCancel={() => setFile(null)}
+          onConfirm={(blob) => void insertImage(blob)}
+        />
+      ) : null}
       <input type="hidden" name={name} value={jsonValue} readOnly />
     </div>
   );

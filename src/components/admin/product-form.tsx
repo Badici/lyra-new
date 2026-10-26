@@ -1,5 +1,5 @@
 import { AdminForm } from "@/components/admin/admin-form";
-import { ImageField } from "@/components/admin/image-field";
+import { ProductGalleryField } from "@/components/admin/product-gallery-field";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { VariantFields, type VariantFieldValue } from "@/components/admin/variant-fields";
 import { upsertProduct } from "@/features/products/admin-actions";
@@ -24,6 +24,7 @@ export type ProductFormValues = {
   isFeatured: boolean;
   isPopular: boolean;
   mainImageKey: string | null;
+  gallery?: string[] | null;
   categoryLinks?: { categoryId: string }[];
   variants?: VariantFieldValue[];
 };
@@ -41,11 +42,14 @@ export function ProductForm({
   return (
     <AdminForm action={upsertProduct} returnTo="/admin/produse" className="admin-card grid max-w-3xl gap-4 p-5">
       {product ? <input type="hidden" name="id" value={product.id} /> : null}
-      <ImageField
-        name="mainImageKey"
-        label="Imagine principală"
-        hint="1600×1600 px"
-        defaultValue={product?.mainImageKey}
+      <ProductGalleryField
+        images={
+          product?.gallery?.length
+            ? product.gallery
+            : product?.mainImageKey
+              ? [product.mainImageKey]
+              : []
+        }
       />
       <div>
         <label className="admin-label" htmlFor="name">
