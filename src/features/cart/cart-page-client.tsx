@@ -1,15 +1,36 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { LinkButton } from "@/components/ui/link-button";
-import { PlaceholderMedia } from "@/components/ui/placeholder-media";
+import { MediaImage } from "@/components/ui/media-image";
 import { StockNotice } from "@/components/public/stock-notice";
+import { lookupCartImages } from "@/features/cart/images";
 import { useCart } from "@/features/cart/cart-context";
 import { formatRon } from "@/lib/money";
 
 export function CartPageClient() {
   const { items, subtotalBani, setQuantity, removeItem, hydrated } = useCart();
+  const [images, setImages] = useState<Record<string, string | null>>({});
+  const missing = items
+    .filter((item) => !item.imageKey)
+    .map((item) => item.slug)
+    .join("\n");
+
+  useEffect(() => {
+    const slugs = missing.split("\n").filter(Boolean);
+    if (slugs.length === 0) return;
+    let cancelled = false;
+    lookupCartImages(slugs)
+      .then((found) => {
+        if (!cancelled) setImages(found);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [missing]);
 
   if (!hydrated) {
     return (
@@ -42,7 +63,14 @@ export function CartPageClient() {
                 key={item.lineId}
                 className="grid gap-4 border-b border-border pb-6 sm:grid-cols-[7rem_1fr_auto]"
               >
-                <PlaceholderMedia seed={`product-${item.slug}`} ratio="square" className="w-28" />
+                <Link href={`/produse/${item.slug}`} className="block w-28">
+                  <MediaImage
+                    src={item.imageKey || images[item.slug]}
+                    seed={`product-${item.slug}`}
+                    alt={item.name}
+                    ratio="square"
+                  />
+                </Link>
                 <div>
                   <Link
                     href={`/produse/${item.slug}`}

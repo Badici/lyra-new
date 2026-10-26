@@ -20,6 +20,7 @@ type Props = {
   productId: string;
   slug: string;
   name: string;
+  imageKey?: string | null;
   priceBani: number;
   compareAtPriceBani?: number | null;
   stockQuantity: number;
@@ -30,6 +31,7 @@ export function ProductPurchase({
   productId,
   slug,
   name,
+  imageKey,
   priceBani,
   compareAtPriceBani,
   stockQuantity,
@@ -64,6 +66,7 @@ export function ProductPurchase({
         variantId: variant?.id ?? null,
         slug,
         name: lineName,
+        imageKey,
         priceBani: unitPrice,
         stockQuantity: stock,
       },

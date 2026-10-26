@@ -15,6 +15,7 @@ export type CartItem = {
   variantId?: string | null;
   slug: string;
   name: string;
+  imageKey?: string | null;
   priceBani: number;
   quantity: number;
   stockQuantity: number;
