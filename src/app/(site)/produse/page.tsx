@@ -67,10 +67,10 @@ export default async function ProdusePage() {
                     </p>
                   ) : null}
                   <Link
-                    href={`#${category.slug}`}
+                    href={`/produse/categorie/${category.slug}`}
                     className="mt-4 inline-block text-sm text-accent underline-offset-4 hover:underline"
                   >
-                    Explorează {category.name}
+                    Vezi categoria {category.name}
                   </Link>
                 </div>
                 <MediaImage

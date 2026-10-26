@@ -4,19 +4,23 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, ShoppingBag, User, X } from "lucide-react";
+import { ChevronDown, Menu, ShoppingBag, User, X } from "lucide-react";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/features/cart/cart-context";
 
+export type NavCategory = { name: string; slug: string };
+
 type SiteHeaderProps = {
   showAdminLink?: boolean;
+  categories?: NavCategory[];
 };
 
-export function SiteHeader({ showAdminLink = false }: SiteHeaderProps) {
+export function SiteHeader({ showAdminLink = false, categories = [] }: SiteHeaderProps) {
   const pathname = usePathname();
   const { itemCount } = useCart();
   const [open, setOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -32,6 +36,11 @@ export function SiteHeader({ showAdminLink = false }: SiteHeaderProps) {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  useEffect(() => {
+    setCategoriesOpen(false);
+    setOpen(false);
+  }, [pathname]);
 
   const closeMenu = () => setOpen(false);
 
@@ -60,6 +69,70 @@ export function SiteHeader({ showAdminLink = false }: SiteHeaderProps) {
           {NAV_LINKS.map((link) => {
             const active =
               pathname === link.href || pathname.startsWith(`${link.href}/`);
+            if (link.href === "/produse" && categories.length > 0) {
+              return (
+                <div
+                  key={link.href}
+                  className="relative"
+                  onMouseEnter={() => setCategoriesOpen(true)}
+                  onMouseLeave={() => setCategoriesOpen(false)}
+                >
+                  <div className="flex items-center gap-1">
+                    <Link
+                      href={link.href}
+                      className={cn(
+                        "link-underline text-sm tracking-wide transition-colors duration-500",
+                        active ? "text-accent" : "text-foreground/80 hover:text-foreground",
+                      )}
+                    >
+                      {link.label}
+                    </Link>
+                    <button
+                      type="button"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-foreground/80 hover:bg-fog/60 hover:text-foreground"
+                      aria-expanded={categoriesOpen}
+                      aria-controls="product-categories"
+                      aria-label="Categorii de produse"
+                      onClick={() => setCategoriesOpen((value) => !value)}
+                    >
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 transition duration-300 ease-out",
+                          categoriesOpen && "rotate-180",
+                        )}
+                      />
+                    </button>
+                  </div>
+                  <div
+                    id="product-categories"
+                    className={cn(
+                      "absolute left-0 top-full z-50 min-w-60 pt-3",
+                      categoriesOpen ? "block" : "hidden",
+                    )}
+                  >
+                    <ul className="rounded-2xl border border-border bg-cream p-2 shadow-soft">
+                      {categories.map((category) => {
+                        const href = `/produse/categorie/${category.slug}`;
+                        const categoryActive = pathname === href;
+                        return (
+                          <li key={category.slug}>
+                            <Link
+                              href={href}
+                              className={cn(
+                                "block rounded-xl px-3 py-2 text-sm transition duration-300 ease-out hover:bg-fog/70",
+                                categoryActive ? "text-accent" : "text-foreground",
+                              )}
+                            >
+                              {category.name}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
+              );
+            }
             return (
               <Link
                 key={link.href}
@@ -139,14 +212,27 @@ export function SiteHeader({ showAdminLink = false }: SiteHeaderProps) {
       >
         <nav className="container-lyra flex flex-col gap-1 py-4" aria-label="Mobil">
           {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={closeMenu}
-              className="rounded-xl px-3 py-3 text-base hover:bg-fog/60"
-            >
-              {link.label}
-            </Link>
+            <div key={link.href}>
+              <Link
+                href={link.href}
+                onClick={closeMenu}
+                className="block rounded-xl px-3 py-3 text-base hover:bg-fog/60"
+              >
+                {link.label}
+              </Link>
+              {link.href === "/produse"
+                ? categories.map((category) => (
+                    <Link
+                      key={category.slug}
+                      href={`/produse/categorie/${category.slug}`}
+                      onClick={closeMenu}
+                      className="block rounded-xl py-2 pl-8 pr-3 text-sm text-foreground/80 hover:bg-fog/60"
+                    >
+                      {category.name}
+                    </Link>
+                  ))
+                : null}
+            </div>
           ))}
           {showAdminLink ? (
             <Link

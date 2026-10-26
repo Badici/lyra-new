@@ -76,6 +76,8 @@ export async function upsertCategory(formData: FormData): Promise<FormResult> {
     revalidatePath("/admin/categorii");
     revalidatePath("/admin/produse");
     revalidatePath("/produse");
+    revalidatePath("/produse/categorie/[slug]", "page");
+    revalidatePath("/", "layout");
     return { ok: true, message: data.id ? "Categoria a fost salvată." : "Categoria a fost adăugată." };
   } catch (error) {
     return saveFailure(error);
@@ -103,6 +105,8 @@ export async function deleteCategory(formData: FormData): Promise<FormResult> {
     await db.delete(categories).where(eq(categories.id, id));
     revalidatePath("/admin/categorii");
     revalidatePath("/produse");
+    revalidatePath("/produse/categorie/[slug]", "page");
+    revalidatePath("/", "layout");
     return { ok: true, message: "Categoria a fost ștearsă." };
   } catch (error) {
     return saveFailure(error);

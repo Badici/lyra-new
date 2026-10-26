@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { articles, episodes, products, shows } from "@/db/schema";
+import { articles, categories, episodes, products, shows } from "@/db/schema";
 import { PRODUCTION_SITE_URL } from "@/lib/constants";
 
 const STATIC_ROUTES = [
@@ -29,11 +29,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   try {
-    const [productRows, articleRows, showRows, episodeRows] = await Promise.all([
+    const [productRows, categoryRows, articleRows, showRows, episodeRows] = await Promise.all([
       db
         .select({ slug: products.slug, updatedAt: products.updatedAt })
         .from(products)
         .where(eq(products.isActive, true)),
+      db
+        .select({ slug: categories.slug, updatedAt: categories.updatedAt })
+        .from(categories)
+        .where(eq(categories.isActive, true)),
       db
         .select({ slug: articles.slug, updatedAt: articles.updatedAt })
         .from(articles)
@@ -54,6 +58,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ]);
 
     const dynamicEntries: MetadataRoute.Sitemap = [
+      ...categoryRows.map((category) => ({
+        url: `${base}/produse/categorie/${category.slug}`,
+        lastModified: category.updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      })),
       ...productRows.map((p) => ({
         url: `${base}/produse/${p.slug}`,
         lastModified: p.updatedAt,

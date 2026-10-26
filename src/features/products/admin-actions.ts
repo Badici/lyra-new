@@ -223,6 +223,7 @@ export async function upsertProduct(formData: FormData): Promise<FormResult> {
     revalidatePath("/admin/stoc");
     revalidatePath("/produse");
     revalidatePath(`/produse/${slug}`);
+    revalidatePath("/produse/categorie/[slug]", "page");
     return { ok: true, message: data.id ? "Produsul a fost salvat." : "Produsul a fost adăugat." };
   } catch (error) {
     return saveFailure(error);

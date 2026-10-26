@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { NAV_LINKS } from "@/lib/constants";
+import type { NavCategory } from "@/components/layout/site-header";
 
-export function SiteFooter() {
+export function SiteFooter({ categories = [] }: { categories?: NavCategory[] }) {
   return (
     <footer className="surface-depth mt-auto">
       <div className="container-lyra grid gap-10 py-14 md:grid-cols-[1.2fr_1fr_1fr]">
@@ -27,6 +28,20 @@ export function SiteFooter() {
                 <Link href={link.href} className="link-underline hover:text-cream">
                   {link.label}
                 </Link>
+                {link.href === "/produse" && categories.length > 0 ? (
+                  <ul className="mt-2 space-y-2 pl-3">
+                    {categories.map((category) => (
+                      <li key={category.slug}>
+                        <Link
+                          href={`/produse/categorie/${category.slug}`}
+                          className="link-underline hover:text-cream"
+                        >
+                          {category.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </li>
             ))}
             <li>
